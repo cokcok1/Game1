@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>福音麻雀 - 恩典金句版</title>
+    <title>福音麻雀 - 特大版</title>
     <style>
-        :root { --tile-w: 34px; --tile-h: 46px; }
+        /* --- 1. 核心調整：加大麻雀基礎尺寸 --- */
+        :root { 
+            --tile-w: 42px; /* 寬度加大 */
+            --tile-h: 56px; /* 高度加大 */
+        }
         
         * { box-sizing: border-box; }
 
@@ -24,62 +28,146 @@
             touch-action: none;
         }
         
-        /* 頂部 */
+        /* --- 2. 壓縮頂部高度 (慳位) --- */
         header {
-            flex-shrink: 0; height: 60px; padding: 0 10px; background: rgba(0,0,0,0.6); 
-            display: flex; justify-content: space-between; align-items: center; z-index: 100;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0; 
+            height: 44px; /* 由 60 減到 44 */
+            padding: 0 8px; 
+            background: rgba(0,0,0,0.6); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            z-index: 100;
+            font-size: 14px;
         }
-        select { padding: 8px; font-size: 14px; border-radius: 8px; border: 1px solid #ccc; background: #fff; max-width: 180px; }
-        #status { font-size: 14px; font-weight: bold; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 15px; }
         
-        /* 遊戲區 */
-        #game-viewport {
-            flex: 1; width: 100%; display: flex; justify-content: center; align-items: center; 
-            position: relative; overflow: hidden; padding: 10px;
+        /* 選單樣式微調 */
+        select { 
+            padding: 4px; 
+            font-size: 14px; 
+            border-radius: 5px; 
+            border: 1px solid #ccc; 
+            background: #fff; 
+            max-width: 160px; 
         }
-        #game-board { position: relative; transition: transform 0.3s ease; transform-origin: center center; }
+        
+        #status { 
+            font-size: 14px; 
+            font-weight: bold; 
+            background: rgba(0,0,0,0.3); 
+            padding: 4px 10px; 
+            border-radius: 12px; 
+        }
+        
+        /* --- 遊戲主區域 (無邊距) --- */
+        #game-viewport {
+            flex: 1; 
+            width: 100%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            position: relative; 
+            overflow: hidden; 
+            padding: 0; /* 移除留白，盡用空間 */
+        }
 
-        /* 底部 */
+        #game-board { 
+            position: relative; 
+            transition: transform 0.2s ease; 
+            transform-origin: center center; 
+        }
+
+        /* --- 3. 壓縮底部高度 (慳位) --- */
         footer { 
-            flex-shrink: 0; height: 70px; padding: 10px; background: rgba(0,0,0,0.8); 
-            display: flex; justify-content: space-around; align-items: center; z-index: 100;
-            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            flex-shrink: 0; 
+            height: 54px; /* 由 70 減到 54 */
+            padding: 5px; 
+            background: rgba(0,0,0,0.8); 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center; 
+            z-index: 100;
+            padding-bottom: max(5px, env(safe-area-inset-bottom));
         }
 
         .btn {
-            background: linear-gradient(to bottom, #FFD700, #FFA000); border: none; padding: 0;
-            width: 30%; height: 44px; border-radius: 22px; font-weight: bold; font-size: 15px; 
-            box-shadow: 0 4px 0 #b8860b; cursor: pointer; display: flex; justify-content: center; 
-            align-items: center; color: #333;
+            background: linear-gradient(to bottom, #FFD700, #FFA000); 
+            border: none; 
+            padding: 0;
+            width: 32%; 
+            height: 38px; /* 按鈕稍微變扁 */
+            border-radius: 19px; 
+            font-weight: bold; 
+            font-size: 15px; 
+            box-shadow: 0 3px 0 #b8860b; 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            color: #333;
         }
-        .btn:active { transform: translateY(3px); box-shadow: none; }
-        .btn-blue { background: linear-gradient(to bottom, #4FC3F7, #039BE5); box-shadow: 0 4px 0 #0277BD; color: white; }
+        .btn:active { transform: translateY(2px); box-shadow: none; }
+        .btn-blue { background: linear-gradient(to bottom, #4FC3F7, #039BE5); box-shadow: 0 3px 0 #0277BD; color: white; }
 
-        /* 麻雀牌 */
+        /* --- 麻雀牌樣式 (字體放大) --- */
         .tile {
-            position: absolute; width: var(--tile-w); height: var(--tile-h);
-            background: #fdfdfd; border-radius: 4px; box-sizing: border-box; cursor: pointer;
-            box-shadow: 2px 2px 0 #999, 3px 3px 4px rgba(0,0,0,0.5); border: 1px solid #ccc;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: absolute; 
+            width: var(--tile-w); 
+            height: var(--tile-h);
+            background: #fdfdfd; 
+            border-radius: 6px; 
+            cursor: pointer;
+            box-shadow: 
+                2px 2px 0 #999, /* 厚度 */
+                3px 3px 5px rgba(0,0,0,0.4); /* 陰影 */
+            border: 1px solid #ccc;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;
             transition: all 0.1s;
         }
-        .t-suit { position: absolute; top: 0; right: 2px; font-size: 8px; color: #888; }
-        .t-icon { font-size: 20px; line-height: 1; }
-        .t-text { font-size: 9px; font-weight: 900; margin-top: 1px; color: #333; }
         
+        .t-suit { 
+            position: absolute; 
+            top: 2px; 
+            right: 3px; 
+            font-size: 10px; /* 加大 */
+            color: #888; 
+            line-height: 1;
+        }
+        
+        .t-icon { 
+            font-size: 28px; /* 圖案極大化 */
+            line-height: 1; 
+            margin-top: 2px;
+        }
+        
+        .t-text { 
+            font-size: 11px; /* 文字加大 */
+            font-weight: 900; 
+            margin-top: 0px; 
+            color: #333; 
+        }
+        
+        /* 狀態 */
         .tile.locked { filter: brightness(0.6) contrast(0.8); cursor: default; }
         .tile.selected { background: #fff59d; border: 2px solid #ff3d00; transform: translate(-1px, -1px); z-index: 999 !important; }
         .c-red { color: #d32f2f; } .c-blue { color: #1976d2; } .c-green { color: #388e3c; }
 
-        /* 彈窗 (Win/Lose) */
+        /* 彈窗 */
         #msg-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: none; flex-direction: column;
+            background: rgba(0,0,0,0.92); display: none; flex-direction: column;
             justify-content: center; align-items: center; z-index: 200; text-align: center;
+            padding: 20px;
         }
-        .overlay-title { font-size: 28px; font-weight: bold; margin-bottom: 20px; }
-        .overlay-verse { font-size: 18px; color: #fff; line-height: 1.6; max-width: 80%; margin: 0 auto; background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; }
+        .overlay-title { font-size: 32px; font-weight: bold; margin-bottom: 20px; }
+        .overlay-verse { 
+            font-size: 20px; color: #fff; line-height: 1.5; 
+            background: rgba(255,255,255,0.15); padding: 25px; border-radius: 15px; 
+            width: 100%; max-width: 400px;
+        }
     </style>
 </head>
 <body>
@@ -108,7 +196,7 @@
 <div id="msg-overlay">
     <div id="overlay-title" class="overlay-title" style="color:#FFD700;">哈利路亞！</div>
     <div id="overlay-verse" class="overlay-verse"></div>
-    <button id="overlay-btn" class="btn" style="width: 200px; margin-top: 30px;" onclick="forceNewGame()">挑戰下一關</button>
+    <button id="overlay-btn" class="btn" style="width: 220px; margin-top: 30px; height: 50px; font-size: 18px;" onclick="forceNewGame()">挑戰下一關</button>
 </div>
 
 <script>
@@ -127,22 +215,21 @@
         {t:"愛", i:"❤️", s:"番", c:"#333"}, {t:"阿們", i:"🙏", s:"番", c:"#333"}
     ];
     
-    // 金句庫：分成「勝利金句」和「鼓勵金句」
     const winVerses = [
         "流淚撒種的，必歡呼收割。(詩 126:5)",
-        "那美好的仗我已經打過了，當跑的路我已經跑盡了。(提後 4:7)",
+        "那美好的仗我已經打過了。(提後 4:7)",
         "靠著那加給我力量的，凡事都能做。(腓 4:13)",
         "你們是世上的光。城造在山上是不能隱藏的。(太 5:14)",
         "得勝的，我要賜他在我寶座上與我同坐。(啟 3:21)"
     ];
 
     const loseVerses = [
-        "我的恩典是夠你用的，因為我的能力是在人的軟弱上顯得完全。(林後 12:9)",
+        "我的恩典是夠你用的。(林後 12:9)",
         "應當一無掛慮，只要凡事藉著禱告。(腓 4:6)",
         "你們要休息，要知道我是神。(詩 46:10)",
         "萬事都互相效力，叫愛神的人得益處。(羅 8:28)",
-        "壓傷的蘆葦，他不折斷；將殘的燈火，他不吹滅。(賽 42:3)",
-        "雖然無花果樹不發旺，葡萄樹不結果...然而，我要因耶和華歡欣。(哈 3:17-18)"
+        "壓傷的蘆葦，他不折斷。(賽 42:3)",
+        "雖然無花果樹不發旺...我要因耶和華歡欣。(哈 3:17-18)"
     ];
 
     // --- 2. 地圖產生器 ---
@@ -162,7 +249,6 @@
         return strategies[Math.floor(Math.random() * strategies.length)]();
     }
 
-    // 地圖算法
     function generatePyramid(rows, cols, layerSizes) {
         let map = [];
         for(let r=0; r<rows; r++) for(let c=0; c<cols; c++) map.push([0, r, c]);
@@ -223,7 +309,8 @@
     // --- 3. 遊戲邏輯 ---
     let tiles = [];
     let selectedTile = null;
-    let tileW = 34, tileH = 46;
+    let tileW = 42; // 對應 CSS 變數
+    let tileH = 56;
 
     function changeMap(val) { startGame(val); }
     function forceNewGame() { startGame(document.getElementById('map-select').value); }
@@ -260,6 +347,8 @@
         }
         
         if(!isValidStart) alert("此局難度極高，建議按「新局」重試！");
+        
+        // 重要：延遲執行縮放，確保渲染完成
         setTimeout(fitBoard, 50);
         updateStatusText();
     }
@@ -275,16 +364,21 @@
             el.className = 'tile';
             const card = deck[index];
             el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
+            
+            // 減少偏移量，令堆疊更緊湊
             let left = c * tileW + (z * 3);
-            let top = r * tileH - (z * 5); 
+            let top = r * tileH - (z * 4); 
             el.style.left = left + 'px'; el.style.top = top + 'px'; el.style.zIndex = z * 10 + r; 
+            
             const tileObj = { el: el, data: card, z: z, r: r, c: c, active: true, id: index };
             el.onclick = () => onTileClick(tileObj);
             board.appendChild(el);
             tiles.push(tileObj);
         });
-        board.style.width = (maxX + 1) * tileW + 20 + 'px';
-        board.style.height = (maxY + 1) * tileH + 20 + 'px';
+        
+        // 重新計算邊界，不加太多緩衝
+        board.style.width = (maxX + 1) * tileW + 10 + 'px';
+        board.style.height = (maxY + 1) * tileH + 10 + 'px';
     }
 
     function updateLockStatus() {
@@ -334,10 +428,7 @@
                     tile.el.style.display = 'none'; 
                     updateLockStatus(); 
                     updateStatusText();
-                    
-                    // --- 核心修改：每次消牌後檢查狀態 ---
-                    checkGameState();
-
+                    checkGameState(); // 檢查勝負
                 }, 200);
             } else {
                 selectedTile.el.classList.remove('selected'); selectedTile = tile; tile.el.classList.add('selected');
@@ -347,17 +438,12 @@
         }
     }
 
-    // --- 新增：狀態檢查邏輯 ---
     function checkGameState() {
         let count = tiles.filter(t => t.active).length;
-        
         if (count === 0) {
-            // 1. 贏了
             showModal('win');
         } else {
-            // 2. 檢查是否還有路行
             if (!hasAvailableMoves()) {
-                // 3. 輸了/死局
                 showModal('lose');
             }
         }
@@ -371,10 +457,9 @@
 
         if (type === 'win') {
             titleEl.innerText = "哈利路亞！(勝利)";
-            titleEl.style.color = "#FFD700"; // 金色
+            titleEl.style.color = "#FFD700"; 
             verseEl.innerText = winVerses[Math.floor(Math.random() * winVerses.length)];
             btnEl.innerText = "挑戰下一關";
-            // 贏了就隨機去下一關
             btnEl.onclick = () => {
                 const maps = ['random', 'turtle', 'castle', 'cross', 'bridge'];
                 const nextMap = maps[Math.floor(Math.random() * maps.length)];
@@ -383,13 +468,11 @@
             };
         } else {
             titleEl.innerText = "恩典夠用 (暫時無路)";
-            titleEl.style.color = "#4FC3F7"; // 淺藍色
+            titleEl.style.color = "#4FC3F7"; 
             verseEl.innerText = loseVerses[Math.floor(Math.random() * loseVerses.length)];
             btnEl.innerText = "重新開始";
-            // 輸了就重玩當前關卡
             btnEl.onclick = () => forceNewGame();
         }
-
         overlay.style.display = 'flex';
     }
 
@@ -432,15 +515,24 @@
         document.getElementById('status').innerText = "剩餘: " + count;
     }
 
+    // --- 關鍵修正：盡可能放大 ---
     function fitBoard() {
         const board = document.getElementById('game-board');
         const view = document.getElementById('game-viewport');
         if(!board || !view) return;
-        board.style.transform = 'scale(1)';
-        const boardW = board.scrollWidth, boardH = board.scrollHeight;
-        const viewW = view.clientWidth, viewH = view.clientHeight;
-        const scale = Math.min((viewW - 20) / boardW, (viewH - 20) / boardH);
-        board.style.transform = `scale(${Math.min(scale, 1.2)})`;
+        
+        board.style.transform = 'scale(1)'; // 先重置
+        
+        const boardW = board.scrollWidth;
+        const boardH = board.scrollHeight;
+        const viewW = view.clientWidth;
+        const viewH = view.clientHeight;
+
+        // 計算最大比例 (不設上限)
+        const scale = Math.min(viewW / boardW, viewH / boardH);
+        
+        // 稍微留 4% 邊隙，避免太貼邊被手機殼遮住
+        board.style.transform = `scale(${scale * 0.96})`;
     }
     window.addEventListener('resize', fitBoard);
     startGame('random'); 
