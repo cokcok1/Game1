@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>福音麻雀 - 完美邏輯版</title>
+    <title>福音麻雀</title>
     <style>
         :root { --tile-w: 42px; --tile-h: 56px; }
         * { box-sizing: border-box; }
@@ -15,18 +15,22 @@
         
         /* 頂部 */
         header {
-            flex-shrink: 0; height: 44px; padding: 0 8px; background: rgba(0,0,0,0.6); 
+            flex-shrink: 0; height: 44px; padding: 0 10px; background: rgba(0,0,0,0.6); 
             display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 14px;
         }
-        select { padding: 4px; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; background: #fff; max-width: 160px; }
+        select { padding: 4px; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; background: #fff; max-width: 140px; }
         #status { font-size: 14px; font-weight: bold; background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 12px; }
         
-        /* 遊戲區 */
+        /* 遊戲區 - 確保 Flex 居中 */
         #game-viewport {
             flex: 1; width: 100%; display: flex; justify-content: center; align-items: center; 
             position: relative; overflow: hidden; padding: 0;
         }
-        #game-board { position: relative; transition: transform 0.2s ease; transform-origin: center center; }
+        #game-board { 
+            position: relative; 
+            transition: transform 0.2s ease; 
+            transform-origin: center center; /* 關鍵：從中心縮放 */
+        }
 
         /* 底部 */
         footer { 
@@ -43,26 +47,27 @@
         .btn:active { transform: translateY(2px); box-shadow: none; }
         .btn-blue { background: linear-gradient(to bottom, #4FC3F7, #039BE5); box-shadow: 0 3px 0 #0277BD; color: white; }
 
-        /* 麻雀牌 - 修正浮起問題 */
+        /* 麻雀牌 */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
             background: #fdfdfd; border-radius: 6px; cursor: pointer;
-            border: 1px solid #999; /* 邊框深色一點 */
+            border: 1px solid #999; 
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: all 0.1s;
         }
         
-        /* 視覺修正：不同層級有不同陰影 */
-        .tile[data-layer="0"] { box-shadow: 1px 1px 0 #bbb; } /* 底層：幾乎無陰影，貼地 */
+        /* 層次陰影 */
+        .tile[data-layer="0"] { box-shadow: 1px 1px 0 #bbb; }
         .tile[data-layer="1"] { box-shadow: 2px 2px 2px rgba(0,0,0,0.3), 2px 2px 0 #bbb; }
         .tile[data-layer="2"] { box-shadow: 3px 3px 4px rgba(0,0,0,0.4), 3px 3px 0 #bbb; }
         .tile[data-layer="3"] { box-shadow: 4px 4px 6px rgba(0,0,0,0.5), 4px 4px 0 #bbb; }
+        .tile[data-layer="4"] { box-shadow: 5px 5px 8px rgba(0,0,0,0.5), 5px 5px 0 #bbb; }
         
         .t-suit { position: absolute; top: 2px; right: 3px; font-size: 10px; color: #888; line-height: 1; }
         .t-icon { font-size: 28px; line-height: 1; margin-top: 2px; }
         .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; }
         
-        .tile.locked { filter: brightness(0.65) contrast(0.9); cursor: default; } /* 鎖住時稍微光亮一點點，不要太黑 */
+        .tile.locked { filter: brightness(0.65) contrast(0.9); cursor: default; }
         .tile.selected { background: #fff59d; border: 2px solid #ff3d00; transform: translate(-1px, -1px); z-index: 999 !important; }
         .c-red { color: #d32f2f; } .c-blue { color: #1976d2; } .c-green { color: #388e3c; }
 
@@ -84,11 +89,12 @@
 
 <header>
     <select id="map-select" onchange="changeMap(this.value)">
+        <option value="random">🎲 無限隨機</option>
         <option value="turtle">🐢 經典龜背</option>
         <option value="castle">🏰 堅固堡壘</option>
         <option value="cross">✝️ 榮耀十架</option>
         <option value="bridge">🌉 恩典之橋</option>
-        <option value="random">🎲 隨機結構</option>
+        <option value="towers">🗼 雙子塔</option>
     </select>
     <div id="status">剩餘: 0</div>
 </header>
@@ -114,14 +120,17 @@
         {t:"摩西", i:"🌊", s:"萬", c:"c-red"}, {t:"大衛", i:"👑", s:"萬", c:"c-red"},
         {t:"保羅", i:"📜", s:"萬", c:"c-red"}, {t:"彼得", i:"🐟", s:"萬", c:"c-red"},
         {t:"約拿", i:"🐋", s:"萬", c:"c-red"}, {t:"馬利亞", i:"🤰", s:"萬", c:"c-red"},
-        {t:"耶京", i:"🏰", s:"筒", c:"c-blue"}, {t:"西奈", i:"⛰️", s:"筒", c:"c-blue"},
+        {t:"亞伯拉罕", i:"🐑", s:"萬", c:"c-red"}, {t:"但以理", i:"🦁", s:"萬", c:"c-red"},
+        {t:"教會", i:"🏰", s:"筒", c:"c-blue"}, {t:"西奈", i:"⛰️", s:"筒", c:"c-blue"},
         {t:"紅海", i:"🌊", s:"筒", c:"c-blue"}, {t:"伊甸", i:"🍎", s:"筒", c:"c-blue"},
         {t:"加利利", i:"🛶", s:"筒", c:"c-blue"}, {t:"聖殿", i:"🏛️", s:"筒", c:"c-blue"},
+        {t:"耶利哥", i:"🧱", s:"筒", c:"c-blue"}, {t:"方舟", i:"🚢", s:"筒", c:"c-blue"},
         {t:"十架", i:"✝️", s:"索", c:"c-green"}, {t:"聖經", i:"📖", s:"索", c:"c-green"},
         {t:"五餅", i:"🍞", s:"索", c:"c-green"}, {t:"二魚", i:"🐟", s:"索", c:"c-green"},
         {t:"寶血", i:"🍷", s:"索", c:"c-green"}, {t:"聖靈", i:"🕊️", s:"索", c:"c-green"},
         {t:"信", i:"🛡️", s:"番", c:"#333"}, {t:"望", i:"⚓", s:"番", c:"#333"},
-        {t:"愛", i:"❤️", s:"番", c:"#333"}, {t:"阿們", i:"🙏", s:"番", c:"#333"}
+        {t:"愛", i:"❤️", s:"番", c:"#333"}, {t:"阿們", i:"🙏", s:"番", c:"#333"},
+        {t:"禱告", i:"🤲", s:"番", c:"#333"}, {t:"復活", i:"🌅", s:"番", c:"#333"}
     ];
     
     const winVerses = [
@@ -134,13 +143,13 @@
         "你們要休息，要知道我是神。(詩 46:10)", "萬事都互相效力。(羅 8:28)"
     ];
 
-    // --- 地圖結構定義 (只定義位置，不放牌) ---
-    // 這裡定義的是「位置槽位 (Slots)」，格式: [z, r, c]
+    // --- 地圖結構 ---
     const MapBlueprints = {
         turtle: () => generatePyramid(6, 8, [6,6, 4,4, 2,2, 1,1]), 
         castle: () => generateWall(6, 8),
         cross: () => generateCross(),
         bridge: () => generateBridge(),
+        towers: () => generateTowers(),
         random: () => generateChaos()
     };
 
@@ -178,11 +187,19 @@
         }
         return slots;
     }
+    function generateTowers() {
+        let slots = [];
+        for(let r=0; r<6; r++) for(let c=0; c<8; c++) {
+             if(c<2 || c>5) { slots.push([0, r, c]); slots.push([1, r, c]); if(r>1&&r<4) slots.push([2, r, c]); }
+             else if(r===2 || r===3) slots.push([0, r, c]); 
+        }
+        return slots;
+    }
     function generateChaos() {
         let slots = [];
-        for(let r=0; r<6; r++) for(let c=0; c<8; c++) slots.push([0, r, c]); // 底座
-        for(let i=0; i<30; i++) {
-            slots.push([1, Math.floor(Math.random()*4)+1, Math.floor(Math.random()*6)+1]);
+        for(let r=0; r<6; r++) for(let c=0; c<8; c++) slots.push([0, r, c]); 
+        for(let i=0; i<32; i++) {
+            slots.push([Math.floor(Math.random()*2)+1, Math.floor(Math.random()*4)+1, Math.floor(Math.random()*6)+1]);
         }
         return slots;
     }
@@ -195,22 +212,6 @@
     function changeMap(val) { startGame(val); }
     function forceNewGame() { startGame(document.getElementById('map-select').value); }
 
-    // 核心：逆向生成演算法 (Reverse Generation)
-    // 1. 取得所有位置槽位 (Slots)
-    // 2. 從牌庫隨機抽一對牌
-    // 3. 尋找兩個「目前可以放置」的位置 (即：如果現在放下去，將來可以被拿走)
-    //    -> 這裡的「將來可以拿走」在逆向過程中，等同於「放置時不會違反規則」
-    //    -> 但逆向思考比較複雜，我們用一個更簡單的「保證有解洗牌法」(Solvable Shuffle)
-    
-    // 改良版策略：
-    // 我們先生產出有解的牌序，再填入地圖。
-    // 方法：
-    // 1. 建立地圖結構。
-    // 2. 模擬玩遊戲：從地圖中「可選」的位置裡，隨機選兩張，標記為「一對」。
-    // 3. 把這兩張移出地圖，重複步驟2，直到地圖清空。
-    // 4. 記錄下這個「配對順序」。
-    // 5. 真正開始遊戲時，將相同的牌填入剛才記錄的配對位置中。
-    
     function startGame(mapType) {
         document.getElementById('msg-overlay').style.display = 'none';
         const board = document.getElementById('game-board');
@@ -218,28 +219,32 @@
         tiles = [];
         selectedTile = null;
 
-        // 1. 獲取地圖槽位
+        // 1. 獲取並修正地圖 (自動置中邏輯)
         let slots = MapBlueprints[mapType]();
-        // 必須是偶數
         if(slots.length % 2 !== 0) slots.pop();
+        
+        // **核心修正：座標歸零化 (Normalize)**
+        // 找出最小的 Col 和 Row，將所有牌移到左上角 (0,0)
+        let minC = Infinity, minR = Infinity;
+        slots.forEach(s => {
+            if(s[1] < minR) minR = s[1];
+            if(s[2] < minC) minC = s[2];
+        });
+        slots.forEach(s => {
+            s[1] -= minR; // Row 歸零
+            s[2] -= minC; // Col 歸零
+        });
 
-        // 2. 建立虛擬牌組物件用來運算
+        // 2. 建立虛擬牌組
         let virtualTiles = slots.map((s, i) => ({
             id: i, z: s[0], r: s[1], c: s[2], 
-            active: true, // 在模擬中，active 代表「還在場上」
-            pairId: null  // 用來記錄它跟誰一對
+            active: true
         }));
 
-        // 3. 逆向配對 (模擬消除過程)
-        // 為了保證有解，我們模擬「消除」。
-        // 在模擬中，我們每次從「可選牌」中隨機選兩張，設為一組配對，然後移除。
-        // 重複直到清空。
+        // 3. 逆向配對生成 (保證有解)
         let pairs = [];
-        let tempTiles = JSON.parse(JSON.stringify(virtualTiles)); // 複製一份
-        
-        // 為了防止隨機選擇導致死局 (雖然機率低)，我們嘗試最多 10 次
-        let success = false;
-        let attempt = 0;
+        let tempTiles = JSON.parse(JSON.stringify(virtualTiles));
+        let success = false, attempt = 0;
 
         while(!success && attempt < 20) {
             tempTiles = JSON.parse(JSON.stringify(virtualTiles));
@@ -247,71 +252,72 @@
             let possible = true;
             
             while(tempTiles.some(t => t.active)) {
-                // 找出所有現在能拿的牌 (未被遮擋)
                 let available = getAvailableTiles(tempTiles);
+                if(available.length < 2) { possible = false; break; }
                 
-                if(available.length < 2) {
-                    possible = false; // 死局
-                    break;
-                }
-                
-                // 隨機選兩張
                 let idx1 = Math.floor(Math.random() * available.length);
                 let tile1 = available[idx1];
-                available.splice(idx1, 1); // 移出陣列以免重複選
+                available.splice(idx1, 1);
                 
                 let idx2 = Math.floor(Math.random() * available.length);
                 let tile2 = available[idx2];
                 
-                // 記錄這兩張是一對
                 pairs.push([tile1.id, tile2.id]);
-                
-                // 從場上移除 (模擬消除)
-                tile1.active = false;
-                tile2.active = false;
+                tile1.active = false; tile2.active = false;
             }
-            
             if(possible) success = true;
             attempt++;
         }
-
-        if(!success) {
-            // 極端情況 fallback: 隨機發牌 (極少發生)
-            console.log("Fallback to random");
+        if(!success) { // Fallback
             pairs = [];
-            for(let i=0; i<virtualTiles.length; i+=2) {
-                pairs.push([i, i+1]); // 假配對
-            }
+            for(let i=0; i<virtualTiles.length; i+=2) pairs.push([i, i+1]);
         }
 
-        // 4. 填入真實花色
-        // 我們有一組配對列表 (pairs)，現在把花色填進去
-        // 每個 pair 分配一個花色
-        let finalTilesData = new Array(virtualTiles.length);
+        // 4. 嚴格庫存分配 (Strict Inventory)
+        // 確保每款牌出 4 隻 (即 2 對)
+        // pairs 是一個陣列，包含所有配對的 index
+        let totalPairs = pairs.length;
+        let cardInventory = [];
         
-        pairs.forEach(pair => {
-            // 隨機選一個花色
-            let card = rawTiles[Math.floor(Math.random() * rawTiles.length)];
-            // 賦予這兩張牌
+        // 隨機打亂牌型庫
+        let shuffledTypes = [...rawTiles].sort(() => Math.random() - 0.5);
+        let typeIndex = 0;
+        
+        // 每次取一種牌型，分配給 2 個 pair (即 4 隻牌)
+        for(let i=0; i < totalPairs; i += 2) {
+            // 如果 i 是最後一對 (單數對)，就只能給一對
+            let cardType = shuffledTypes[typeIndex % shuffledTypes.length];
+            cardInventory.push(cardType); // 給第 i 對
+            
+            if(i + 1 < totalPairs) {
+                cardInventory.push(cardType); // 給第 i+1 對
+            }
+            
+            typeIndex++; // 下次換新款
+        }
+        
+        // 此時 cardInventory 有 totalPairs 那麼多個花色，且兩兩相同
+        // 打亂 inventory 分配給 pairs
+        cardInventory.sort(() => Math.random() - 0.5);
+        
+        let finalTilesData = new Array(virtualTiles.length);
+        pairs.forEach((pair, idx) => {
+            let card = cardInventory[idx];
             finalTilesData[pair[0]] = card;
             finalTilesData[pair[1]] = card;
         });
 
-        // 5. 渲染真實畫面
+        // 5. 渲染
         renderTiles(virtualTiles, finalTilesData);
-        
         setTimeout(fitBoard, 50);
         updateStatusText();
     }
 
-    // 輔助：判斷哪些牌可以拿 (模擬用)
     function getAvailableTiles(tileSet) {
         let available = [];
         for(let tile of tileSet) {
             if(!tile.active) continue;
-            if(!checkLockedInSet(tile, tileSet)) {
-                available.push(tile);
-            }
+            if(!checkLockedInSet(tile, tileSet)) available.push(tile);
         }
         return available;
     }
@@ -320,7 +326,6 @@
         let hasTop = false, hasLeft = false, hasRight = false;
         for(let other of tileSet) {
             if(!other.active || other.id === tile.id) continue;
-            // 檢查遮擋 (同樣的邏輯)
             if(other.z === tile.z + 1 && other.r === tile.r && other.c === tile.c) hasTop = true;
             if(other.z === tile.z && other.r === tile.r) {
                 if(other.c === tile.c - 1) hasLeft = true;
@@ -340,32 +345,27 @@
             
             const el = document.createElement('div');
             el.className = 'tile';
-            el.setAttribute('data-layer', slot.z); // 用於 CSS 陰影控制
+            el.setAttribute('data-layer', slot.z);
             
             const card = dataMap[index];
             el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
             
-            let left = slot.c * tileW + (slot.z * 2); // 減少偏移
+            let left = slot.c * tileW + (slot.z * 2);
             let top = slot.r * tileH - (slot.z * 4); 
             el.style.left = left + 'px'; el.style.top = top + 'px'; el.style.zIndex = slot.z * 10 + slot.r; 
             
-            const tileObj = { 
-                el: el, data: card, 
-                z: slot.z, r: slot.r, c: slot.c, 
-                active: true, id: index 
-            };
+            const tileObj = { el: el, data: card, z: slot.z, r: slot.r, c: slot.c, active: true, id: index };
             el.onclick = () => onTileClick(tileObj);
             board.appendChild(el);
             tiles.push(tileObj);
         });
         
+        // 設定 Board 寬高為「實際內容大小」，方便置中
         board.style.width = (maxX + 1) * tileW + 10 + 'px';
         board.style.height = (maxY + 1) * tileH + 10 + 'px';
         
         updateLockStatus();
     }
-
-    // --- 標準遊戲邏輯 ---
 
     function updateLockStatus() {
         tiles.forEach(t => {
@@ -377,7 +377,6 @@
     }
 
     function checkLocked(tile) {
-        // 使用真實的 tiles 陣列
         let hasTop = false, hasLeft = false, hasRight = false;
         for(let other of tiles) {
             if(!other.active || other === tile) continue;
@@ -401,10 +400,7 @@
                 tile.el.style.transform = "scale(0)"; selectedTile.el.style.transform = "scale(0)";
                 selectedTile = null;
                 setTimeout(() => {
-                    tile.el.style.display = 'none'; 
-                    updateLockStatus(); 
-                    updateStatusText();
-                    checkGameState(); 
+                    tile.el.style.display = 'none'; updateLockStatus(); updateStatusText(); checkGameState(); 
                 }, 200);
             } else {
                 selectedTile.el.classList.remove('selected'); selectedTile = tile; tile.el.classList.add('selected');
@@ -422,10 +418,8 @@
 
     function hasAvailableMoves() {
         let freeTiles = tiles.filter(t => t.active && !t.isLocked);
-        for(let i=0; i<freeTiles.length; i++) {
-            for(let j=i+1; j<freeTiles.length; j++) {
-                if(freeTiles[i].data.t === freeTiles[j].data.t) return true;
-            }
+        for(let i=0; i<freeTiles.length; i++) for(let j=i+1; j<freeTiles.length; j++) {
+            if(freeTiles[i].data.t === freeTiles[j].data.t) return true;
         }
         return false;
     }
@@ -435,21 +429,18 @@
         const titleEl = document.getElementById('overlay-title');
         const verseEl = document.getElementById('overlay-verse');
         const btnEl = document.getElementById('overlay-btn');
-
         if (type === 'win') {
-            titleEl.innerText = "哈利路亞！(勝利)";
-            titleEl.style.color = "#FFD700"; 
+            titleEl.innerText = "哈利路亞！(勝利)"; titleEl.style.color = "#FFD700"; 
             verseEl.innerText = winVerses[Math.floor(Math.random() * winVerses.length)];
             btnEl.innerText = "挑戰下一關";
             btnEl.onclick = () => {
-                const maps = ['turtle', 'castle', 'cross', 'bridge', 'random'];
+                const maps = ['random', 'turtle', 'castle', 'cross', 'bridge', 'towers'];
                 const nextMap = maps[Math.floor(Math.random() * maps.length)];
                 document.getElementById('map-select').value = nextMap;
                 startGame(nextMap);
             };
         } else {
-            titleEl.innerText = "恩典夠用 (暫時無路)";
-            titleEl.style.color = "#4FC3F7"; 
+            titleEl.innerText = "恩典夠用 (暫時無路)"; titleEl.style.color = "#4FC3F7"; 
             verseEl.innerText = loseVerses[Math.floor(Math.random() * loseVerses.length)];
             btnEl.innerText = "重新開始";
             btnEl.onclick = () => forceNewGame();
@@ -457,28 +448,19 @@
         overlay.style.display = 'flex';
     }
 
-    // --- 智能洗牌 (保證洗完有得玩) ---
     function shuffleActiveTiles() {
+        // 洗牌也要遵循「嚴格庫存」
         let activeTiles = tiles.filter(t => t.active);
         let datas = activeTiles.map(t => t.data);
-        
-        // 嘗試洗牌直到有解
-        let attempt = 0; 
-        let solvable = false;
-        
-        // 找出所有未鎖定的位置索引
+        let attempt = 0, solvable = false;
         let freeIndices = [];
         activeTiles.forEach((t, idx) => { if(!checkLocked(t)) freeIndices.push(idx); });
 
         while(!solvable && attempt < 50) {
             datas.sort(() => Math.random() - 0.5);
-            // 檢查是否至少有一對在 freeIndices 中
             let freeDatas = freeIndices.map(i => datas[i]);
             let seen = new Set();
-            for(let d of freeDatas) { 
-                if(seen.has(d.t)) { solvable = true; break; } 
-                seen.add(d.t); 
-            }
+            for(let d of freeDatas) { if(seen.has(d.t)) { solvable = true; break; } seen.add(d.t); }
             attempt++;
         }
 
@@ -489,7 +471,6 @@
         selectedTile = null;
         const b = document.getElementById('game-board');
         b.style.opacity = 0.5; setTimeout(() => b.style.opacity = 1, 300);
-        
         if(!solvable) alert("牌局過於複雜，建議直接開新局！");
     }
 
@@ -506,8 +487,7 @@
     }
 
     function updateStatusText() {
-        let count = tiles.filter(t => t.active).length;
-        document.getElementById('status').innerText = "剩餘: " + count;
+        document.getElementById('status').innerText = "剩餘: " + tiles.filter(t => t.active).length;
     }
 
     function fitBoard() {
