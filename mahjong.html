@@ -3,155 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>福音麻雀 - 特大版</title>
+    <title>福音麻雀 - 完美邏輯版</title>
     <style>
-        /* --- 1. 核心調整：加大麻雀基礎尺寸 --- */
-        :root { 
-            --tile-w: 42px; /* 寬度加大 */
-            --tile-h: 56px; /* 高度加大 */
-        }
-        
+        :root { --tile-w: 42px; --tile-h: 56px; }
         * { box-sizing: border-box; }
-
         body {
-            margin: 0; 
-            background-color: #054a29; 
-            font-family: "Microsoft JhengHei", sans-serif;
-            overflow: hidden; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh; 
-            height: 100dvh; 
-            color: white; 
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none;
+            margin: 0; background-color: #054a29; font-family: "Microsoft JhengHei", sans-serif;
+            overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
+            color: white; user-select: none; -webkit-user-select: none; touch-action: none;
         }
         
-        /* --- 2. 壓縮頂部高度 (慳位) --- */
+        /* 頂部 */
         header {
-            flex-shrink: 0; 
-            height: 44px; /* 由 60 減到 44 */
-            padding: 0 8px; 
-            background: rgba(0,0,0,0.6); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            z-index: 100;
-            font-size: 14px;
+            flex-shrink: 0; height: 44px; padding: 0 8px; background: rgba(0,0,0,0.6); 
+            display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 14px;
         }
+        select { padding: 4px; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; background: #fff; max-width: 160px; }
+        #status { font-size: 14px; font-weight: bold; background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 12px; }
         
-        /* 選單樣式微調 */
-        select { 
-            padding: 4px; 
-            font-size: 14px; 
-            border-radius: 5px; 
-            border: 1px solid #ccc; 
-            background: #fff; 
-            max-width: 160px; 
-        }
-        
-        #status { 
-            font-size: 14px; 
-            font-weight: bold; 
-            background: rgba(0,0,0,0.3); 
-            padding: 4px 10px; 
-            border-radius: 12px; 
-        }
-        
-        /* --- 遊戲主區域 (無邊距) --- */
+        /* 遊戲區 */
         #game-viewport {
-            flex: 1; 
-            width: 100%; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            position: relative; 
-            overflow: hidden; 
-            padding: 0; /* 移除留白，盡用空間 */
+            flex: 1; width: 100%; display: flex; justify-content: center; align-items: center; 
+            position: relative; overflow: hidden; padding: 0;
         }
+        #game-board { position: relative; transition: transform 0.2s ease; transform-origin: center center; }
 
-        #game-board { 
-            position: relative; 
-            transition: transform 0.2s ease; 
-            transform-origin: center center; 
-        }
-
-        /* --- 3. 壓縮底部高度 (慳位) --- */
+        /* 底部 */
         footer { 
-            flex-shrink: 0; 
-            height: 54px; /* 由 70 減到 54 */
-            padding: 5px; 
-            background: rgba(0,0,0,0.8); 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center; 
-            z-index: 100;
+            flex-shrink: 0; height: 54px; padding: 5px; background: rgba(0,0,0,0.8); 
+            display: flex; justify-content: space-around; align-items: center; z-index: 100;
             padding-bottom: max(5px, env(safe-area-inset-bottom));
         }
-
         .btn {
-            background: linear-gradient(to bottom, #FFD700, #FFA000); 
-            border: none; 
-            padding: 0;
-            width: 32%; 
-            height: 38px; /* 按鈕稍微變扁 */
-            border-radius: 19px; 
-            font-weight: bold; 
-            font-size: 15px; 
-            box-shadow: 0 3px 0 #b8860b; 
-            cursor: pointer; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            color: #333;
+            background: linear-gradient(to bottom, #FFD700, #FFA000); border: none; padding: 0;
+            width: 32%; height: 38px; border-radius: 19px; font-weight: bold; font-size: 15px; 
+            box-shadow: 0 3px 0 #b8860b; cursor: pointer; display: flex; justify-content: center; 
+            align-items: center; color: #333;
         }
         .btn:active { transform: translateY(2px); box-shadow: none; }
         .btn-blue { background: linear-gradient(to bottom, #4FC3F7, #039BE5); box-shadow: 0 3px 0 #0277BD; color: white; }
 
-        /* --- 麻雀牌樣式 (字體放大) --- */
+        /* 麻雀牌 - 修正浮起問題 */
         .tile {
-            position: absolute; 
-            width: var(--tile-w); 
-            height: var(--tile-h);
-            background: #fdfdfd; 
-            border-radius: 6px; 
-            cursor: pointer;
-            box-shadow: 
-                2px 2px 0 #999, /* 厚度 */
-                3px 3px 5px rgba(0,0,0,0.4); /* 陰影 */
-            border: 1px solid #ccc;
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center;
+            position: absolute; width: var(--tile-w); height: var(--tile-h);
+            background: #fdfdfd; border-radius: 6px; cursor: pointer;
+            border: 1px solid #999; /* 邊框深色一點 */
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: all 0.1s;
         }
         
-        .t-suit { 
-            position: absolute; 
-            top: 2px; 
-            right: 3px; 
-            font-size: 10px; /* 加大 */
-            color: #888; 
-            line-height: 1;
-        }
+        /* 視覺修正：不同層級有不同陰影 */
+        .tile[data-layer="0"] { box-shadow: 1px 1px 0 #bbb; } /* 底層：幾乎無陰影，貼地 */
+        .tile[data-layer="1"] { box-shadow: 2px 2px 2px rgba(0,0,0,0.3), 2px 2px 0 #bbb; }
+        .tile[data-layer="2"] { box-shadow: 3px 3px 4px rgba(0,0,0,0.4), 3px 3px 0 #bbb; }
+        .tile[data-layer="3"] { box-shadow: 4px 4px 6px rgba(0,0,0,0.5), 4px 4px 0 #bbb; }
         
-        .t-icon { 
-            font-size: 28px; /* 圖案極大化 */
-            line-height: 1; 
-            margin-top: 2px;
-        }
+        .t-suit { position: absolute; top: 2px; right: 3px; font-size: 10px; color: #888; line-height: 1; }
+        .t-icon { font-size: 28px; line-height: 1; margin-top: 2px; }
+        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; }
         
-        .t-text { 
-            font-size: 11px; /* 文字加大 */
-            font-weight: 900; 
-            margin-top: 0px; 
-            color: #333; 
-        }
-        
-        /* 狀態 */
-        .tile.locked { filter: brightness(0.6) contrast(0.8); cursor: default; }
+        .tile.locked { filter: brightness(0.65) contrast(0.9); cursor: default; } /* 鎖住時稍微光亮一點點，不要太黑 */
         .tile.selected { background: #fff59d; border: 2px solid #ff3d00; transform: translate(-1px, -1px); z-index: 999 !important; }
         .c-red { color: #d32f2f; } .c-blue { color: #1976d2; } .c-green { color: #388e3c; }
 
@@ -159,8 +70,7 @@
         #msg-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.92); display: none; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 200; text-align: center;
-            padding: 20px;
+            justify-content: center; align-items: center; z-index: 200; text-align: center; padding: 20px;
         }
         .overlay-title { font-size: 32px; font-weight: bold; margin-bottom: 20px; }
         .overlay-verse { 
@@ -174,11 +84,11 @@
 
 <header>
     <select id="map-select" onchange="changeMap(this.value)">
-        <option value="random">🎲 無限隨機</option>
         <option value="turtle">🐢 經典龜背</option>
         <option value="castle">🏰 堅固堡壘</option>
         <option value="cross">✝️ 榮耀十架</option>
         <option value="bridge">🌉 恩典之橋</option>
+        <option value="random">🎲 隨機結構</option>
     </select>
     <div id="status">剩餘: 0</div>
 </header>
@@ -200,7 +110,6 @@
 </div>
 
 <script>
-    // --- 1. 資料庫 ---
     const rawTiles = [
         {t:"摩西", i:"🌊", s:"萬", c:"c-red"}, {t:"大衛", i:"👑", s:"萬", c:"c-red"},
         {t:"保羅", i:"📜", s:"萬", c:"c-red"}, {t:"彼得", i:"🐟", s:"萬", c:"c-red"},
@@ -216,105 +125,92 @@
     ];
     
     const winVerses = [
-        "流淚撒種的，必歡呼收割。(詩 126:5)",
-        "那美好的仗我已經打過了。(提後 4:7)",
-        "靠著那加給我力量的，凡事都能做。(腓 4:13)",
-        "你們是世上的光。城造在山上是不能隱藏的。(太 5:14)",
+        "流淚撒種的，必歡呼收割。(詩 126:5)", "那美好的仗我已經打過了。(提後 4:7)",
+        "靠著那加給我力量的，凡事都能做。(腓 4:13)", "你們是世上的光。(太 5:14)",
         "得勝的，我要賜他在我寶座上與我同坐。(啟 3:21)"
     ];
-
     const loseVerses = [
-        "我的恩典是夠你用的。(林後 12:9)",
-        "應當一無掛慮，只要凡事藉著禱告。(腓 4:6)",
-        "你們要休息，要知道我是神。(詩 46:10)",
-        "萬事都互相效力，叫愛神的人得益處。(羅 8:28)",
-        "壓傷的蘆葦，他不折斷。(賽 42:3)",
-        "雖然無花果樹不發旺...我要因耶和華歡欣。(哈 3:17-18)"
+        "我的恩典是夠你用的。(林後 12:9)", "應當一無掛慮，只要凡事藉著禱告。(腓 4:6)",
+        "你們要休息，要知道我是神。(詩 46:10)", "萬事都互相效力。(羅 8:28)"
     ];
 
-    // --- 2. 地圖產生器 ---
-    const PresetMaps = {
+    // --- 地圖結構定義 (只定義位置，不放牌) ---
+    // 這裡定義的是「位置槽位 (Slots)」，格式: [z, r, c]
+    const MapBlueprints = {
         turtle: () => generatePyramid(6, 8, [6,6, 4,4, 2,2, 1,1]), 
         castle: () => generateWall(6, 8),
         cross: () => generateCross(),
-        bridge: () => generateBridge()
+        bridge: () => generateBridge(),
+        random: () => generateChaos()
     };
 
-    function generateRandomMap() {
-        const strategies = [
-            () => generatePyramid(6, 8, [6,6, 5,5, 3,3, 1,1]), 
-            () => generateIslands(), 
-            () => generateChaosSymmetry() 
-        ];
-        return strategies[Math.floor(Math.random() * strategies.length)]();
-    }
-
     function generatePyramid(rows, cols, layerSizes) {
-        let map = [];
-        for(let r=0; r<rows; r++) for(let c=0; c<cols; c++) map.push([0, r, c]);
-        let currentLayer = 1;
+        let slots = [];
+        let currentLayer = 0;
         for(let i=0; i<layerSizes.length; i+=2) {
             let h = layerSizes[i], w = layerSizes[i+1];
             let startR = Math.floor((rows - h)/2), startC = Math.floor((cols - w)/2);
-            for(let r=0; r<h; r++) for(let c=0; c<w; c++) map.push([currentLayer, startR+r, startC+c]);
+            for(let r=0; r<h; r++) for(let c=0; c<w; c++) slots.push([currentLayer, startR+r, startC+c]);
             currentLayer++;
         }
-        return map;
-    }
-    function generateIslands() {
-        let map = [];
-        for(let l=0; l<3; l++) for(let r=0; r<4; r++) for(let c=0; c<4; c++) {
-            map.push([l, r+1, c]); map.push([l, r+1, c+5]); 
-        }
-        map.push([0, 2, 4]); map.push([0, 3, 4]);
-        return map;
-    }
-    function generateChaosSymmetry() {
-        let map = [];
-        const rows = 8, cols = 10;
-        for(let r=1; r<rows-1; r++) for(let c=1; c<cols-1; c++) map.push([0, r, c]);
-        for(let i=0; i<30; i++) {
-            let r = Math.floor(Math.random() * (rows-2)) + 1;
-            let c = Math.floor(Math.random() * (cols/2 - 1)) + 1;
-            let z = Math.floor(Math.random() * 3) + 1;
-            map.push([z, r, c]); map.push([z, r, cols-1-c]);
-        }
-        return map;
+        return slots;
     }
     function generateWall(rows, cols) {
-        let map = [];
+        let slots = [];
         for(let r=0; r<rows; r++) for(let c=0; c<cols; c++) {
-            map.push([0, r, c]);
-            if(r===0 || r===rows-1 || c===0 || c===cols-1) map.push([1, r, c]); 
-            if((r===0 || r===rows-1) && (c===0 || c===cols-1)) map.push([2, r, c]); 
+            slots.push([0, r, c]);
+            if(r===0 || r===rows-1 || c===0 || c===cols-1) slots.push([1, r, c]); 
         }
-        return map;
+        return slots;
     }
     function generateCross() {
-        let map = [];
-        for(let r=0; r<8; r++) { map.push([0, r, 3]); map.push([0, r, 4]); map.push([1, r, 3]); }
-        for(let c=0; c<8; c++) { map.push([0, 2, c]); map.push([0, 3, c]); map.push([1, 2, c]); }
-        map.push([2, 2, 3]); map.push([2, 3, 3]);
-        return map;
+        let slots = [];
+        for(let r=0; r<8; r++) { slots.push([0, r, 3]); slots.push([0, r, 4]); slots.push([1, r, 3]); }
+        for(let c=0; c<8; c++) { slots.push([0, 2, c]); slots.push([0, 3, c]); slots.push([1, 2, c]); }
+        slots.push([2, 2, 3]); slots.push([2, 3, 3]);
+        return slots;
     }
     function generateBridge() {
-        let map = [];
+        let slots = [];
         for(let c=0; c<10; c++) {
-            map.push([0, 2, c]); map.push([0, 3, c]);
-            if(c<3 || c>6) { map.push([1, 2, c]); map.push([1, 3, c]); map.push([2, 2, c]); }
+            slots.push([0, 2, c]); slots.push([0, 3, c]);
+            if(c<3 || c>6) { slots.push([1, 2, c]); slots.push([1, 3, c]); slots.push([2, 2, c]); }
         }
-        return map;
+        return slots;
+    }
+    function generateChaos() {
+        let slots = [];
+        for(let r=0; r<6; r++) for(let c=0; c<8; c++) slots.push([0, r, c]); // 底座
+        for(let i=0; i<30; i++) {
+            slots.push([1, Math.floor(Math.random()*4)+1, Math.floor(Math.random()*6)+1]);
+        }
+        return slots;
     }
 
-    // --- 3. 遊戲邏輯 ---
+    // --- 遊戲邏輯 ---
     let tiles = [];
     let selectedTile = null;
-    let tileW = 42; // 對應 CSS 變數
-    let tileH = 56;
+    let tileW = 42, tileH = 56;
 
     function changeMap(val) { startGame(val); }
     function forceNewGame() { startGame(document.getElementById('map-select').value); }
 
+    // 核心：逆向生成演算法 (Reverse Generation)
+    // 1. 取得所有位置槽位 (Slots)
+    // 2. 從牌庫隨機抽一對牌
+    // 3. 尋找兩個「目前可以放置」的位置 (即：如果現在放下去，將來可以被拿走)
+    //    -> 這裡的「將來可以拿走」在逆向過程中，等同於「放置時不會違反規則」
+    //    -> 但逆向思考比較複雜，我們用一個更簡單的「保證有解洗牌法」(Solvable Shuffle)
+    
+    // 改良版策略：
+    // 我們先生產出有解的牌序，再填入地圖。
+    // 方法：
+    // 1. 建立地圖結構。
+    // 2. 模擬玩遊戲：從地圖中「可選」的位置裡，隨機選兩張，標記為「一對」。
+    // 3. 把這兩張移出地圖，重複步驟2，直到地圖清空。
+    // 4. 記錄下這個「配對順序」。
+    // 5. 真正開始遊戲時，將相同的牌填入剛才記錄的配對位置中。
+    
     function startGame(mapType) {
         document.getElementById('msg-overlay').style.display = 'none';
         const board = document.getElementById('game-board');
@@ -322,64 +218,154 @@
         tiles = [];
         selectedTile = null;
 
-        let positions;
-        if(mapType === 'random') positions = generateRandomMap();
-        else positions = PresetMaps[mapType]();
-        if(positions.length % 2 !== 0) positions.pop();
+        // 1. 獲取地圖槽位
+        let slots = MapBlueprints[mapType]();
+        // 必須是偶數
+        if(slots.length % 2 !== 0) slots.pop();
 
-        let deck = [];
-        let pairsNeeded = positions.length / 2;
-        for(let i=0; i<pairsNeeded; i++) {
-            let card = rawTiles[i % rawTiles.length];
-            deck.push(card); deck.push(card);
+        // 2. 建立虛擬牌組物件用來運算
+        let virtualTiles = slots.map((s, i) => ({
+            id: i, z: s[0], r: s[1], c: s[2], 
+            active: true, // 在模擬中，active 代表「還在場上」
+            pairId: null  // 用來記錄它跟誰一對
+        }));
+
+        // 3. 逆向配對 (模擬消除過程)
+        // 為了保證有解，我們模擬「消除」。
+        // 在模擬中，我們每次從「可選牌」中隨機選兩張，設為一組配對，然後移除。
+        // 重複直到清空。
+        let pairs = [];
+        let tempTiles = JSON.parse(JSON.stringify(virtualTiles)); // 複製一份
+        
+        // 為了防止隨機選擇導致死局 (雖然機率低)，我們嘗試最多 10 次
+        let success = false;
+        let attempt = 0;
+
+        while(!success && attempt < 20) {
+            tempTiles = JSON.parse(JSON.stringify(virtualTiles));
+            pairs = [];
+            let possible = true;
+            
+            while(tempTiles.some(t => t.active)) {
+                // 找出所有現在能拿的牌 (未被遮擋)
+                let available = getAvailableTiles(tempTiles);
+                
+                if(available.length < 2) {
+                    possible = false; // 死局
+                    break;
+                }
+                
+                // 隨機選兩張
+                let idx1 = Math.floor(Math.random() * available.length);
+                let tile1 = available[idx1];
+                available.splice(idx1, 1); // 移出陣列以免重複選
+                
+                let idx2 = Math.floor(Math.random() * available.length);
+                let tile2 = available[idx2];
+                
+                // 記錄這兩張是一對
+                pairs.push([tile1.id, tile2.id]);
+                
+                // 從場上移除 (模擬消除)
+                tile1.active = false;
+                tile2.active = false;
+            }
+            
+            if(possible) success = true;
+            attempt++;
         }
 
-        let isValidStart = false;
-        let attempts = 0;
-        while(!isValidStart && attempts < 20) {
-            deck.sort(() => Math.random() - 0.5); 
-            board.innerHTML = '';
-            tiles = [];
-            renderTiles(positions, deck); 
-            updateLockStatus(); 
-            if(hasAvailableMoves()) isValidStart = true; 
-            else attempts++;
+        if(!success) {
+            // 極端情況 fallback: 隨機發牌 (極少發生)
+            console.log("Fallback to random");
+            pairs = [];
+            for(let i=0; i<virtualTiles.length; i+=2) {
+                pairs.push([i, i+1]); // 假配對
+            }
         }
+
+        // 4. 填入真實花色
+        // 我們有一組配對列表 (pairs)，現在把花色填進去
+        // 每個 pair 分配一個花色
+        let finalTilesData = new Array(virtualTiles.length);
         
-        if(!isValidStart) alert("此局難度極高，建議按「新局」重試！");
+        pairs.forEach(pair => {
+            // 隨機選一個花色
+            let card = rawTiles[Math.floor(Math.random() * rawTiles.length)];
+            // 賦予這兩張牌
+            finalTilesData[pair[0]] = card;
+            finalTilesData[pair[1]] = card;
+        });
+
+        // 5. 渲染真實畫面
+        renderTiles(virtualTiles, finalTilesData);
         
-        // 重要：延遲執行縮放，確保渲染完成
         setTimeout(fitBoard, 50);
         updateStatusText();
     }
 
-    function renderTiles(positions, deck) {
+    // 輔助：判斷哪些牌可以拿 (模擬用)
+    function getAvailableTiles(tileSet) {
+        let available = [];
+        for(let tile of tileSet) {
+            if(!tile.active) continue;
+            if(!checkLockedInSet(tile, tileSet)) {
+                available.push(tile);
+            }
+        }
+        return available;
+    }
+
+    function checkLockedInSet(tile, tileSet) {
+        let hasTop = false, hasLeft = false, hasRight = false;
+        for(let other of tileSet) {
+            if(!other.active || other.id === tile.id) continue;
+            // 檢查遮擋 (同樣的邏輯)
+            if(other.z === tile.z + 1 && other.r === tile.r && other.c === tile.c) hasTop = true;
+            if(other.z === tile.z && other.r === tile.r) {
+                if(other.c === tile.c - 1) hasLeft = true;
+                if(other.c === tile.c + 1) hasRight = true;
+            }
+        }
+        return hasTop || (hasLeft && hasRight);
+    }
+
+    function renderTiles(slots, dataMap) {
         const board = document.getElementById('game-board');
         let maxX = 0, maxY = 0;
-        positions.forEach((pos, index) => {
-            const [z, r, c] = pos;
-            if(c > maxX) maxX = c;
-            if(r > maxY) maxY = r;
+        
+        slots.forEach((slot, index) => {
+            if(slot.c > maxX) maxX = slot.c;
+            if(slot.r > maxY) maxY = slot.r;
+            
             const el = document.createElement('div');
             el.className = 'tile';
-            const card = deck[index];
+            el.setAttribute('data-layer', slot.z); // 用於 CSS 陰影控制
+            
+            const card = dataMap[index];
             el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
             
-            // 減少偏移量，令堆疊更緊湊
-            let left = c * tileW + (z * 3);
-            let top = r * tileH - (z * 4); 
-            el.style.left = left + 'px'; el.style.top = top + 'px'; el.style.zIndex = z * 10 + r; 
+            let left = slot.c * tileW + (slot.z * 2); // 減少偏移
+            let top = slot.r * tileH - (slot.z * 4); 
+            el.style.left = left + 'px'; el.style.top = top + 'px'; el.style.zIndex = slot.z * 10 + slot.r; 
             
-            const tileObj = { el: el, data: card, z: z, r: r, c: c, active: true, id: index };
+            const tileObj = { 
+                el: el, data: card, 
+                z: slot.z, r: slot.r, c: slot.c, 
+                active: true, id: index 
+            };
             el.onclick = () => onTileClick(tileObj);
             board.appendChild(el);
             tiles.push(tileObj);
         });
         
-        // 重新計算邊界，不加太多緩衝
         board.style.width = (maxX + 1) * tileW + 10 + 'px';
         board.style.height = (maxY + 1) * tileH + 10 + 'px';
+        
+        updateLockStatus();
     }
+
+    // --- 標準遊戲邏輯 ---
 
     function updateLockStatus() {
         tiles.forEach(t => {
@@ -391,6 +377,7 @@
     }
 
     function checkLocked(tile) {
+        // 使用真實的 tiles 陣列
         let hasTop = false, hasLeft = false, hasRight = false;
         for(let other of tiles) {
             if(!other.active || other === tile) continue;
@@ -403,23 +390,12 @@
         return hasTop || (hasLeft && hasRight);
     }
 
-    function hasAvailableMoves() {
-        let freeTiles = tiles.filter(t => t.active && !checkLocked(t));
-        for(let i=0; i<freeTiles.length; i++) {
-            for(let j=i+1; j<freeTiles.length; j++) {
-                if(freeTiles[i].data.t === freeTiles[j].data.t) return true;
-            }
-        }
-        return false;
-    }
-
     function onTileClick(tile) {
         if(!tile.active || tile.isLocked) return;
         if(selectedTile === tile) {
             tile.el.classList.remove('selected'); selectedTile = null;
         } else if(selectedTile) {
             if(tile.data.t === selectedTile.data.t) {
-                // 配對成功
                 tile.active = false; selectedTile.active = false;
                 tile.el.style.opacity = 0; selectedTile.el.style.opacity = 0;
                 tile.el.style.transform = "scale(0)"; selectedTile.el.style.transform = "scale(0)";
@@ -428,7 +404,7 @@
                     tile.el.style.display = 'none'; 
                     updateLockStatus(); 
                     updateStatusText();
-                    checkGameState(); // 檢查勝負
+                    checkGameState(); 
                 }, 200);
             } else {
                 selectedTile.el.classList.remove('selected'); selectedTile = tile; tile.el.classList.add('selected');
@@ -440,13 +416,18 @@
 
     function checkGameState() {
         let count = tiles.filter(t => t.active).length;
-        if (count === 0) {
-            showModal('win');
-        } else {
-            if (!hasAvailableMoves()) {
-                showModal('lose');
+        if (count === 0) showModal('win');
+        else if (!hasAvailableMoves()) showModal('lose');
+    }
+
+    function hasAvailableMoves() {
+        let freeTiles = tiles.filter(t => t.active && !t.isLocked);
+        for(let i=0; i<freeTiles.length; i++) {
+            for(let j=i+1; j<freeTiles.length; j++) {
+                if(freeTiles[i].data.t === freeTiles[j].data.t) return true;
             }
         }
+        return false;
     }
 
     function showModal(type) {
@@ -461,13 +442,13 @@
             verseEl.innerText = winVerses[Math.floor(Math.random() * winVerses.length)];
             btnEl.innerText = "挑戰下一關";
             btnEl.onclick = () => {
-                const maps = ['random', 'turtle', 'castle', 'cross', 'bridge'];
+                const maps = ['turtle', 'castle', 'cross', 'bridge', 'random'];
                 const nextMap = maps[Math.floor(Math.random() * maps.length)];
                 document.getElementById('map-select').value = nextMap;
                 startGame(nextMap);
             };
         } else {
-            titleEl.innerText = "恩典夠用";
+            titleEl.innerText = "恩典夠用 (暫時無路)";
             titleEl.style.color = "#4FC3F7"; 
             verseEl.innerText = loseVerses[Math.floor(Math.random() * loseVerses.length)];
             btnEl.innerText = "重新開始";
@@ -476,19 +457,31 @@
         overlay.style.display = 'flex';
     }
 
+    // --- 智能洗牌 (保證洗完有得玩) ---
     function shuffleActiveTiles() {
         let activeTiles = tiles.filter(t => t.active);
         let datas = activeTiles.map(t => t.data);
-        let attempt = 0, solvable = false;
+        
+        // 嘗試洗牌直到有解
+        let attempt = 0; 
+        let solvable = false;
+        
+        // 找出所有未鎖定的位置索引
         let freeIndices = [];
         activeTiles.forEach((t, idx) => { if(!checkLocked(t)) freeIndices.push(idx); });
-        while(!solvable && attempt < 20) {
+
+        while(!solvable && attempt < 50) {
             datas.sort(() => Math.random() - 0.5);
+            // 檢查是否至少有一對在 freeIndices 中
             let freeDatas = freeIndices.map(i => datas[i]);
             let seen = new Set();
-            for(let d of freeDatas) { if(seen.has(d.t)) { solvable = true; break; } seen.add(d.t); }
+            for(let d of freeDatas) { 
+                if(seen.has(d.t)) { solvable = true; break; } 
+                seen.add(d.t); 
+            }
             attempt++;
         }
+
         activeTiles.forEach((t, i) => {
             t.data = datas[i]; t.el.classList.remove('selected');
             t.el.innerHTML = `<div class="t-suit">${t.data.s}</div><div class="t-icon ${t.data.c}">${t.data.i}</div><div class="t-text ${t.data.c}">${t.data.t}</div>`;
@@ -496,6 +489,8 @@
         selectedTile = null;
         const b = document.getElementById('game-board');
         b.style.opacity = 0.5; setTimeout(() => b.style.opacity = 1, 300);
+        
+        if(!solvable) alert("牌局過於複雜，建議直接開新局！");
     }
 
     function autoHint() {
@@ -515,23 +510,12 @@
         document.getElementById('status').innerText = "剩餘: " + count;
     }
 
-    // --- 關鍵修正：盡可能放大 ---
     function fitBoard() {
         const board = document.getElementById('game-board');
         const view = document.getElementById('game-viewport');
         if(!board || !view) return;
-        
-        board.style.transform = 'scale(1)'; // 先重置
-        
-        const boardW = board.scrollWidth;
-        const boardH = board.scrollHeight;
-        const viewW = view.clientWidth;
-        const viewH = view.clientHeight;
-
-        // 計算最大比例 (不設上限)
-        const scale = Math.min(viewW / boardW, viewH / boardH);
-        
-        // 稍微留 4% 邊隙，避免太貼邊被手機殼遮住
+        board.style.transform = 'scale(1)'; 
+        const scale = Math.min(view.clientWidth / board.scrollWidth, view.clientHeight / board.scrollHeight);
         board.style.transform = `scale(${scale * 0.96})`;
     }
     window.addEventListener('resize', fitBoard);
