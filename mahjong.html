@@ -3,34 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>福音麻雀 - v10</title>
+    <title>福音麻雀 - v11</title>
     <style>
-        :root { --tile-w: 42px; --tile-h: 56px; }
+        :root { 
+            --tile-w: 42px; 
+            --tile-h: 56px; 
+            --depth-x: 2px; /* 側面厚度 */
+            --depth-y: 4px; /* 底部厚度 */
+        }
+        
         * { box-sizing: border-box; }
+
         body {
-            margin: 0; background-color: #054a29; font-family: "Microsoft JhengHei", sans-serif;
+            margin: 0; background-color: #054a29; 
+            /* 加入蓆紋背景，增加真實感 */
+            background-image: repeating-linear-gradient(45deg, #065f35 0, #065f35 1px, #054a29 0, #054a29 5px);
+            font-family: "Microsoft JhengHei", sans-serif;
             overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
             color: white; user-select: none; -webkit-user-select: none; touch-action: none;
-            position: relative;
         }
         
         /* 頂部 */
         header {
-            flex-shrink: 0; height: 44px; padding: 0 10px; background: rgba(0,0,0,0.6); 
+            flex-shrink: 0; height: 44px; padding: 0 10px; background: rgba(0,0,0,0.8); 
             display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
-        select { padding: 4px; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; background: #fff; max-width: 140px; }
-        #status { font-size: 14px; font-weight: bold; background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 12px; }
+        select { padding: 4px; font-size: 14px; border-radius: 5px; border: 1px solid #999; background: #eee; max-width: 140px; }
+        #status { font-size: 14px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 12px; }
         
-        /* 遊戲區 */
+        /* 遊戲區 - 改用絕對置中 */
         #game-viewport {
-            flex: 1; width: 100%; display: flex; justify-content: center; align-items: center; 
-            position: relative; overflow: hidden; padding: 0;
+            flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
         }
+
         #game-board { 
-            position: relative; 
-            transition: transform 0.2s ease; 
+            position: absolute; 
+            top: 50%; left: 50%; /* 強制定位在中心 */
+            transform: translate(-50%, -50%); /* 修正偏移 */
             transform-origin: center center;
+            transition: transform 0.1s linear; /* 縮放時平滑 */
         }
 
         /* 底部 */
@@ -38,6 +50,7 @@
             flex-shrink: 0; height: 54px; padding: 5px; background: rgba(0,0,0,0.8); 
             display: flex; justify-content: space-around; align-items: center; z-index: 100;
             padding-bottom: max(5px, env(safe-area-inset-bottom));
+            border-top: 1px solid rgba(255,255,255,0.1);
         }
         .btn {
             background: linear-gradient(to bottom, #FFD700, #FFA000); border: none; padding: 0;
@@ -48,28 +61,44 @@
         .btn:active { transform: translateY(2px); box-shadow: none; }
         .btn-blue { background: linear-gradient(to bottom, #4FC3F7, #039BE5); box-shadow: 0 3px 0 #0277BD; color: white; }
 
-        /* 麻雀牌 - 清晰平面風格 */
+        /* 麻雀牌 - 實體感設計 */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
-            background: #fdfdfd; border-radius: 6px; cursor: pointer;
-            border: 1px solid #999;
+            background: #fff; 
+            border-radius: 4px; 
+            cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: all 0.1s;
+            
+            /* 模擬麻雀牌厚度 (背綠色) */
+            border-right: var(--depth-x) solid #1a5e2e; /* 側面深綠 */
+            border-bottom: var(--depth-y) solid #0d3d1e; /* 底部深綠 */
+            border-top: 1px solid #fff;
+            border-left: 1px solid #fff;
+            
+            /* 紮實的陰影，貼近地面 */
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
         
-        /* 層次陰影 */
-        .tile[data-layer="0"] { box-shadow: 1px 1px 0 #bbb; }
-        .tile[data-layer="1"] { box-shadow: 2px 2px 2px rgba(0,0,0,0.3), 2px 2px 0 #bbb; }
-        .tile[data-layer="2"] { box-shadow: 3px 3px 4px rgba(0,0,0,0.4), 3px 3px 0 #bbb; }
-        .tile[data-layer="3"] { box-shadow: 4px 4px 6px rgba(0,0,0,0.5), 4px 4px 0 #bbb; }
-        .tile[data-layer="4"] { box-shadow: 5px 5px 8px rgba(0,0,0,0.5), 5px 5px 0 #bbb; }
-        
-        .t-suit { position: absolute; top: 2px; right: 3px; font-size: 10px; color: #888; line-height: 1; }
-        .t-icon { font-size: 28px; line-height: 1; margin-top: 2px; }
+        .t-suit { position: absolute; top: 1px; right: 2px; font-size: 10px; color: #888; line-height: 1; }
+        .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; }
         .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; }
         
-        .tile.locked { filter: brightness(0.65) contrast(0.9); cursor: default; }
-        .tile.selected { background: #fff59d; border: 2px solid #ff3d00; transform: translate(-1px, -1px); z-index: 999 !important; }
+        /* 鎖定狀態：明顯變暗，模擬被陰影遮住 */
+        .tile.locked { 
+            filter: brightness(0.65); /* 變暗 */
+            cursor: default; 
+            background: #ddd; /* 牌面變灰 */
+        }
+        
+        /* 選中狀態：輕微浮起 */
+        .tile.selected { 
+            background: #fffbe6; 
+            border-color: #ff9800; /* 邊框變橙 */
+            transform: translate(-1px, -1px);
+            z-index: 999 !important; 
+        }
+        
         .c-red { color: #d32f2f; } .c-blue { color: #1976d2; } .c-green { color: #388e3c; }
 
         /* 彈窗 */
@@ -85,18 +114,9 @@
             width: 100%; max-width: 400px;
         }
 
-        /* 水印 */
         #watermark {
-            position: absolute;
-            bottom: 60px; /* 位於 footer 之上 */
-            right: 10px;
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.4);
-            pointer-events: none;
-            z-index: 150;
-            font-family: sans-serif;
-            text-align: right;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            position: absolute; bottom: 60px; right: 10px; font-size: 10px;
+            color: rgba(255, 255, 255, 0.3); pointer-events: none; z-index: 150;
         }
     </style>
 </head>
@@ -124,7 +144,7 @@
     <button class="btn" onclick="autoHint()">💡 提示</button>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v10</div>
+<div id="watermark">Powered by Google Gemini v11</div>
 
 <div id="msg-overlay">
     <div id="overlay-title" class="overlay-title" style="color:#FFD700;">哈利路亞！</div>
@@ -133,7 +153,6 @@
 </div>
 
 <script>
-    // 資料庫：教會版
     const rawTiles = [
         {t:"摩西", i:"🌊", s:"萬", c:"c-red"}, {t:"大衛", i:"👑", s:"萬", c:"c-red"},
         {t:"保羅", i:"📜", s:"萬", c:"c-red"}, {t:"彼得", i:"🐟", s:"萬", c:"c-red"},
@@ -161,7 +180,6 @@
         "你們要休息，要知道我是神。(詩 46:10)", "萬事都互相效力。(羅 8:28)"
     ];
 
-    // --- 地圖結構 ---
     const MapBlueprints = {
         turtle: () => generatePyramid(6, 8, [6,6, 4,4, 2,2, 1,1]), 
         castle: () => generateWall(6, 8),
@@ -170,10 +188,10 @@
         towers: () => generateTowers(),
         random: () => generateChaos()
     };
-
+    
+    // 生成器邏輯
     function generatePyramid(rows, cols, layerSizes) {
-        let slots = [];
-        let currentLayer = 0;
+        let slots = []; let currentLayer = 0;
         for(let i=0; i<layerSizes.length; i+=2) {
             let h = layerSizes[i], w = layerSizes[i+1];
             let startR = Math.floor((rows - h)/2), startC = Math.floor((cols - w)/2);
@@ -222,10 +240,13 @@
         return slots;
     }
 
-    // --- 遊戲邏輯 ---
+    // --- 遊戲變數 ---
     let tiles = [];
     let selectedTile = null;
-    let tileW = 42, tileH = 56;
+    let tileW = 42; 
+    let tileH = 56;
+    let offsetX = -3; // 層級X偏移 (負數代表向左上)
+    let offsetY = -5; // 層級Y偏移 (負數代表向左上)
 
     function changeMap(val) { startGame(val); }
     function forceNewGame() { startGame(document.getElementById('map-select').value); }
@@ -237,17 +258,18 @@
         tiles = [];
         selectedTile = null;
 
-        // 1. 獲取並置中地圖
+        // 1. 獲取地圖 & 正規化 (Normalize)
         let slots = MapBlueprints[mapType]();
         if(slots.length % 2 !== 0) slots.pop();
+        
         let minC = Infinity, minR = Infinity;
         slots.forEach(s => { if(s[1]<minR) minR=s[1]; if(s[2]<minC) minC=s[2]; });
         slots.forEach(s => { s[1]-=minR; s[2]-=minC; });
 
-        // 2. 建立虛擬牌組
+        // 2. 虛擬牌組
         let virtualTiles = slots.map((s, i) => ({ id: i, z: s[0], r: s[1], c: s[2], active: true }));
 
-        // 3. 逆向配對生成 (保證有解)
+        // 3. 逆向生成 (保證有解)
         let pairs = [], tempTiles, success = false, attempt = 0;
         while(!success && attempt < 20) {
             tempTiles = JSON.parse(JSON.stringify(virtualTiles)); pairs = []; let possible = true;
@@ -262,7 +284,7 @@
         }
         if(!success) for(let i=0;i<virtualTiles.length;i+=2) pairs.push([i,i+1]);
 
-        // 4. 嚴格庫存分配 (每款4隻)
+        // 4. 庫存分配
         let totalPairs = pairs.length, cardInventory = [], shuffledTypes = [...rawTiles].sort(()=>Math.random()-0.5);
         let typeIndex = 0;
         for(let i=0; i<totalPairs; i+=2) {
@@ -276,7 +298,7 @@
 
         // 5. 渲染
         renderTiles(virtualTiles, finalTilesData);
-        setTimeout(fitBoard, 50);
+        setTimeout(fitBoard, 50); // 確保 DOM 更新後計算大小
         updateStatusText();
     }
 
@@ -297,18 +319,25 @@
     function renderTiles(slots, dataMap) {
         const board = document.getElementById('game-board');
         let maxX=0, maxY=0;
+        
         slots.forEach((slot, index) => {
-            if(slot.c>maxX) maxX=slot.c; if(slot.r>maxY) maxY=slot.r;
+            if(slot.c > maxX) maxX = slot.c;
+            if(slot.r > maxY) maxY = slot.r;
+            
             const el = document.createElement('div');
             el.className = 'tile';
-            el.setAttribute('data-layer', slot.z);
+            // el.setAttribute('data-layer', slot.z);
             
             const card = dataMap[index];
             el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
             
-            let left = slot.c * tileW + (slot.z * 2);
-            let top = slot.r * tileH - (slot.z * 4); 
-            el.style.left = left + 'px'; el.style.top = top + 'px'; el.style.zIndex = slot.z * 10 + slot.r; 
+            // 紮實堆疊計算：減少 z 軸偏移
+            let left = slot.c * tileW + (slot.z * offsetX);
+            let top = slot.r * tileH + (slot.z * offsetY); 
+            
+            el.style.left = left + 'px'; 
+            el.style.top = top + 'px'; 
+            el.style.zIndex = slot.z * 10 + slot.r; 
             
             const tileObj = { el: el, data: card, z: slot.z, r: slot.r, c: slot.c, active: true, id: index };
             el.onclick = () => onTileClick(tileObj);
@@ -316,8 +345,10 @@
             tiles.push(tileObj);
         });
         
-        board.style.width = (maxX+1) * tileW + 10 + 'px';
-        board.style.height = (maxY+1) * tileH + 10 + 'px';
+        // 設定 board 大小，僅供參考，實際由 fitBoard 縮放
+        board.style.width = (maxX + 1) * tileW + 'px';
+        board.style.height = (maxY + 1) * tileH + 'px';
+        
         updateLockStatus();
     }
 
@@ -342,9 +373,9 @@
             if(tile.data.t === selectedTile.data.t) {
                 tile.active=false; selectedTile.active=false;
                 tile.el.style.opacity=0; selectedTile.el.style.opacity=0;
-                tile.el.style.transform="scale(0) rotate(20deg)"; selectedTile.el.style.transform="scale(0) rotate(20deg)";
+                tile.el.style.transform="scale(0)"; selectedTile.el.style.transform="scale(0)";
                 selectedTile = null;
-                setTimeout(() => { tile.el.style.display='none'; updateLockStatus(); updateStatusText(); checkGameState(); }, 250);
+                setTimeout(() => { tile.el.style.display='none'; updateLockStatus(); updateStatusText(); checkGameState(); }, 150);
             } else { selectedTile.el.classList.remove('selected'); selectedTile = tile; tile.el.classList.add('selected'); }
         } else { selectedTile = tile; tile.el.classList.add('selected'); }
     }
@@ -396,12 +427,27 @@
 
     function updateStatusText() { document.getElementById('status').innerText = "剩餘: " + tiles.filter(t => t.active).length; }
 
+    // --- 絕對置中邏輯 (核心修正) ---
     function fitBoard() {
-        const board = document.getElementById('game-board'), view = document.getElementById('game-viewport');
-        if(!board || !view) return; board.style.transform='scale(1)';
-        const scale = Math.min(view.clientWidth / board.scrollWidth, view.clientHeight / board.scrollHeight);
-        board.style.transform = `scale(${scale * 0.94})`;
+        const board = document.getElementById('game-board');
+        const view = document.getElementById('game-viewport');
+        if(!board || !view) return;
+        
+        // 先重置
+        board.style.transform = 'translate(-50%, -50%) scale(1)';
+        
+        const boardW = board.scrollWidth;
+        const boardH = board.scrollHeight;
+        const viewW = view.clientWidth;
+        const viewH = view.clientHeight;
+
+        // 計算最大比例 (留 10px 邊距)
+        const scale = Math.min((viewW - 20) / boardW, (viewH - 20) / boardH);
+        
+        // 應用：位移 + 縮放
+        board.style.transform = `translate(-50%, -50%) scale(${scale})`;
     }
+    
     window.addEventListener('resize', fitBoard);
     startGame('random'); 
 </script>
