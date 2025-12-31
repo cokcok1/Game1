@@ -3,13 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>福音麻雀 - v12</title>
+    
+    <meta name="apple-mobile-web-app-title" content="福音麻雀">
+    <meta name="application-name" content="福音麻雀">
+    
+    <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=✝&background=FFD700&color=333333&size=512&font-size=0.6&length=1">
+    <link rel="icon" type="image/png" href="https://ui-avatars.com/api/?name=✝&background=FFD700&color=333333&size=192&font-size=0.6&length=1">
+
+    <title>福音麻雀 - v13</title>
     <style>
         :root { 
             --tile-w: 42px; 
             --tile-h: 56px; 
             --depth-x: 2px;
-            --depth-y: 5px; /* 加厚底部，增強落地感 */
+            --depth-y: 5px;
         }
         
         * { box-sizing: border-box; }
@@ -22,13 +29,11 @@
             color: white; user-select: none; -webkit-user-select: none; touch-action: none;
         }
         
-        /* --- 頂部 (iPad 適配修復) --- */
+        /* 頂部 (iPad 適配) */
         header {
             flex-shrink: 0; 
-            /* 自動增加高度以適配瀏海屏/狀態欄 */
             height: calc(44px + env(safe-area-inset-top)); 
             padding: 0 10px; 
-            /* 增加頂部內距，讓內容避開狀態欄 */
             padding-top: env(safe-area-inset-top); 
             background: rgba(0,0,0,0.85); 
             display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 14px;
@@ -56,7 +61,7 @@
             padding: 5px; 
             padding-bottom: max(5px, env(safe-area-inset-bottom));
             background: rgba(0,0,0,0.85); 
-            display: flex; justify-content: space-around; align-items: flex-start; /* 對齊調整 */
+            display: flex; justify-content: space-around; align-items: flex-start;
             padding-top: 10px;
             z-index: 100;
             border-top: 1px solid rgba(255,255,255,0.1);
@@ -85,7 +90,6 @@
             border-top: 1px solid #fff;
             border-left: 1px solid #fff;
             
-            /* 陰影 */
             box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
         }
         
@@ -93,20 +97,10 @@
         .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; }
         .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; }
         
-        /* 鎖定狀態：加深遮罩，讓玩家知道這張牌被壓住了 */
-        .tile.locked { 
-            filter: brightness(0.6); 
-            cursor: default; 
-            background: #ccc; 
-            box-shadow: none; /* 鎖住的牌不應該有浮起感 */
-        }
+        .tile.locked { filter: brightness(0.6); cursor: default; background: #ccc; box-shadow: none; }
         
-        /* 選中狀態 */
         .tile.selected { 
-            background: #fffbe6; 
-            border-color: #ff9800; 
-            transform: translateY(-2px); /* 只向上浮，不向左 */
-            z-index: 999 !important; 
+            background: #fffbe6; border-color: #ff9800; transform: translateY(-2px); z-index: 999 !important; 
         }
         
         .c-red { color: #d32f2f; } .c-blue { color: #1976d2; } .c-green { color: #388e3c; }
@@ -153,7 +147,7 @@
     <button class="btn" onclick="autoHint()">💡 提示</button>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v12</div>
+<div id="watermark">Powered by Google Gemini v13</div>
 
 <div id="msg-overlay">
     <div id="overlay-title" class="overlay-title" style="color:#FFD700;">哈利路亞！</div>
@@ -162,6 +156,7 @@
 </div>
 
 <script>
+    // 資料庫修正：亞伯拉罕 -> 亞伯蘭
     const rawTiles = [
         {t:"摩西", i:"🌊", s:"萬", c:"c-red"}, {t:"大衛", i:"👑", s:"萬", c:"c-red"},
         {t:"保羅", i:"📜", s:"萬", c:"c-red"}, {t:"彼得", i:"🐟", s:"萬", c:"c-red"},
@@ -252,9 +247,8 @@
     let selectedTile = null;
     let tileW = 42; 
     let tileH = 56;
-    // 修正視覺偏移：垂直堆疊
     let offsetX = 0; 
-    let offsetY = -8; // 向上堆疊，讓層次感變成「高度」
+    let offsetY = -8; 
 
     function changeMap(val) { startGame(val); }
     function forceNewGame() { startGame(document.getElementById('map-select').value); }
@@ -266,7 +260,6 @@
         tiles = [];
         selectedTile = null;
 
-        // 1. 地圖與正規化
         let slots = MapBlueprints[mapType]();
         if(slots.length % 2 !== 0) slots.pop();
         
@@ -274,10 +267,8 @@
         slots.forEach(s => { if(s[1]<minR) minR=s[1]; if(s[2]<minC) minC=s[2]; });
         slots.forEach(s => { s[1]-=minR; s[2]-=minC; });
 
-        // 2. 虛擬牌組
         let virtualTiles = slots.map((s, i) => ({ id: i, z: s[0], r: s[1], c: s[2], active: true }));
 
-        // 3. 逆向生成
         let pairs = [], tempTiles, success = false, attempt = 0;
         while(!success && attempt < 20) {
             tempTiles = JSON.parse(JSON.stringify(virtualTiles)); pairs = []; let possible = true;
@@ -292,7 +283,6 @@
         }
         if(!success) for(let i=0;i<virtualTiles.length;i+=2) pairs.push([i,i+1]);
 
-        // 4. 庫存分配
         let totalPairs = pairs.length, cardInventory = [], shuffledTypes = [...rawTiles].sort(()=>Math.random()-0.5);
         let typeIndex = 0;
         for(let i=0; i<totalPairs; i+=2) {
@@ -304,7 +294,6 @@
         let finalTilesData = new Array(virtualTiles.length);
         pairs.forEach((pair, idx) => { finalTilesData[pair[0]] = finalTilesData[pair[1]] = cardInventory[idx]; });
 
-        // 5. 渲染
         renderTiles(virtualTiles, finalTilesData);
         setTimeout(fitBoard, 50);
         updateStatusText();
@@ -318,7 +307,6 @@
         let hasTop=false, hasLeft=false, hasRight=false;
         for(let other of tileSet) {
             if(!other.active || other.id === tile.id) continue;
-            // 嚴格堆疊檢查
             if(other.z === tile.z+1 && other.r === tile.r && other.c === tile.c) hasTop = true;
             if(other.z === tile.z && other.r === tile.r) { if(other.c === tile.c-1) hasLeft=true; if(other.c === tile.c+1) hasRight=true; }
         }
@@ -339,7 +327,6 @@
             const card = dataMap[index];
             el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
             
-            // 垂直堆疊
             let left = slot.c * tileW + (slot.z * offsetX);
             let top = slot.r * tileH + (slot.z * offsetY); 
             
