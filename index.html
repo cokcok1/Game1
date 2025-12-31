@@ -2,7 +2,493 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <meta name="apple-mobile-web-app-title" content="福音麻雀">
+    <meta name="application-name" content="福音麻雀">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
+    <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
+
+    <title>福音麻雀 - v20 兒童版</title>
+    <style>
+        :root { 
+            --tile-w: 42px; 
+            --tile-h: 56px; 
+            --depth: 14px;
+        }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0; 
+            /* v20 修改：淺粉綠色夢幻背景 */
+            background: linear-gradient(135deg, #e0f7fa 0%, #c8e6c9 100%);
+            font-family: "Microsoft JhengHei", "Comic Sans MS", sans-serif; /* 嘗試加入一點可愛字體 */
+            overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
+            color: #333; /* v20 修改：文字改為深色 */
+            user-select: none; -webkit-user-select: none; touch-action: none;
+        }
+        
+        /* v20 修改：Header 玩具化 */
+        header {
+            flex-shrink: 0; 
+            height: calc(50px + env(safe-area-inset-top)); 
+            padding: 5px 10px; 
+            padding-top: calc(5px + env(safe-area-inset-top)); 
+            /* 改為明亮的白色半透明，加粗邊框 */
+            background: rgba(255, 255, 255, 0.8);
+            border-bottom: 3px solid #4fc3f7;
+            border-radius: 0 0 15px 15px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 14px;
+            box-shadow: 0 4px 10px rgba(79, 195, 247, 0.3);
+            color: #0277bd; font-weight: bold;
+        }
+        select { 
+            padding: 6px; font-size: 14px; border-radius: 20px; /* 更圓 */
+            border: 2px solid #4fc3f7; background: #fff; max-width: 140px; 
+            color: #0277bd; font-weight: bold;
+        }
+        #status { 
+            font-size: 14px; font-weight: bold; 
+            background: #ffeb3b; color: #d84315; /* 鮮艷配色 */
+            padding: 6px 12px; border-radius: 20px; 
+            border: 2px solid #ffc107;
+            box-shadow: 2px 2px 0 #ff9800;
+        }
+        
+        #game-viewport {
+            flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
+            perspective: 2000px; perspective-origin: center center;
+        }
+
+        #game-board { 
+            position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%) rotateX(30deg) rotateZ(0deg); 
+            transform-origin: center center; transform-style: preserve-3d;
+        }
+
+        /* v20 修改：Footer 玩具化 */
+        footer { 
+            flex-shrink: 0; height: calc(60px + env(safe-area-inset-bottom)); 
+            padding: 8px; 
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            background: rgba(255, 255, 255, 0.8);
+            border-top: 3px solid #4fc3f7;
+            border-radius: 15px 15px 0 0;
+            display: flex; justify-content: space-around; align-items: flex-start;
+            z-index: 100;
+            box-shadow: 0 -4px 10px rgba(79, 195, 247, 0.3);
+        }
+        /* v20 修改：糖果按鈕 */
+        .btn {
+            background: linear-gradient(to bottom, #ffeb3b, #ffc107); /* 更亮的黃色 */
+            border: 2px solid #ff9800; padding: 0;
+            width: 32%; height: 42px; border-radius: 25px; /* 超級圓 */
+            font-weight: 900; font-size: 16px; 
+            box-shadow: 0 4px 0 #e65100; cursor: pointer; display: flex; justify-content: center; 
+            align-items: center; color: #bf360c;
+            transition: all 0.1s;
+        }
+        .btn:active { transform: translateY(4px); box-shadow: 0 0px 0 #e65100; }
+        .btn-blue { 
+            background: linear-gradient(to bottom, #4dd0e1, #00bcd4); /* 更亮的藍色 */
+            border: 2px solid #0097a7;
+            box-shadow: 0 4px 0 #006064; color: #004d40; 
+        }
+        .btn-blue:active { transform: translateY(4px); box-shadow: 0 0px 0 #006064; }
+
+        /* v20 修改：玩具搖桿 */
+        #joystick-zone {
+            position: absolute; bottom: 80px; right: 15px; width: 80px; height: 80px; z-index: 150;
+            background: rgba(255, 255, 255, 0.3); border: 3px solid #4fc3f7; /* 藍色邊框 */
+            border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
+            backdrop-filter: blur(2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #joystick-knob {
+            width: 36px; height: 36px; 
+            background: radial-gradient(circle at 30% 30%, #ff80ab, #f50057); /* 粉紅色球 */
+            border: 2px solid #c51162;
+            border-radius: 50%;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3); position: relative;
+        }
+        #joystick-hint {
+            position: absolute; bottom: -22px; width: 100%; text-align: center;
+            font-size: 11px; color: #0277bd; font-weight: bold; pointer-events: none;
+        }
+
+        /* --- 麻雀牌 (玩具質感) --- */
+        .tile {
+            position: absolute; width: var(--tile-w); height: var(--tile-h);
+            background-color: #fffcf0; /* 稍微暖一點的米白 */
+            border-radius: 6px; /* v20: 更圓的角 */
+            cursor: pointer;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transform-style: preserve-3d; transition: transform 0.1s;
+            box-shadow: inset 0 2px 3px rgba(255,255,255,1), inset 0 -2px 3px rgba(0,0,0,0.05);
+            border: none;
+        }
+        /* v20: 側面顏色更柔和，像塑膠玩具 */
+        .tile::before {
+            content: ''; position: absolute; width: 100.5%; height: var(--depth);
+            bottom: 0; left: 0; background: #e0e0e0; transform-origin: bottom; transform: rotateX(-90deg);
+            border: 1px solid #ccc; border-radius: 0 0 6px 6px;
+        }
+        .tile::after {
+            content: ''; position: absolute; width: var(--depth); height: 100.5%;
+            top: 0; right: 0; background: #d8d8d8; transform-origin: right; transform: rotateY(90deg);
+            border: 1px solid #ccc; border-radius: 0 6px 6px 0;
+        }
+
+        .tile.locked { background-color: #f0f0f0; color: #aaa; }
+        .tile.locked::before, .tile.locked::after { background: #d0d0d0; border-color: #bbb; }
+        .tile.locked img, .tile.locked .t-icon { opacity: 0.4; }
+
+        .tile.selected { 
+            background-color: #fffde7; 
+            transform: translateZ(calc(var(--base-z) + 15px)) !important; 
+            box-shadow: 0 0 0 3px #ffeb3b, 0 0 15px #ffeb3b; /* 發光效果改為黃色 */
+        }
+
+        .t-suit { position: absolute; top: 2px; right: 3px; font-size: 11px; color: #999; line-height: 1; backface-visibility: hidden; }
+        .t-icon { font-size: 28px; line-height: 1; margin-top: 2px; backface-visibility: hidden; }
+        .t-text { font-size: 12px; font-weight: 900; margin-top: 0px; color: #444; backface-visibility: hidden; }
+        
+        .c-red { color: #e91e63; } /* 更鮮豔的紅 */
+        .c-blue { color: #2196f3; } /* 更鮮豔的藍 */
+        .c-green { color: #4caf50; } /* 更鮮豔的綠 */
+
+        #msg-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.85); /* v20: 改為明亮的半透明遮罩 */
+            display: none; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 200; text-align: center; padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+        .overlay-title { font-size: 36px; font-weight: 900; margin-bottom: 20px; color: #f50057; text-shadow: 2px 2px 0 #ff80ab; }
+        .overlay-verse { 
+            font-size: 22px; color: #0277bd; line-height: 1.5; font-weight: bold;
+            background: #e1f5fe; padding: 30px; border-radius: 25px; border: 4px solid #4fc3f7;
+            width: 100%; max-width: 450px; box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        #watermark {
+            position: absolute; bottom: 75px; left: 15px; font-size: 11px; font-weight: bold;
+            color: rgba(0, 121, 107, 0.5); pointer-events: none; z-index: 150; /* 深綠色水印 */
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <select id="map-select" onchange="changeMap(this.value)">
+        <option value="random">🎲 無限隨機</option>
+        <option value="turtle">🐢 經典龜背</option>
+        <option value="castle">🏰 堅固堡壘</option>
+        <option value="cross">✝️ 榮耀十架</option>
+        <option value="bridge">🌉 恩典之橋</option>
+        <option value="towers">🗼 雙子塔</option>
+    </select>
+    <div id="status">剩餘: 0</div>
+</header>
+
+<div id="game-viewport">
+    <div id="game-board"></div>
+    <div id="joystick-zone"><div id="joystick-knob"></div><div id="joystick-hint">轉動視角</div></div>
+</div>
+
+<footer>
+    <button class="btn btn-blue" onclick="forceNewGame()">🔄 新局</button>
+    <button class="btn" onclick="shuffleActiveTiles()">🔀 洗牌</button>
+    <button class="btn" onclick="autoHint()">💡 提示</button>
+</footer>
+
+<div id="watermark">Powered by Google Gemini v20 (Kids Edition)</div>
+
+<div id="msg-overlay">
+    <div id="overlay-title" class="overlay-title">哈利路亞！</div>
+    <div id="overlay-verse" class="overlay-verse"></div>
+    <button id="overlay-btn" class="btn" style="width: 220px; margin-top: 30px; height: 55px; font-size: 20px; border-radius: 30px;" onclick="forceNewGame()">挑戰下一關</button>
+</div>
+
+<script>
+    const rawTiles = [
+        {t:"摩西", i:"🌊", s:"萬", c:"c-red"}, {t:"大衛", i:"👑", s:"萬", c:"c-red"},
+        {t:"保羅", i:"📜", s:"萬", c:"c-red"}, {t:"彼得", i:"🐟", s:"萬", c:"c-red"},
+        {t:"約拿", i:"🐋", s:"萬", c:"c-red"}, {t:"馬利亞", i:"🤰", s:"萬", c:"c-red"},
+        {t:"亞伯蘭", i:"🐑", s:"萬", c:"c-red"}, {t:"但以理", i:"🦁", s:"萬", c:"c-red"},
+        {t:"教會", i:"⛪", s:"筒", c:"c-blue"}, {t:"西奈", i:"⛰️", s:"筒", c:"c-blue"},
+        {t:"紅海", i:"🌊", s:"筒", c:"c-blue"}, {t:"伊甸", i:"🍎", s:"筒", c:"c-blue"},
+        {t:"加利利", i:"🛶", s:"筒", c:"c-blue"}, {t:"聖殿", i:"🏛️", s:"筒", c:"c-blue"},
+        {t:"耶利哥", i:"🧱", s:"筒", c:"c-blue"}, {t:"方舟", i:"🚢", s:"筒", c:"c-blue"},
+        {t:"十架", i:"✝️", s:"索", c:"c-green"}, {t:"聖經", i:"📖", s:"索", c:"c-green"},
+        {t:"五餅", i:"🍞", s:"索", c:"c-green"}, {t:"二魚", i:"🐟", s:"索", c:"c-green"},
+        {t:"寶血", i:"🍷", s:"索", c:"c-green"}, {t:"聖靈", i:"🕊️", s:"索", c:"c-green"},
+        {t:"信", i:"🛡️", s:"番", c:"#333"}, {t:"望", i:"⚓", s:"番", c:"#333"},
+        {t:"愛", i:"❤️", s:"番", c:"#333"}, {t:"阿們", i:"🙏", s:"番", c:"#333"},
+        {t:"禱告", i:"🤲", s:"番", c:"#333"}, {t:"復活", i:"🌅", s:"番", c:"#333"}
+    ];
+    
+    const winVerses = ["流淚撒種的，必歡呼收割。(詩 126:5)", "那美好的仗我已經打過了。(提後 4:7)", "靠著那加給我力量的，凡事都能做。(腓 4:13)", "你們是世上的光。(太 5:14)", "得勝的，我要賜他在我寶座上與我同坐。(啟 3:21)"];
+    const loseVerses = ["我的恩典是夠你用的。(林後 12:9)", "應當一無掛慮，只要凡事藉著禱告。(腓 4:6)", "你們要休息，要知道我是神。(詩 46:10)", "萬事都互相效力。(羅 8:28)"];
+
+    const MapBlueprints = {
+        turtle: () => generatePyramid(6, 8, [6,6, 4,4, 2,2, 1,1]), 
+        castle: () => generateWall(6, 8),
+        cross: () => generateCross(),
+        bridge: () => generateBridge(),
+        towers: () => generateTowers(),
+        random: () => generateChaos()
+    };
+    function generatePyramid(rows, cols, layerSizes) { let slots=[]; let cl=0; for(let i=0;i<layerSizes.length;i+=2){ let h=layerSizes[i], w=layerSizes[i+1]; let sr=Math.floor((rows-h)/2), sc=Math.floor((cols-w)/2); for(let r=0;r<h;r++) for(let c=0;c<w;c++) slots.push([cl, sr+r, sc+c]); cl++; } return slots; }
+    function generateWall(rows, cols) { let slots=[]; for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) { slots.push([0, r, c]); if(r===0||r===rows-1||c===0||c===cols-1) slots.push([1, r, c]); } return slots; }
+    function generateCross() { let slots=[]; for(let r=0;r<8;r++) { slots.push([0,r,3]); slots.push([0,r,4]); slots.push([1,r,3]); } for(let c=0;c<8;c++) { slots.push([0,2,c]); slots.push([0,3,c]); slots.push([1,2,c]); } slots.push([2,2,3]); slots.push([2,3,3]); return slots; }
+    function generateBridge() { let slots=[]; for(let c=0;c<10;c++) { slots.push([0,2,c]); slots.push([0,3,c]); if(c<3||c>6) { slots.push([1,2,c]); slots.push([1,3,c]); slots.push([2,2,c]); } } return slots; }
+    function generateTowers() { let slots=[]; for(let r=0;r<6;r++) for(let c=0;c<8;c++) { if(c<2||c>5) { slots.push([0,r,c]); slots.push([1,r,c]); if(r>1&&r<4) slots.push([2,r,c]); } else if(r===2||r===3) slots.push([0,r,c]); } return slots; }
+    function generateChaos() { let slots=[]; for(let r=0;r<6;r++) for(let c=0;c<8;c++) slots.push([0,r,c]); for(let i=0;i<32;i++) slots.push([Math.floor(Math.random()*2)+1, Math.floor(Math.random()*4)+1, Math.floor(Math.random()*6)+1]); return slots; }
+
+    let tiles = [];
+    let selectedTile = null;
+    let tileW = 42, tileH = 56;
+    let globalScale = 1;
+    let viewRotX = 30;
+    let viewRotZ = 0;
+
+    function changeMap(val) { startGame(val); }
+    function forceNewGame() { startGame(document.getElementById('map-select').value); }
+
+    function startGame(mapType) {
+        document.getElementById('msg-overlay').style.display = 'none';
+        const board = document.getElementById('game-board');
+        board.innerHTML = ''; tiles = []; selectedTile = null;
+        viewRotX = 30; viewRotZ = 0; 
+
+        let slots = MapBlueprints[mapType]();
+        if(slots.length % 2 !== 0) slots.pop();
+        let minC = Infinity, minR = Infinity;
+        slots.forEach(s => { if(s[1]<minR) minR=s[1]; if(s[2]<minC) minC=s[2]; });
+        slots.forEach(s => { s[1]-=minR; s[2]-=minC; });
+
+        let virtualTiles = slots.map((s, i) => ({ id: i, z: s[0], r: s[1], c: s[2], active: true }));
+        let pairs = [], tempTiles, success = false, attempt = 0;
+        while(!success && attempt < 20) {
+            tempTiles = JSON.parse(JSON.stringify(virtualTiles)); pairs = []; let possible = true;
+            while(tempTiles.some(t => t.active)) {
+                let available = getAvailableTiles(tempTiles);
+                if(available.length < 2) { possible = false; break; }
+                let t1 = available.splice(Math.floor(Math.random()*available.length), 1)[0];
+                let t2 = available.splice(Math.floor(Math.random()*available.length), 1)[0];
+                pairs.push([t1.id, t2.id]); t1.active = false; t2.active = false;
+            }
+            if(possible) success = true; attempt++;
+        }
+        if(!success) for(let i=0;i<virtualTiles.length;i+=2) pairs.push([i,i+1]);
+
+        let totalPairs = pairs.length, cardInventory = [], shuffledTypes = [...rawTiles].sort(()=>Math.random()-0.5);
+        let typeIndex = 0;
+        for(let i=0; i<totalPairs; i+=2) {
+            let card = shuffledTypes[typeIndex % shuffledTypes.length];
+            cardInventory.push(card); if(i+1<totalPairs) cardInventory.push(card);
+            typeIndex++;
+        }
+        cardInventory.sort(()=>Math.random()-0.5);
+        let finalTilesData = new Array(virtualTiles.length);
+        pairs.forEach((pair, idx) => { finalTilesData[pair[0]] = finalTilesData[pair[1]] = cardInventory[idx]; });
+
+        renderTiles(virtualTiles, finalTilesData);
+        setTimeout(fitBoard, 50);
+        updateStatusText();
+    }
+
+    function getAvailableTiles(tileSet) { return tileSet.filter(t => t.active && !checkLockedInSet(t, tileSet)); }
+    function checkLockedInSet(tile, tileSet) {
+        let hasTop=false, hasLeft=false, hasRight=false;
+        for(let other of tileSet) {
+            if(!other.active || other.id === tile.id) continue;
+            if(other.z === tile.z+1 && other.r === tile.r && other.c === tile.c) hasTop = true;
+            if(other.z === tile.z && other.r === tile.r) { if(other.c === tile.c-1) hasLeft=true; if(other.c === tile.c+1) hasRight=true; }
+        }
+        return hasTop || (hasLeft && hasRight);
+    }
+
+    function renderTiles(slots, dataMap) {
+        const board = document.getElementById('game-board');
+        let maxX=0, maxY=0;
+        slots.forEach((slot, index) => {
+            if(slot.c > maxX) maxX = slot.c; if(slot.r > maxY) maxY = slot.r;
+            const el = document.createElement('div');
+            el.className = 'tile';
+            
+            const card = dataMap[index];
+            el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
+            
+            let left = slot.c * tileW; 
+            let top = slot.r * tileH; 
+            let zHeight = slot.z * 14; 
+            
+            el.style.left = left + 'px'; 
+            el.style.top = top + 'px'; 
+            el.style.transform = `translateZ(${zHeight}px)`; 
+            el.style.setProperty('--base-z', zHeight + 'px');
+            el.style.zIndex = slot.z * 10 + slot.r; 
+            
+            const tileObj = { el: el, data: card, z: slot.z, r: slot.r, c: slot.c, active: true, id: index };
+            el.onclick = () => onTileClick(tileObj);
+            board.appendChild(el);
+            tiles.push(tileObj);
+        });
+        board.style.width = (maxX + 1) * tileW + 'px';
+        board.style.height = (maxY + 1) * tileH + 'px';
+        updateLockStatus();
+    }
+
+    function updateLockStatus() { tiles.forEach(t => { if(!t.active) return; t.isLocked = checkLocked(t); t.el.classList.toggle('locked', t.isLocked); }); }
+    
+    function checkLocked(tile) {
+        let hasTop=false, hasLeft=false, hasRight=false;
+        for(let other of tiles) {
+            if(!other.active || other === tile) continue;
+            if(other.z === tile.z+1 && other.r === tile.r && other.c === tile.c) hasTop = true;
+            if(other.z === tile.z && other.r === tile.r) { if(other.c === tile.c-1) hasLeft=true; if(other.c === tile.c+1) hasRight=true; }
+        }
+        return hasTop || (hasLeft && hasRight);
+    }
+
+    function onTileClick(tile) {
+        if(!tile.active || tile.isLocked) return;
+        if(selectedTile === tile) { tile.el.classList.remove('selected'); selectedTile = null; }
+        else if(selectedTile) {
+            if(tile.data.t === selectedTile.data.t) {
+                tile.active=false; selectedTile.active=false;
+                tile.el.style.display='none'; selectedTile.el.style.display='none'; 
+                selectedTile = null;
+                updateLockStatus(); updateStatusText(); checkGameState();
+            } else { selectedTile.el.classList.remove('selected'); selectedTile = tile; tile.el.classList.add('selected'); }
+        } else { selectedTile = tile; tile.el.classList.add('selected'); }
+    }
+
+    function checkGameState() { if(tiles.filter(t=>t.active).length===0) showModal('win'); else if(!hasAvailableMoves()) showModal('lose'); }
+    function hasAvailableMoves() {
+        let free = tiles.filter(t=>t.active && !t.isLocked);
+        for(let i=0;i<free.length;i++) for(let j=i+1;j<free.length;j++) if(free[i].data.t === free[j].data.t) return true;
+        return false;
+    }
+
+    function showModal(type) {
+        const overlay = document.getElementById('msg-overlay'), title = document.getElementById('overlay-title'), verse = document.getElementById('overlay-verse'), btn = document.getElementById('overlay-btn');
+        if(type==='win') {
+            title.innerText="🎉 哈利路亞！挑戰成功！ 🎉"; title.style.color="#f50057"; verse.innerText=winVerses[Math.floor(Math.random()*winVerses.length)];
+            verse.style.borderColor = "#f50057"; verse.style.color="#c51162"; verse.style.background="#fce4ec";
+            btn.innerText="挑戰下一關"; btn.onclick=()=>{ document.getElementById('map-select').value=['random','turtle','castle','cross','bridge','towers'][Math.floor(Math.random()*6)]; startGame(document.getElementById('map-select').value); };
+        } else {
+            title.innerText="💪 恩典夠用！再試一次！ 💪"; title.style.color="#0277bd"; verse.innerText=loseVerses[Math.floor(Math.random()*loseVerses.length)];
+            verse.style.borderColor = "#0277bd"; verse.style.color="#01579b"; verse.style.background="#e1f5fe";
+            btn.innerText="重新開始"; btn.onclick=()=>forceNewGame();
+        }
+        overlay.style.display='flex';
+    }
+
+    function shuffleActiveTiles() {
+        let active=tiles.filter(t=>t.active), datas=active.map(t=>t.data), attempt=0, solvable=false;
+        let freeIndices=active.map((t,i)=>!checkLocked(t)?i:-1).filter(i=>i!==-1);
+        while(!solvable && attempt<50) {
+            datas.sort(()=>Math.random()-0.5); let seen=new Set();
+            for(let i of freeIndices) { if(seen.has(datas[i].t)) { solvable=true; break; } seen.add(datas[i].t); }
+            attempt++;
+        }
+        active.forEach((t,i)=>{ t.data=datas[i]; t.el.classList.remove('selected'); t.el.innerHTML=`<div class="t-suit">${t.data.s}</div><div class="t-icon ${t.data.c}">${t.data.i}</div><div class="t-text ${t.data.c}">${t.data.t}</div>`; });
+        selectedTile=null; document.getElementById('game-board').style.opacity=0.5; setTimeout(()=>document.getElementById('game-board').style.opacity=1, 300);
+    }
+
+    function autoHint() {
+        let free=tiles.filter(t=>t.active && !t.isLocked);
+        for(let i=0;i<free.length;i++) for(let j=i+1;j<free.length;j++) if(free[i].data.t === free[j].data.t) {
+            free[i].el.style.background='#81d4fa'; free[j].el.style.background='#81d4fa';
+            setTimeout(()=>{ free[i].el.style.background=''; free[j].el.style.background=''; }, 1500); return;
+        }
+        alert("目前無解，請按「洗牌」！");
+    }
+
+    function updateStatusText() { document.getElementById('status').innerText = "剩餘: " + tiles.filter(t => t.active).length; }
+
+    function applyViewTransform() {
+        const board = document.getElementById('game-board');
+        if(!board) return;
+        board.style.transform = `translate(-50%, -50%) rotateX(${viewRotX}deg) rotateZ(${viewRotZ}deg) scale(${globalScale})`;
+    }
+
+    function fitBoard() {
+        const board = document.getElementById('game-board');
+        const view = document.getElementById('game-viewport');
+        if(!board || !view) return;
+        board.style.transform = 'none';
+        const boardW = board.scrollWidth; const boardH = board.scrollHeight;
+        const viewW = view.clientWidth; const viewH = view.clientHeight;
+        globalScale = Math.min((viewW - 40) / boardW, (viewH - 60) / boardH); // v20: 預留更多底部空間給玩具 Footer
+        applyViewTransform();
+    }
+    window.addEventListener('resize', fitBoard);
+
+    const joystickZone = document.getElementById('joystick-zone');
+    const joystickKnob = document.getElementById('joystick-knob');
+    let isDragging = false;
+    let startX, startY;
+    let initialRotX, initialRotZ;
+
+    function handleStart(e) {
+        isDragging = true;
+        startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+        initialRotX = viewRotX; initialRotZ = viewRotZ;
+        joystickKnob.style.transition = 'none';
+    }
+
+    function handleMove(e) {
+        if (!isDragging) return;
+        e.preventDefault(); 
+        const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+        const deltaX = clientX - startX;
+        const deltaY = clientY - startY;
+        const maxDist = 30;
+        const dist = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+        const limitedDist = Math.min(dist, maxDist);
+        const angle = Math.atan2(deltaY, deltaX);
+        const knobX = Math.cos(angle) * limitedDist;
+        const knobY = Math.sin(angle) * limitedDist;
+        joystickKnob.style.transform = `translate(${knobX}px, ${knobY}px)`;
+        viewRotZ = initialRotZ + (deltaX * 0.5); 
+        viewRotX = initialRotX - (deltaY * 0.5); 
+        viewRotX = Math.max(0, Math.min(viewRotX, 60)); 
+        applyViewTransform();
+    }
+
+    function handleEnd() {
+        isDragging = false;
+        joystickKnob.style.transition = 'transform 0.2s';
+        joystickKnob.style.transform = 'translate(0, 0)';
+    }
+
+    joystickZone.addEventListener('mousedown', handleStart);
+    joystickZone.addEventListener('touchstart', handleStart, {passive: false});
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('touchmove', handleMove, {passive: false});
+    window.addEventListener('mouseup', handleEnd);
+    window.addEventListener('touchend', handleEnd);
+
+    startGame('random'); 
+</script>
+</body>
+</html>
+
     
     <meta name="apple-mobile-web-app-title" content="福音麻雀">
     <meta name="application-name" content="福音麻雀">
