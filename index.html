@@ -13,50 +13,57 @@
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀</title>
+    <title>福音麻雀 - v27 水晶版</title>
     <style>
         :root { 
-            --tile-w: 42px; 
-            --tile-h: 56px; 
-            --depth: 14px;
-            /* 背景色：經典深綠 */
+            --tile-w: 44px; /* 稍微加大一點點以配合圓角 */
+            --tile-h: 58px; 
+            --depth: 12px; /* 水晶不需要太厚，薄一點更精緻 */
             --bg-color: #054a29; 
-            --ui-cloud-bg: rgba(0, 0, 0, 0.6); 
+            /* UI 背景也改為毛玻璃風格 */
+            --ui-glass-bg: rgba(255, 255, 255, 0.2);
+            --ui-glass-border: rgba(255, 255, 255, 0.3);
             --text-dark: #fff;
             --btn-yellow-1: #ffd54f;
             --btn-yellow-2: #ffb300;
             --btn-blue-1: #4fc3f7;
             --btn-blue-2: #0288d1;
-            --tile-side-color: #f0e6d2; 
-            --tile-bottom-color: #e8dabf;
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             margin: 0; 
-            /* v26 修改：只保留純色背景，移除 background-image */
             background-color: var(--bg-color);
-            
+            /* 增加一點微妙的漸變，讓玻璃效果更明顯 */
+            background-image: linear-gradient(to bottom, #065f35, #054a29);
             font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
             overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
             color: var(--text-dark); user-select: none; -webkit-user-select: none; touch-action: none;
         }
         
+        /* UI 區域全面玻璃化 */
+        header, footer, .overlay-box, #joystick-zone {
+            backdrop-filter: blur(10px) saturate(150%);
+            -webkit-backdrop-filter: blur(10px) saturate(150%);
+            background-color: var(--ui-glass-bg) !important;
+            border: 1px solid var(--ui-glass-border);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
         header {
             flex-shrink: 0; 
             height: calc(50px + env(safe-area-inset-top)); 
             padding: 5px 15px;
             padding-top: calc(5px + env(safe-area-inset-top)); 
-            background: var(--ui-cloud-bg); 
             display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             border-bottom-left-radius: 20px;
             border-bottom-right-radius: 20px;
             margin: 0 10px 5px 10px;
         }
-        select { padding: 6px 10px; font-size: 14px; border-radius: 15px; border: 2px solid #555; background: #eee; max-width: 140px; color: #333; font-weight: bold; }
-        #status { font-size: 15px; font-weight: bold; background: #ffe082; color: #d84315; padding: 6px 15px; border-radius: 20px; box-shadow: 0 2px 0 #ffca28; }
+        select { padding: 6px 10px; font-size: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.3); max-width: 140px; color: #fff; font-weight: bold; backdrop-filter: blur(5px); }
+        option { background: #333; color: #fff; }
+        #status { font-size: 15px; font-weight: bold; background: rgba(255, 213, 79, 0.8); color: #d84315; padding: 6px 15px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.4); }
         
         #game-viewport {
             flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
@@ -77,56 +84,46 @@
             height: calc(80px + env(safe-area-inset-bottom)); 
             padding: 5px 10px; 
             padding-bottom: max(5px, env(safe-area-inset-bottom));
-            background: var(--ui-cloud-bg); 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             z-index: 100;
-            box-shadow: 0 -4px 8px rgba(0,0,0,0.3);
             border-top-left-radius: 25px;
             border-top-right-radius: 25px;
             margin: 5px 10px 0 10px;
         }
 
         .footer-btns {
-            display: flex;
-            flex: 1; 
-            justify-content: space-around;
-            margin-right: 10px; 
+            display: flex; flex: 1; justify-content: space-around; margin-right: 10px;
         }
         
+        /* 按鈕也加入一點玻璃質感 */
         .btn {
-            background: linear-gradient(to bottom, var(--btn-yellow-1), var(--btn-yellow-2)); 
-            border: 3px solid #ffffff; padding: 0;
+            background: linear-gradient(to bottom, rgba(255, 213, 79, 0.9), rgba(255, 179, 0, 0.9)); 
+            border: 2px solid rgba(255,255,255,0.7); padding: 0;
             width: auto; flex: 1; margin: 0 3px;
-            height: 44px; border-radius: 25px; font-weight: bold; font-size: 16px; 
-            box-shadow: 0 5px 0 #ff8f00; cursor: pointer; display: flex; justify-content: center; 
+            height: 44px; border-radius: 22px; font-weight: bold; font-size: 16px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.4); 
+            cursor: pointer; display: flex; justify-content: center; 
             align-items: center; color: #5d4037;
             transition: all 0.1s;
+            backdrop-filter: blur(5px);
         }
-        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #ff8f00; }
+        .btn:active { transform: translateY(3px); box-shadow: 0 2px 3px rgba(0,0,0,0.1); }
         .btn-blue { 
-            background: linear-gradient(to bottom, var(--btn-blue-1), var(--btn-blue-2)); 
-            box-shadow: 0 5px 0 #01579b; color: white; 
+            background: linear-gradient(to bottom, rgba(79, 195, 247, 0.9), rgba(3, 155, 229, 0.9));
+            color: white; 
         }
-        .btn-blue:active { transform: translateY(3px); box-shadow: 0 2px 0 #01579b; }
 
         #joystick-zone {
-            position: relative; 
-            bottom: auto; right: auto;
-            width: 60px; height: 60px; 
-            z-index: 150;
-            flex-shrink: 0; 
-            background: rgba(0, 0, 0, 0.3); 
-            border: 2px solid rgba(255, 255, 255, 0.4);
+            position: relative; bottom: auto; right: auto;
+            width: 60px; height: 60px; z-index: 150; flex-shrink: 0;
             border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
-            backdrop-filter: blur(3px); box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         #joystick-knob {
-            width: 28px; height: 28px; 
-            background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
-            border-radius: 50%; border: 2px solid #fff;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.3); position: relative;
+            width: 28px; height: 28px; background: radial-gradient(circle at 30% 30%, rgba(255, 204, 128, 0.9), rgba(255, 152, 0, 0.9));
+            border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); box-shadow: 0 3px 5px rgba(0,0,0,0.2); position: relative;
+            backdrop-filter: blur(2px);
         }
         #joystick-hint {
             position: absolute; bottom: -15px; width: 100%; text-align: center;
@@ -134,75 +131,104 @@
              text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
         }
 
-        /* 麻雀牌樣式 */
+        /* --- v27 核心：iPhone 水晶玻璃麻雀 --- */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
-            background-color: #ffffff; 
-            border-radius: 5px; 
+            /* 主體：半透明乳白玻璃 */
+            background-color: rgba(255, 255, 255, 0.65);
+            /* 關鍵：毛玻璃濾鏡 (iOS 風格核心) */
+            backdrop-filter: blur(8px) saturate(150%);
+            -webkit-backdrop-filter: blur(8px) saturate(150%);
+            
+            border-radius: 8px; /* 更圓潤的角落，像 App icon */
             cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transform-style: preserve-3d; transition: transform 0.1s;
-            box-shadow: inset 0 2px 3px rgba(255,255,255,1), inset 0 -2px 3px rgba(0,0,0,0.05);
-            border: none;
+            
+            /* 精細的水晶光影效果 */
+            border-top: 1px solid rgba(255, 255, 255, 0.8); /* 頂部高光邊框 */
+            border-left: 1px solid rgba(255, 255, 255, 0.8); /* 左側高光邊框 */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3); /* 底部暗邊框 */
+            border-right: 1px solid rgba(255, 255, 255, 0.3); /* 右側暗邊框 */
+            
+            box-shadow: 
+                inset 0 0 15px rgba(255, 255, 255, 0.5), /* 內部發光感 */
+                0 4px 10px rgba(0, 0, 0, 0.15); /* 柔和的外部投影 */
         }
 
+        /* 側面牆身 - 半透明水晶感 */
         .tile::before {
             content: ''; position: absolute; width: 100.5%; height: var(--depth);
-            bottom: 0; left: 0;
-            background: var(--tile-bottom-color); 
+            bottom: 0; left: -0.25%;
+            /* 半透明側面，帶一點點綠色調的反射 */
+            background: linear-gradient(to bottom, rgba(255,255,255,0.4), rgba(200, 220, 200, 0.3));
             transform-origin: bottom; transform: rotateX(-90deg);
-            border: 1px solid #d0c0a0; border-radius: 2px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            backdrop-filter: blur(5px);
         }
         .tile::after {
             content: ''; position: absolute; width: var(--depth); height: 100.5%;
-            top: 0; right: 0;
-            background: var(--tile-side-color);
+            top: -0.25%; right: 0;
+            background: linear-gradient(to right, rgba(255,255,255,0.5), rgba(220, 240, 220, 0.4));
             transform-origin: right; transform: rotateY(90deg);
-            border: 1px solid #d0c0a0; border-radius: 2px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            backdrop-filter: blur(5px);
         }
 
-        .tile.locked::before, .tile.locked::after { background: #ccc; border-color: #aaa; }
-        .tile.locked { background-color: #e6e6e6; color: #999; box-shadow: none; }
-        .tile.locked img, .tile.locked .t-icon { opacity: 0.4; }
+        /* 鎖定狀態 - 磨砂感更重，變暗 */
+        .tile.locked { 
+            background-color: rgba(200, 200, 200, 0.5);
+            backdrop-filter: blur(4px) grayscale(50%);
+            box-shadow: none;
+            border-color: rgba(255,255,255,0.2);
+        }
+        .tile.locked img, .tile.locked .t-icon { opacity: 0.3; }
 
+        /* 選中狀態 - 發光水晶 */
         .tile.selected { 
-            background-color: #fff9c4; 
-            transform: translateZ(calc(var(--base-z) + 20px)) !important; 
-            box-shadow: 0 0 10px #ffeb3b, inset 0 2px 3px rgba(255,255,255,1); 
-            border: 2px solid #ffee58;
+            background-color: rgba(255, 249, 196, 0.8); /* 發黃光 */
+            transform: translateZ(calc(var(--base-z) + 20px)) scale(1.05) !important; /* 輕微放大 */
+            box-shadow: 
+                inset 0 0 20px rgba(255, 235, 59, 0.6), /* 強烈內部金光 */
+                0 0 15px rgba(255, 235, 59, 0.8); /* 外部發光 */
+            border: 2px solid rgba(255, 238, 88, 0.9);
+            z-index: 999;
         }
 
-        .t-suit { position: absolute; top: 1px; right: 2px; font-size: 10px; color: #999; line-height: 1; backface-visibility: hidden; }
-        .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; backface-visibility: hidden; }
-        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #444; backface-visibility: hidden; }
+        /* 內容嵌入感：增加文字投影 */
+        .t-suit { position: absolute; top: 2px; right: 3px; font-size: 10px; color: #999; line-height: 1; backface-visibility: hidden; text-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; backface-visibility: hidden; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15)); }
+        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #444; backface-visibility: hidden; text-shadow: 0 1px 1px rgba(255,255,255,0.5), 0 1px 3px rgba(0,0,0,0.1); }
         
         .c-red { color: #e53935; } .c-blue { color: #1e88e5; } .c-green { color: #43a047; }
 
         /* 彈窗 */
         #msg-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); 
+            background: rgba(0, 0, 0, 0.6); 
             display: none; flex-direction: column;
             justify-content: center; align-items: center; z-index: 200; text-align: center; padding: 20px;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
         }
         .overlay-box {
-            background: #fff; padding: 30px; border-radius: 30px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 5px solid #ffd54f;
-            max-width: 90%; color: #333;
+            background: rgba(255, 255, 255, 0.85); padding: 30px; border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.6);
+            max-width: 90%; color: #333; backdrop-filter: blur(15px) saturate(120%);
         }
-        .overlay-title { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #ffb300; text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0,0,0,0.1); }
+        .overlay-title { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #ffb300; text-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .overlay-verse { 
             font-size: 22px; color: #0288d1; line-height: 1.6; 
-            background: #e0f2f1; padding: 20px; border-radius: 20px; 
-            width: 100%; margin-bottom: 20px; border: 2px dashed #b2dfdb;
-            font-weight: bold;
+            background: rgba(224, 242, 241, 0.7); padding: 20px; border-radius: 20px; 
+            width: 100%; margin-bottom: 20px; border: 1px solid rgba(178, 223, 219, 0.8);
+            font-weight: bold; backdrop-filter: blur(5px);
         }
 
         #watermark {
             position: absolute; bottom: 95px; left: 20px; font-size: 11px;
-            color: rgba(255, 255, 255, 0.3); pointer-events: none; z-index: 150; font-weight: bold;
-            text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+            color: rgba(255, 255, 255, 0.4); pointer-events: none; z-index: 150; font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
     </style>
 </head>
@@ -236,7 +262,7 @@
     </div>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v26</div>
+<div id="watermark">Powered by Google Gemini v27 (Crystal Edition)</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
@@ -284,7 +310,7 @@
 
     let tiles = [];
     let selectedTile = null;
-    let tileW = 42, tileH = 56;
+    let tileW = 44, tileH = 58; /* v27: 配合新樣式微調尺寸 */
     let globalScale = 1;
     let viewRotX = 30;
     let viewRotZ = 0;
@@ -359,7 +385,7 @@
             
             let left = slot.c * tileW; 
             let top = slot.r * tileH; 
-            let zHeight = slot.z * 14; 
+            let zHeight = slot.z * 12; /* v27: 配合水晶厚度 */
             
             el.style.left = left + 'px'; 
             el.style.top = top + 'px'; 
@@ -449,7 +475,6 @@
     function applyViewTransform() {
         const board = document.getElementById('game-board');
         if(!board) return;
-        // v23: 恢復垂直居中 (-50%)
         board.style.transform = `translate(-50%, -50%) rotateX(${viewRotX}deg) rotateZ(${viewRotZ}deg) scale(${globalScale})`;
     }
 
@@ -465,6 +490,7 @@
     }
     window.addEventListener('resize', fitBoard);
 
+    // Joystick
     const joystickZone = document.getElementById('joystick-zone');
     const joystickKnob = document.getElementById('joystick-knob');
     let isDragging = false;
