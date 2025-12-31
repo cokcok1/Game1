@@ -13,13 +13,12 @@
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v18</title>
+    <title>福音麻雀 - v19</title>
     <style>
         :root { 
             --tile-w: 42px; 
             --tile-h: 56px; 
-            /* v18 修改：大幅增加厚度 */
-            --depth: 14px; 
+            --depth: 14px; /* 麻雀厚度 */
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -77,77 +76,78 @@
         .btn:active { transform: translateY(2px); box-shadow: none; }
         .btn-blue { background: linear-gradient(to bottom, #4FC3F7, #039BE5); box-shadow: 0 3px 0 #0277BD; color: white; }
 
-        /* Joystick */
+        /* --- Joystick 位置調整 --- */
         #joystick-zone {
-            position: absolute; bottom: 90px; right: 20px; width: 100px; height: 100px; z-index: 150;
-            background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.3);
+            position: absolute; 
+            bottom: 70px; /* v19: 向下移，更貼近 footer */
+            right: 15px;  /* v19: 向右靠 */
+            width: 80px;  /* v19: 縮小尺寸 (原100px) */
+            height: 80px; 
+            z-index: 150;
+            background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
             backdrop-filter: blur(2px);
         }
         #joystick-knob {
-            width: 40px; height: 40px; background: rgba(255, 215, 0, 0.8); border-radius: 50%;
+            width: 34px; height: 34px; /* v19: 對應縮小 */
+            background: rgba(255, 215, 0, 0.7); border-radius: 50%;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5); position: relative;
         }
         #joystick-hint {
-            position: absolute; bottom: -25px; width: 100%; text-align: center;
-            font-size: 10px; color: rgba(255,255,255,0.6); pointer-events: none;
+            position: absolute; bottom: -20px; width: 100%; text-align: center;
+            font-size: 9px; color: rgba(255,255,255,0.5); pointer-events: none;
         }
 
-        /* --- v18 核心修改：實體質感麻雀 --- */
+        /* --- 麻雀牌樣式修正 --- */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
-            /* v18 修改：使用象牙白，並移除邊框，消除「透明膠感」 */
-            background-color: #fdfdfadd; 
+            /* v19 核心修正：移除透明度 (dd)，改為完全不透明 (#fdfdfa) */
+            background-color: #fdfdfa; 
             border-radius: 3px; 
             cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transform-style: preserve-3d; 
             transition: transform 0.1s;
             
-            /* v18 修改：使用內陰影模擬實體邊緣倒角(Bevel)，取代舊邊框 */
             box-shadow: inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 1px rgba(0,0,0,0.1);
-            border: none; /* 移除舊邊框 */
+            border: none;
         }
 
-        /* 側面牆身 (Side Walls) - 顏色稍微加深以配合厚度 */
+        /* 側面牆身 */
         .tile::before {
             content: ''; position: absolute;
-            width: 100%; height: var(--depth);
+            /* 輕微增加寬度以覆蓋接縫 */
+            width: 100.5%; height: var(--depth);
             bottom: 0; left: 0;
-            background: #cecece; /* 底部灰色加深 */
+            background: #cecece; 
             transform-origin: bottom;
             transform: rotateX(-90deg);
             border: 1px solid #a0a0a0;
         }
         .tile::after {
             content: ''; position: absolute;
-            width: var(--depth); height: 100%;
+            width: var(--depth); height: 100.5%;
             top: 0; right: 0;
-            background: #c0c0c0; /* 右側灰色加深 */
+            background: #c0c0c0;
             transform-origin: right;
             transform: rotateY(90deg);
             border: 1px solid #a0a0a0;
         }
 
-        /* 鎖定狀態 */
         .tile.locked::before, .tile.locked::after { background: #999; border-color: #777; }
         .tile.locked { 
-            background-color: #e0e0e0; /* 鎖定時變灰 */
+            background-color: #e0e0e0; 
             color: #888;
             box-shadow: none;
         }
         .tile.locked img, .tile.locked .t-icon { opacity: 0.5; }
 
-        /* 選中狀態 */
         .tile.selected { 
-            background-color: #fffbe6; /* 選中時變亮黃 */
-            /* 這裡使用 translateZ 疊加 */
+            background-color: #fffbe6; 
             transform: translateZ(calc(var(--base-z) + 15px)) !important; 
-            /* 選中時增加發光效果 */
             box-shadow: 0 0 5px #ff9800, inset 0 1px 1px rgba(255,255,255,0.9);
         }
 
-        /* 內容樣式 - 增加文字陰影模擬印刷感 */
         .t-suit { position: absolute; top: 1px; right: 2px; font-size: 10px; color: #888; line-height: 1; backface-visibility: hidden; }
         .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; backface-visibility: hidden; text-shadow: 0 1px 0 rgba(255,255,255,0.5); }
         .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; backface-visibility: hidden; text-shadow: 0 1px 0 rgba(255,255,255,0.5); }
@@ -188,7 +188,7 @@
 
 <div id="game-viewport">
     <div id="game-board"></div>
-    <div id="joystick-zone"><div id="joystick-knob"></div><div id="joystick-hint">調整視角</div></div>
+    <div id="joystick-zone"><div id="joystick-knob"></div><div id="joystick-hint">視角</div></div>
 </div>
 
 <footer>
@@ -197,7 +197,7 @@
     <button class="btn" onclick="autoHint()">💡 提示</button>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v18</div>
+<div id="watermark">Powered by Google Gemini v19</div>
 
 <div id="msg-overlay">
     <div id="overlay-title" class="overlay-title" style="color:#FFD700;">哈利路亞！</div>
@@ -318,7 +318,7 @@
             
             let left = slot.c * tileW; 
             let top = slot.r * tileH; 
-            let zHeight = slot.z * 14; // 使用新的厚度
+            let zHeight = slot.z * 14; 
             
             el.style.left = left + 'px'; 
             el.style.top = top + 'px'; 
@@ -421,6 +421,7 @@
     }
     window.addEventListener('resize', fitBoard);
 
+    // Joystick
     const joystickZone = document.getElementById('joystick-zone');
     const joystickKnob = document.getElementById('joystick-knob');
     let isDragging = false;
