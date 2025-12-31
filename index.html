@@ -6,11 +6,13 @@
     
     <meta name="apple-mobile-web-app-title" content="福音麻雀">
     <meta name="application-name" content="福音麻雀">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     
-    <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=✝&background=FFD700&color=333333&size=512&font-size=0.6&length=1">
+    <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v13</title>
+    <title>福音麻雀 - v14</title>
     <style>
         :root { 
             --tile-w: 42px; 
@@ -147,7 +149,7 @@
     <button class="btn" onclick="autoHint()">💡 提示</button>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v13</div>
+<div id="watermark">Powered by Google Gemini v14</div>
 
 <div id="msg-overlay">
     <div id="overlay-title" class="overlay-title" style="color:#FFD700;">哈利路亞！</div>
@@ -156,7 +158,7 @@
 </div>
 
 <script>
-    // 資料庫修正：亞伯拉罕 -> 亞伯蘭
+    // 資料庫確認：「亞伯蘭」已修改，「教會」已修改
     const rawTiles = [
         {t:"摩西", i:"🌊", s:"萬", c:"c-red"}, {t:"大衛", i:"👑", s:"萬", c:"c-red"},
         {t:"保羅", i:"📜", s:"萬", c:"c-red"}, {t:"彼得", i:"🐟", s:"萬", c:"c-red"},
@@ -421,7 +423,6 @@
 
     function updateStatusText() { document.getElementById('status').innerText = "剩餘: " + tiles.filter(t => t.active).length; }
 
-    // --- 絕對置中 ---
     function fitBoard() {
         const board = document.getElementById('game-board');
         const view = document.getElementById('game-viewport');
