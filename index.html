@@ -13,13 +13,14 @@
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v23</title>
+    <title>福音麻雀</title>
     <style>
         :root { 
             --tile-w: 42px; 
             --tile-h: 56px; 
             --depth: 14px;
-            --bg-color: #065f35; 
+            /* 背景色：經典深綠 */
+            --bg-color: #054a29; 
             --ui-cloud-bg: rgba(0, 0, 0, 0.6); 
             --text-dark: #fff;
             --btn-yellow-1: #ffd54f;
@@ -34,8 +35,9 @@
 
         body {
             margin: 0; 
+            /* v26 修改：只保留純色背景，移除 background-image */
             background-color: var(--bg-color);
-            background-image: repeating-linear-gradient(45deg, #065f35 0, #065f35 1px, #054a29 0, #054a29 5px);
+            
             font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
             overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
             color: var(--text-dark); user-select: none; -webkit-user-select: none; touch-action: none;
@@ -234,7 +236,7 @@
     </div>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v23</div>
+<div id="watermark">Powered by Google Gemini v26</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
