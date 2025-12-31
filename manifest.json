@@ -1,0 +1,21 @@
+{
+  "name": "福音麻雀",
+  "short_name": "福音麻雀",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#054a29",
+  "theme_color": "#054a29",
+  "description": "一款結合福音元素的上海麻雀遊戲。",
+  "icons": [
+    {
+      "src": "./mj.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./mj.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
