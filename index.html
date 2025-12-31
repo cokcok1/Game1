@@ -13,12 +13,13 @@
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v17</title>
+    <title>福音麻雀 - v18</title>
     <style>
         :root { 
             --tile-w: 42px; 
             --tile-h: 56px; 
-            --depth: 8px; /* 麻雀厚度 */
+            /* v18 修改：大幅增加厚度 */
+            --depth: 14px; 
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -45,14 +46,13 @@
         
         #game-viewport {
             flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
-            perspective: 2000px; /* 增加透視距離，減少邊緣變形 */
+            perspective: 2000px;
             perspective-origin: center center;
         }
 
         #game-board { 
             position: absolute; 
             top: 50%; left: 50%; 
-            /* 預設視角：稍微傾斜，讓厚度可見 */
             transform: translate(-50%, -50%) rotateX(30deg) rotateZ(0deg); 
             transform-origin: center center;
             transform-style: preserve-3d;
@@ -93,62 +93,64 @@
             font-size: 10px; color: rgba(255,255,255,0.6); pointer-events: none;
         }
 
-        /* --- v17 核心：真實物理堆疊樣式 --- */
+        /* --- v18 核心修改：實體質感麻雀 --- */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
-            background: #fff; border-radius: 2px; cursor: pointer;
+            /* v18 修改：使用象牙白，並移除邊框，消除「透明膠感」 */
+            background-color: #fdfdfadd; 
+            border-radius: 3px; 
+            cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            /* 關鍵：保留 3D 空間 */
             transform-style: preserve-3d; 
-            transition: transform 0.1s; /* 移除 opacity transition 以避免閃爍 */
+            transition: transform 0.1s;
             
-            /* 正面 */
-            border: 1px solid #ccc;
-            /* 陰影：不再偏移，而是垂直向下，模擬環境光 */
-            box-shadow: 0px 0px 1px rgba(0,0,0,0.2); 
+            /* v18 修改：使用內陰影模擬實體邊緣倒角(Bevel)，取代舊邊框 */
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 1px rgba(0,0,0,0.1);
+            border: none; /* 移除舊邊框 */
         }
 
-        /* 使用 ::before 和 ::after 製作真實厚度 (Side Walls) */
+        /* 側面牆身 (Side Walls) - 顏色稍微加深以配合厚度 */
         .tile::before {
             content: ''; position: absolute;
             width: 100%; height: var(--depth);
             bottom: 0; left: 0;
-            background: #d9d9d9; /* 底部厚度顏色 */
+            background: #cecece; /* 底部灰色加深 */
             transform-origin: bottom;
             transform: rotateX(-90deg);
-            border: 1px solid #bbb;
+            border: 1px solid #a0a0a0;
         }
         .tile::after {
             content: ''; position: absolute;
             width: var(--depth); height: 100%;
             top: 0; right: 0;
-            background: #cdcdcd; /* 右側厚度顏色 */
+            background: #c0c0c0; /* 右側灰色加深 */
             transform-origin: right;
             transform: rotateY(90deg);
-            border: 1px solid #bbb;
+            border: 1px solid #a0a0a0;
         }
 
-        /* 鎖定狀態：加深遮罩 (Overlay) */
-        .tile.locked::before, .tile.locked::after { background: #999; }
+        /* 鎖定狀態 */
+        .tile.locked::before, .tile.locked::after { background: #999; border-color: #777; }
         .tile.locked { 
-            background: #e0e0e0; /* 牌面變灰 */
-            color: #888; /* 圖案變淡 */
+            background-color: #e0e0e0; /* 鎖定時變灰 */
+            color: #888;
+            box-shadow: none;
         }
         .tile.locked img, .tile.locked .t-icon { opacity: 0.5; }
 
-        /* 選中狀態：垂直浮起 */
+        /* 選中狀態 */
         .tile.selected { 
-            background: #fffbe6; 
-            border: 2px solid #ff9800;
-            /* 這裡使用 translateZ 疊加，JS 會處理基礎高度 */
+            background-color: #fffbe6; /* 選中時變亮黃 */
+            /* 這裡使用 translateZ 疊加 */
             transform: translateZ(calc(var(--base-z) + 15px)) !important; 
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            /* 選中時增加發光效果 */
+            box-shadow: 0 0 5px #ff9800, inset 0 1px 1px rgba(255,255,255,0.9);
         }
 
-        /* 內容樣式 */
+        /* 內容樣式 - 增加文字陰影模擬印刷感 */
         .t-suit { position: absolute; top: 1px; right: 2px; font-size: 10px; color: #888; line-height: 1; backface-visibility: hidden; }
-        .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; backface-visibility: hidden; }
-        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; backface-visibility: hidden; }
+        .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; backface-visibility: hidden; text-shadow: 0 1px 0 rgba(255,255,255,0.5); }
+        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; backface-visibility: hidden; text-shadow: 0 1px 0 rgba(255,255,255,0.5); }
         
         .c-red { color: #d32f2f; } .c-blue { color: #1976d2; } .c-green { color: #388e3c; }
 
@@ -195,7 +197,7 @@
     <button class="btn" onclick="autoHint()">💡 提示</button>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v17</div>
+<div id="watermark">Powered by Google Gemini v18</div>
 
 <div id="msg-overlay">
     <div id="overlay-title" class="overlay-title" style="color:#FFD700;">哈利路亞！</div>
@@ -243,7 +245,7 @@
     let selectedTile = null;
     let tileW = 42, tileH = 56;
     let globalScale = 1;
-    let viewRotX = 30; // 預設更斜一點，顯示厚度
+    let viewRotX = 30;
     let viewRotZ = 0;
 
     function changeMap(val) { startGame(val); }
@@ -253,7 +255,7 @@
         document.getElementById('msg-overlay').style.display = 'none';
         const board = document.getElementById('game-board');
         board.innerHTML = ''; tiles = []; selectedTile = null;
-        viewRotX = 30; viewRotZ = 0; // 重置視角
+        viewRotX = 30; viewRotZ = 0; 
 
         let slots = MapBlueprints[mapType]();
         if(slots.length % 2 !== 0) slots.pop();
@@ -297,7 +299,6 @@
         let hasTop=false, hasLeft=false, hasRight=false;
         for(let other of tileSet) {
             if(!other.active || other.id === tile.id) continue;
-            // 邏輯回歸：嚴格檢查網格覆蓋
             if(other.z === tile.z+1 && other.r === tile.r && other.c === tile.c) hasTop = true;
             if(other.z === tile.z && other.r === tile.r) { if(other.c === tile.c-1) hasLeft=true; if(other.c === tile.c+1) hasRight=true; }
         }
@@ -315,16 +316,13 @@
             const card = dataMap[index];
             el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
             
-            // v17 關鍵修正：取消 Visual Offset，改用 TranslateZ 垂直堆疊
             let left = slot.c * tileW; 
             let top = slot.r * tileH; 
-            let zHeight = slot.z * 8; // 8px 是 --depth 定義的厚度
+            let zHeight = slot.z * 14; // 使用新的厚度
             
             el.style.left = left + 'px'; 
             el.style.top = top + 'px'; 
-            // 基礎高度 + Z軸堆疊
             el.style.transform = `translateZ(${zHeight}px)`; 
-            // 儲存基礎高度給 hover 效果用
             el.style.setProperty('--base-z', zHeight + 'px');
             el.style.zIndex = slot.z * 10 + slot.r; 
             
@@ -340,7 +338,6 @@
 
     function updateLockStatus() { tiles.forEach(t => { if(!t.active) return; t.isLocked = checkLocked(t); t.el.classList.toggle('locked', t.isLocked); }); }
     
-    // 檢查邏輯與渲染位置現在 1:1 對應
     function checkLocked(tile) {
         let hasTop=false, hasLeft=false, hasRight=false;
         for(let other of tiles) {
@@ -357,7 +354,7 @@
         else if(selectedTile) {
             if(tile.data.t === selectedTile.data.t) {
                 tile.active=false; selectedTile.active=false;
-                tile.el.style.display='none'; selectedTile.el.style.display='none'; // 立即隱藏
+                tile.el.style.display='none'; selectedTile.el.style.display='none'; 
                 selectedTile = null;
                 updateLockStatus(); updateStatusText(); checkGameState();
             } else { selectedTile.el.classList.remove('selected'); selectedTile = tile; tile.el.classList.add('selected'); }
@@ -406,7 +403,6 @@
 
     function updateStatusText() { document.getElementById('status').innerText = "剩餘: " + tiles.filter(t => t.active).length; }
 
-    // --- 視角控制 ---
     function applyViewTransform() {
         const board = document.getElementById('game-board');
         if(!board) return;
@@ -425,7 +421,6 @@
     }
     window.addEventListener('resize', fitBoard);
 
-    // Joystick Logic
     const joystickZone = document.getElementById('joystick-zone');
     const joystickKnob = document.getElementById('joystick-knob');
     let isDragging = false;
