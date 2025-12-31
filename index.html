@@ -13,21 +13,21 @@
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 v20</title>
+    <title>福音麻雀 - v21</title>
     <style>
         :root { 
             --tile-w: 42px; 
             --tile-h: 56px; 
             --depth: 14px;
-            /* 定義兒童版色彩 */
-            --bg-color: #c7f0db; /* 淺粉綠色 */
+            /* 兒童版配色 */
+            --bg-color: #c7f0db; 
             --ui-cloud-bg: #ffffff;
             --text-dark: #555;
             --btn-yellow-1: #ffd54f;
             --btn-yellow-2: #ffb300;
             --btn-blue-1: #4fc3f7;
             --btn-blue-2: #0288d1;
-            --tile-side-color: #f0e6d2; /* 奶油色側面，像玩具 */
+            --tile-side-color: #f0e6d2; 
             --tile-bottom-color: #e8dabf;
         }
         
@@ -35,19 +35,15 @@
 
         body {
             margin: 0; 
-            /* v20 改動：淺粉綠色背景 + 可愛波點圖案 */
             background-color: var(--bg-color);
             background-image: radial-gradient(circle, #ffffff 20%, transparent 20%), radial-gradient(circle, #ffffff 20%, transparent 20%);
             background-size: 30px 30px;
             background-position: 0 0, 15px 15px;
-            
-            /* v20 改動：嘗試使用較圓潤的字體 */
             font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
             overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
             color: var(--text-dark); user-select: none; -webkit-user-select: none; touch-action: none;
         }
         
-        /* v20 改動：頂部欄變成雲朵狀 */
         header {
             flex-shrink: 0; 
             height: calc(50px + env(safe-area-inset-top)); 
@@ -58,11 +54,9 @@
             box-shadow: 0 4px 8px rgba(100,100,100,0.1);
             border-bottom-left-radius: 20px;
             border-bottom-right-radius: 20px;
-            margin: 0 10px 5px 10px; /* 左右留邊，像浮起的雲 */
+            margin: 0 10px 5px 10px;
         }
-        /* 下拉選單可愛化 */
         select { padding: 6px 10px; font-size: 14px; border-radius: 15px; border: 2px solid #b2dfdb; background: #e0f2f1; max-width: 140px; color: #00796b; font-weight: bold; }
-        /* 狀態欄可愛化 */
         #status { font-size: 15px; font-weight: bold; background: #ffe082; color: #d84315; padding: 6px 15px; border-radius: 20px; box-shadow: 0 2px 0 #ffca28; }
         
         #game-viewport {
@@ -74,12 +68,12 @@
         #game-board { 
             position: absolute; 
             top: 50%; left: 50%; 
-            transform: translate(-50%, -50%) rotateX(30deg) rotateZ(0deg); 
+            /* v21 修改：將 Y 軸偏移由 -50% 改為 -55%，讓棋盤整體稍微向上移，騰出下方空間 */
+            transform: translate(-50%, -55%) rotateX(30deg) rotateZ(0deg); 
             transform-origin: center center;
             transform-style: preserve-3d;
         }
 
-        /* v20 改動：底部欄變成雲朵狀 */
         footer { 
             flex-shrink: 0; height: calc(70px + env(safe-area-inset-bottom)); 
             padding: 10px; 
@@ -93,7 +87,6 @@
             margin: 5px 10px 0 10px;
         }
         
-        /* v20 改動：按鈕糖果化 */
         .btn {
             background: linear-gradient(to bottom, var(--btn-yellow-1), var(--btn-yellow-2)); 
             border: 3px solid #ffffff; padding: 0;
@@ -109,39 +102,45 @@
         }
         .btn-blue:active { transform: translateY(3px); box-shadow: 0 2px 0 #01579b; }
 
-        /* --- Joystick 可愛化 --- */
+        /* --- Joystick v21 優化 --- */
         #joystick-zone {
-            position: absolute; bottom: 85px; right: 20px; width: 80px; height: 80px; z-index: 150;
-            background: rgba(179, 229, 252, 0.4); /* 淺藍半透明 */
-            border: 3px solid rgba(255, 255, 255, 0.6);
+            position: absolute; 
+            /* v21 修改：位置更低，更靠右，尺寸更小 */
+            bottom: 85px; /* 緊貼 Footer 上方 */
+            right: 10px;  /* 更靠邊 */
+            width: 60px;  /* 縮小：80px -> 60px */
+            height: 60px; 
+            z-index: 150;
+            background: rgba(179, 229, 252, 0.4); 
+            border: 2px solid rgba(255, 255, 255, 0.6);
             border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
             backdrop-filter: blur(3px); box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         #joystick-knob {
-            width: 36px; height: 36px; 
-            background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); /* 橙色糖果球 */
+            /* v21 修改：按鈕頭縮小 */
+            width: 28px; height: 28px; 
+            background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
             border-radius: 50%; border: 2px solid #fff;
             box-shadow: 0 3px 5px rgba(0,0,0,0.3); position: relative;
         }
         #joystick-hint {
-            position: absolute; bottom: -22px; width: 100%; text-align: center;
-            font-size: 11px; color: #0277bd; pointer-events: none; font-weight: bold;
+            position: absolute; bottom: -18px; width: 100%; text-align: center;
+            font-size: 10px; color: #0277bd; pointer-events: none; font-weight: bold;
              text-shadow: 1px 1px 0 #fff;
         }
 
-        /* --- 麻雀牌樣式 - 玩具積木感 --- */
+        /* 麻雀牌樣式 */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
-            background-color: #fffdf0; /* 更暖的奶油白 */
-            border-radius: 5px; /* 圓角更大 */
+            background-color: #fffdf0; 
+            border-radius: 5px; 
             cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transform-style: preserve-3d; transition: transform 0.1s;
-            box-shadow: inset 0 2px 3px rgba(255,255,255,1), inset 0 -2px 3px rgba(0,0,0,0.05); /* 塑膠光澤 */
+            box-shadow: inset 0 2px 3px rgba(255,255,255,1), inset 0 -2px 3px rgba(0,0,0,0.05);
             border: none;
         }
 
-        /* 側面牆身 - 奶油塑膠色 */
         .tile::before {
             content: ''; position: absolute; width: 100.5%; height: var(--depth);
             bottom: 0; left: 0;
@@ -162,28 +161,26 @@
         .tile.locked img, .tile.locked .t-icon { opacity: 0.4; }
 
         .tile.selected { 
-            background-color: #fff9c4; /* 發光黃 */
-            transform: translateZ(calc(var(--base-z) + 20px)) !important; /* 浮更高 */
-            box-shadow: 0 0 10px #ffeb3b, inset 0 2px 3px rgba(255,255,255,1); /* 強烈發光 */
+            background-color: #fff9c4; 
+            transform: translateZ(calc(var(--base-z) + 20px)) !important; 
+            box-shadow: 0 0 10px #ffeb3b, inset 0 2px 3px rgba(255,255,255,1); 
             border: 2px solid #ffee58;
         }
 
-        /* 字體顏色加深，更像玩具印刷 */
         .t-suit { position: absolute; top: 1px; right: 2px; font-size: 10px; color: #999; line-height: 1; backface-visibility: hidden; }
         .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; backface-visibility: hidden; }
         .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #444; backface-visibility: hidden; }
         
         .c-red { color: #e53935; } .c-blue { color: #1e88e5; } .c-green { color: #43a047; }
 
-        /* 彈窗可愛化 */
         #msg-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 121, 107, 0.85); /* 深綠藍色半透明 */
+            background: rgba(0, 121, 107, 0.85); 
             display: none; flex-direction: column;
             justify-content: center; align-items: center; z-index: 200; text-align: center; padding: 20px;
             backdrop-filter: blur(5px);
         }
-        .overlay-box { /* 新增一個內容框 */
+        .overlay-box {
             background: #fff; padding: 30px; border-radius: 30px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 5px solid #b2dfdb;
             max-width: 90%;
@@ -197,7 +194,7 @@
         }
 
         #watermark {
-            position: absolute; bottom: 90px; left: 20px; font-size: 12px;
+            position: absolute; bottom: 85px; left: 15px; font-size: 12px;
             color: rgba(0, 121, 107, 0.5); pointer-events: none; z-index: 150; font-weight: bold;
             text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
         }
@@ -219,7 +216,7 @@
 
 <div id="game-viewport">
     <div id="game-board"></div>
-    <div id="joystick-zone"><div id="joystick-knob"></div><div id="joystick-hint">轉動視角</div></div>
+    <div id="joystick-zone"><div id="joystick-knob"></div><div id="joystick-hint">視角</div></div>
 </div>
 
 <footer>
@@ -228,7 +225,7 @@
     <button class="btn" onclick="autoHint()">💡 提示</button>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v20</div>
+<div id="watermark">Powered by Google Gemini v21</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
@@ -406,11 +403,11 @@
         if(type==='win') {
             title.innerText="🎉 哈利路亞！(勝利)"; title.style.color="#ffb300"; verse.innerText=winVerses[Math.floor(Math.random()*winVerses.length)];
             btn.innerText="挑戰下一關 🚀"; btn.onclick=()=>{ document.getElementById('map-select').value=['random','turtle','castle','cross','bridge','towers'][Math.floor(Math.random()*6)]; startGame(document.getElementById('map-select').value); };
-            btn.className = "btn"; // 黃色按鈕
+            btn.className = "btn"; 
         } else {
             title.innerText="💪 恩典夠用 (暫時無路)"; title.style.color="#4fc3f7"; verse.innerText=loseVerses[Math.floor(Math.random()*loseVerses.length)];
             btn.innerText="重新開始 🔄"; btn.onclick=()=>forceNewGame();
-            btn.className = "btn btn-blue"; // 藍色按鈕
+            btn.className = "btn btn-blue"; 
         }
         overlay.style.display='flex';
     }
@@ -441,7 +438,8 @@
     function applyViewTransform() {
         const board = document.getElementById('game-board');
         if(!board) return;
-        board.style.transform = `translate(-50%, -50%) rotateX(${viewRotX}deg) rotateZ(${viewRotZ}deg) scale(${globalScale})`;
+        // v21 修改：增加垂直偏移 (-55%)
+        board.style.transform = `translate(-50%, -55%) rotateX(${viewRotX}deg) rotateZ(${viewRotZ}deg) scale(${globalScale})`;
     }
 
     function fitBoard() {
