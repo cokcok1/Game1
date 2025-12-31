@@ -13,12 +13,14 @@
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v23</title>
+    <title>福音麻雀 - v24</title>
     <style>
         :root { 
             --tile-w: 42px; 
             --tile-h: 56px; 
-            --depth: 14px;
+            /* v24 修改：厚度增加約 3 倍 (原 14px -> 40px) */
+            --depth: 40px; 
+            
             --bg-color: #065f35; 
             --ui-cloud-bg: rgba(0, 0, 0, 0.6); 
             --text-dark: #fff;
@@ -26,8 +28,6 @@
             --btn-yellow-2: #ffb300;
             --btn-blue-1: #4fc3f7;
             --btn-blue-2: #0288d1;
-            --tile-side-color: #f0e6d2; 
-            --tile-bottom-color: #e8dabf;
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -57,30 +57,27 @@
         
         #game-viewport {
             flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
-            perspective: 2000px;
+            perspective: 2500px; /* 增加透視距離，減少邊緣畸變 */
             perspective-origin: center center;
         }
 
         #game-board { 
             position: absolute; 
             top: 50%; left: 50%; 
-            /* v23: 恢復居中，因為 joystick 不再擋路 */
             transform: translate(-50%, -50%) rotateX(30deg) rotateZ(0deg); 
             transform-origin: center center;
             transform-style: preserve-3d;
         }
 
-        /* v23 改動：Footer 佈局調整 */
         footer { 
             flex-shrink: 0; 
-            /* 稍微增加高度以容納 joystick */
             height: calc(80px + env(safe-area-inset-bottom)); 
             padding: 5px 10px; 
             padding-bottom: max(5px, env(safe-area-inset-bottom));
             background: var(--ui-cloud-bg); 
             display: flex; 
-            justify-content: space-between; /* 左右分佈 */
-            align-items: center; /* 垂直居中 */
+            justify-content: space-between; 
+            align-items: center; 
             z-index: 100;
             box-shadow: 0 -4px 8px rgba(0,0,0,0.3);
             border-top-left-radius: 25px;
@@ -88,18 +85,13 @@
             margin: 5px 10px 0 10px;
         }
 
-        /* v23 新增：按鈕容器 */
         .footer-btns {
-            display: flex;
-            flex: 1; /* 佔用剩餘空間 */
-            justify-content: space-around;
-            margin-right: 10px; /* 與 joystick 保持距離 */
+            display: flex; flex: 1; justify-content: space-around; margin-right: 10px;
         }
         
         .btn {
             background: linear-gradient(to bottom, var(--btn-yellow-1), var(--btn-yellow-2)); 
             border: 3px solid #ffffff; padding: 0;
-            /* v23 修改：改用 flex 分配寬度 */
             width: auto; flex: 1; margin: 0 3px;
             height: 44px; border-radius: 25px; font-weight: bold; font-size: 16px; 
             box-shadow: 0 5px 0 #ff8f00; cursor: pointer; display: flex; justify-content: center; 
@@ -113,24 +105,16 @@
         }
         .btn-blue:active { transform: translateY(3px); box-shadow: 0 2px 0 #01579b; }
 
-        /* --- Joystick v23 改動：整合到 footer 內 --- */
         #joystick-zone {
-            /* 移除絕對定位 */
-            position: relative; 
-            bottom: auto; right: auto;
-            width: 60px; height: 60px; 
-            z-index: 150;
-            flex-shrink: 0; /* 防止被擠壓 */
+            position: relative; width: 60px; height: 60px; z-index: 150; flex-shrink: 0;
             background: rgba(0, 0, 0, 0.3); 
             border: 2px solid rgba(255, 255, 255, 0.4);
             border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
             backdrop-filter: blur(3px); box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         #joystick-knob {
-            width: 28px; height: 28px; 
-            background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
-            border-radius: 50%; border: 2px solid #fff;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.3); position: relative;
+            width: 28px; height: 28px; background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
+            border-radius: 50%; border: 2px solid #fff; box-shadow: 0 3px 5px rgba(0,0,0,0.3); position: relative;
         }
         #joystick-hint {
             position: absolute; bottom: -15px; width: 100%; text-align: center;
@@ -138,42 +122,58 @@
              text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
         }
 
-        /* 麻雀牌樣式 */
+        /* --- v24 麻雀實體化樣式 --- */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
-            /* v23 改動：背景色改回純白色 */
             background-color: #ffffff; 
-            border-radius: 5px; 
+            /* v24: 圓角變小，消除接縫處的「浮空感」 */
+            border-radius: 1px; 
             cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transform-style: preserve-3d; transition: transform 0.1s;
-            box-shadow: inset 0 2px 3px rgba(255,255,255,1), inset 0 -2px 3px rgba(0,0,0,0.05);
+            /* 輕微內陰影增加表面質感 */
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05); 
             border: none;
         }
 
+        /* 側面牆身 (Bottom) - 深灰色模擬陰影 */
         .tile::before {
-            content: ''; position: absolute; width: 100.5%; height: var(--depth);
-            bottom: 0; left: 0;
-            background: var(--tile-bottom-color); 
+            content: ''; position: absolute;
+            /* v24: 寬度稍微大於 100% 以覆蓋接縫 */
+            width: 100.5%; height: var(--depth);
+            bottom: 0; left: -0.25%;
+            background-color: #d0d0d0; /* 實心灰 */
             transform-origin: bottom; transform: rotateX(-90deg);
-            border: 1px solid #d0c0a0; border-radius: 2px;
+            /* 邊框顏色要與背景一致，防止出現線條 */
+            border: 1px solid #d0d0d0; 
+            border-radius: 1px;
         }
+        
+        /* 側面牆身 (Right) - 淺灰色模擬受光面 */
         .tile::after {
-            content: ''; position: absolute; width: var(--depth); height: 100.5%;
-            top: 0; right: 0;
-            background: var(--tile-side-color);
+            content: ''; position: absolute;
+            width: var(--depth); height: 100.5%;
+            top: -0.25%; right: 0;
+            background-color: #e0e0e0; /* 淺一點的灰 */
             transform-origin: right; transform: rotateY(90deg);
-            border: 1px solid #d0c0a0; border-radius: 2px;
+            border: 1px solid #e0e0e0;
+            border-radius: 1px;
         }
 
-        .tile.locked::before, .tile.locked::after { background: #ccc; border-color: #aaa; }
-        .tile.locked { background-color: #e6e6e6; color: #999; box-shadow: none; }
+        /* 鎖定狀態 */
+        .tile.locked { 
+            background-color: #ddd; /* 頂面變暗 */
+            color: #999;
+        }
+        .tile.locked::before { background-color: #bbb; border-color: #bbb; } /* 側面也變暗 */
+        .tile.locked::after { background-color: #ccc; border-color: #ccc; }
         .tile.locked img, .tile.locked .t-icon { opacity: 0.4; }
 
+        /* 選中狀態 */
         .tile.selected { 
             background-color: #fff9c4; 
             transform: translateZ(calc(var(--base-z) + 20px)) !important; 
-            box-shadow: 0 0 10px #ffeb3b, inset 0 2px 3px rgba(255,255,255,1); 
+            box-shadow: 0 0 10px #ffeb3b; 
             border: 2px solid #ffee58;
         }
 
@@ -205,7 +205,6 @@
         }
 
         #watermark {
-            /* v23: 調整水印位置 */
             position: absolute; bottom: 95px; left: 20px; font-size: 11px;
             color: rgba(255, 255, 255, 0.3); pointer-events: none; z-index: 150; font-weight: bold;
             text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
@@ -228,7 +227,7 @@
 
 <div id="game-viewport">
     <div id="game-board"></div>
-    </div>
+</div>
 
 <footer>
     <div class="footer-btns">
@@ -242,7 +241,7 @@
     </div>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v23</div>
+<div id="watermark">Powered by Google Gemini v24</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
@@ -365,7 +364,7 @@
             
             let left = slot.c * tileW; 
             let top = slot.r * tileH; 
-            let zHeight = slot.z * 14; 
+            let zHeight = slot.z * 40; /* v24: 使用增加後的厚度 */
             
             el.style.left = left + 'px'; 
             el.style.top = top + 'px'; 
