@@ -2,728 +2,524 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>聖經研讀 (V30)</title>
-
-    <link rel="apple-touch-icon" sizes="180x180" href="bible-icon.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="bible-icon.png">
-    <link rel="icon" type="image/png" href="bible-icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
+    <meta name="apple-mobile-web-app-title" content="福音麻雀">
+    <meta name="application-name" content="福音麻雀">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
+    <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
+    <title>福音麻雀 - v23</title>
     <style>
-        /* V30: 純白麻雀配色定義 */
-        :root {
-            --bg: #ffffff; /* 背景改為純白 */
-            --text: #333333;
-            --primary: #2c3e50;
-            --accent: #8e44ad;
-            
-            /* 卡片與按鈕：純白底 + 強邊框 + 實體陰影 */
-            --tile-bg: #ffffff;
-            --tile-border: 1px solid #e0e0e0; /* 更明顯的灰色邊框 */
-            --tile-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); /* 更紮實的陰影 */
-            
-            --input-bg: #ffffff;
-            --nav-btn-bg: #f8f9fa; /* 導航按鈕稍微灰一點點以示區別 */
-            --nav-btn-color: #7f8c8d;
-            
-            --scripture-size: 1.25rem;
-            --highlight-color: #f1c40f55;
-            --gemini-title-border: #f39c12;
-
-            /* 統一元件高度 */
-            --element-height: 52px;
+        :root { 
+            --tile-w: 42px; 
+            --tile-h: 56px; 
+            --depth: 14px;
+            --bg-color: #065f35; 
+            --ui-cloud-bg: rgba(0, 0, 0, 0.6); 
+            --text-dark: #fff;
+            --btn-yellow-1: #ffd54f;
+            --btn-yellow-2: #ffb300;
+            --btn-blue-1: #4fc3f7;
+            --btn-blue-2: #0288d1;
+            --tile-side-color: #f0e6d2; 
+            --tile-bottom-color: #e8dabf;
         }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg); /* 使用純白背景 */
-            margin: 0;
-            padding: 20px;
-            color: var(--text);
-            padding-bottom: 120px;
-            -webkit-text-size-adjust: 100%;
+            margin: 0; 
+            background-color: var(--bg-color);
+            font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
+            overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
+            color: var(--text-dark); user-select: none; -webkit-user-select: none; touch-action: none;
         }
-        .container { max-width: 900px; margin: 0 auto; } /* 稍微加寬容器以便並排 */
         
-        h1 { text-align: center; color: var(--primary); font-size: 1.5rem; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 15px; }
-
-        /* 載入狀態 */
-        .loading-container { text-align: center; margin: 10px 0 20px 0; }
-        .progress-bar { width: 100%; height: 10px; background: #f0f0f0; border-radius: 5px; overflow: hidden; margin-top: 10px; border: 1px solid #e0e0e0; }
-        .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
-
-        /* V30: 麻雀牌風格卡片 (移除透明度與模糊) */
-        .tile-card {
-            background: var(--tile-bg);
-            border: var(--tile-border);
-            box-shadow: var(--tile-shadow);
-            border-radius: 12px; /* 稍微方一點 */
-            padding: 25px;
-            margin-bottom: 25px;
+        header {
+            flex-shrink: 0; 
+            height: calc(50px + env(safe-area-inset-top)); 
+            padding: 5px 15px;
+            padding-top: calc(5px + env(safe-area-inset-top)); 
+            background: var(--ui-cloud-bg); 
+            display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            margin: 0 10px 5px 10px;
+        }
+        select { padding: 6px 10px; font-size: 14px; border-radius: 15px; border: 2px solid #555; background: #eee; max-width: 140px; color: #333; font-weight: bold; }
+        #status { font-size: 15px; font-weight: bold; background: #ffe082; color: #d84315; padding: 6px 15px; border-radius: 20px; box-shadow: 0 2px 0 #ffca28; }
+        
+        #game-viewport {
+            flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
+            perspective: 2000px;
+            perspective-origin: center center;
         }
 
-        /* 工具列 */
-        .tools-row { 
+        #game-board { 
+            position: absolute; 
+            top: 50%; left: 50%; 
+            /* v23: 恢復居中，因為 joystick 不再擋路 */
+            transform: translate(-50%, -50%) rotateX(30deg) rotateZ(0deg); 
+            transform-origin: center center;
+            transform-style: preserve-3d;
+        }
+
+        /* v23 改動：Footer 佈局調整 */
+        footer { 
+            flex-shrink: 0; 
+            /* 稍微增加高度以容納 joystick */
+            height: calc(80px + env(safe-area-inset-bottom)); 
+            padding: 5px 10px; 
+            padding-bottom: max(5px, env(safe-area-inset-bottom));
+            background: var(--ui-cloud-bg); 
             display: flex; 
-            gap: 10px; 
-            margin-bottom: 20px;
-            align-items: center;
+            justify-content: space-between; /* 左右分佈 */
+            align-items: center; /* 垂直居中 */
+            z-index: 100;
+            box-shadow: 0 -4px 8px rgba(0,0,0,0.3);
+            border-top-left-radius: 25px;
+            border-top-right-radius: 25px;
+            margin: 5px 10px 0 10px;
         }
-        
-        /* 搜尋框 (麻雀風) */
-        .search-input {
-            flex-grow: 1;
-            height: var(--element-height);
-            padding: 0 15px;
-            border: 2px solid #eee; /* 加粗邊框 */
-            border-radius: 10px; font-size: 16px;
-            background: var(--input-bg); color: var(--text);
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-        }
-        .search-input:focus { border-color: var(--accent); outline: none; }
 
-        /* 按鈕通用樣式 (麻雀風) */
-        .tile-btn {
-            height: var(--element-height);
-            border-radius: 10px; 
-            font-weight: bold; font-size: 1.1rem;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: all 0.1s;
-            box-sizing: border-box;
-            border: var(--tile-border);
-            background: var(--tile-bg);
-            color: var(--text);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .tile-btn:active { transform: translateY(2px); box-shadow: none; }
-        
-        /* 特殊按鈕 */
-        .search-btn { background: var(--primary); color: white; border: none; min-width: 52px; }
-        .read-btn { flex-grow: 2; background-color: var(--primary); color: white; border: none; font-size: 16px; }
-        .nav-arrow-btn { flex-grow: 0; min-width: 60px; background-color: var(--nav-btn-bg); color: var(--nav-btn-color); font-size: 20px; }
-
-        /* V30: 底部控制區域佈局 (關鍵修改) */
-        .bottom-controls-wrapper {
+        /* v23 新增：按鈕容器 */
+        .footer-btns {
             display: flex;
-            gap: 20px;
-            align-items: flex-start; /* 頂部對齊 */
-            margin-top: 10px;
-            border-top: 2px solid #f5f5f5; /* 加一條分隔線 */
-            padding-top: 25px;
-        }
-
-        /* 左側：導航按鈕組 */
-        .nav-buttons-group {
-            flex: 0 0 auto; /* 不縮放，固定寬度 */
-            display: flex; gap: 10px;
-            min-width: 240px;
-        }
-
-        /* 右側：選單控制組 */
-        .selectors-group {
-            flex: 1 1 auto; /* 佔據剩餘空間 */
-            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-            opacity: 0.5; pointer-events: none; transition: opacity 0.3s;
-        }
-        .selectors-group.active { opacity: 1; pointer-events: all; }
-        
-        .full-width { grid-column: 1 / -1; }
-        .verse-group { display: flex; align-items: center; gap: 8px; grid-column: 1 / -1; }
-        
-        /* 下拉選單 (麻雀風) */
-        select {
-            height: var(--element-height);
-            padding: 0 15px;
-            border: 2px solid #eee;
-            border-radius: 10px;
-            font-size: 16px; width: 100%; 
-            background: var(--input-bg); color: var(--text);
-            box-sizing: border-box;
-            -webkit-appearance: none; /* 移除原生樣式以統外觀 */
-            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23999%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-13%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2013l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-            background-repeat: no-repeat;
-            background-position: right 15px top 50%;
-            background-size: 12px auto;
-        }
-        select:focus { border-color: var(--accent); outline: none; }
-
-        /* 搜尋結果區 */
-        .search-results {
-            max-height: 300px; overflow-y: auto; display: none;
-            background: var(--tile-bg); border: var(--tile-border); border-radius: 12px;
-            margin-bottom: 20px; padding: 5px 0; color: var(--text);
-            box-shadow: var(--tile-shadow);
-        }
-        .result-item { padding: 15px 20px; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s; }
-        .result-item:hover { background: #f9f9f9; }
-        .result-ref { font-weight: bold; color: var(--accent); display: block; margin-bottom: 6px; }
-        .result-text { font-size: 0.95rem; opacity: 0.9; line-height: 1.6; }
-
-        /* 經文卡片 */
-        .scripture-card {
-            display: none;
-            border-left: 6px solid var(--accent);
-        }
-
-        /* 功能按鈕區 */
-        .action-area { 
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 25px; 
-            align-items: stretch;
+            flex: 1; /* 佔用剩餘空間 */
+            justify-content: space-around;
+            margin-right: 10px; /* 與 joystick 保持距離 */
         }
         
-        .action-btn {
-            height: auto; min-height: 52px;
-            padding: 10px; border: none; color: white; font-size: 0.9rem; line-height: 1.3;
-            white-space: normal; text-align: center;
+        .btn {
+            background: linear-gradient(to bottom, var(--btn-yellow-1), var(--btn-yellow-2)); 
+            border: 3px solid #ffffff; padding: 0;
+            /* v23 修改：改用 flex 分配寬度 */
+            width: auto; flex: 1; margin: 0 3px;
+            height: 44px; border-radius: 25px; font-weight: bold; font-size: 16px; 
+            box-shadow: 0 5px 0 #ff8f00; cursor: pointer; display: flex; justify-content: center; 
+            align-items: center; color: #5d4037;
+            transition: all 0.1s;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #ff8f00; }
+        .btn-blue { 
+            background: linear-gradient(to bottom, var(--btn-blue-1), var(--btn-blue-2)); 
+            box-shadow: 0 5px 0 #01579b; color: white; 
+        }
+        .btn-blue:active { transform: translateY(3px); box-shadow: 0 2px 0 #01579b; }
+
+        /* --- Joystick v23 改動：整合到 footer 內 --- */
+        #joystick-zone {
+            /* 移除絕對定位 */
+            position: relative; 
+            bottom: auto; right: auto;
+            width: 60px; height: 60px; 
+            z-index: 150;
+            flex-shrink: 0; /* 防止被擠壓 */
+            background: rgba(0, 0, 0, 0.3); 
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
+            backdrop-filter: blur(3px); box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        #joystick-knob {
+            width: 28px; height: 28px; 
+            background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
+            border-radius: 50%; border: 2px solid #fff;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.3); position: relative;
+        }
+        #joystick-hint {
+            position: absolute; bottom: -15px; width: 100%; text-align: center;
+            font-size: 9px; color: rgba(255, 255, 255, 0.7); pointer-events: none; font-weight: bold;
+             text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
         }
 
-        .ai-btn { background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); }
-        .grok-btn { background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); }
-        .copy-btn { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); }
-
-        .ref-title {
-            font-size: 1.4rem; font-weight: bold; color: var(--accent);
-            margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px;
-        }
-        .scripture-text {
-            font-size: var(--scripture-size); 
-            line-height: 1.9; white-space: pre-wrap; color: var(--text);
-            margin-bottom: 25px;
-        }
-        .verse-num { color: #999; font-weight: normal; font-size: 0.75em; margin-right: 8px; vertical-align: super; }
-
-        /* 閱讀整章按鈕 */
-        .context-btn {
-            width: 100%; margin-bottom: 25px; border: none;
-            color: white; background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-            display: none;
+        /* 麻雀牌樣式 */
+        .tile {
+            position: absolute; width: var(--tile-w); height: var(--tile-h);
+            /* v23 改動：背景色改回純白色 */
+            background-color: #ffffff; 
+            border-radius: 5px; 
+            cursor: pointer;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transform-style: preserve-3d; transition: transform 0.1s;
+            box-shadow: inset 0 2px 3px rgba(255,255,255,1), inset 0 -2px 3px rgba(0,0,0,0.05);
+            border: none;
         }
 
-        /* Gemini 區塊 */
-        .gemini-section {
-            display: none; margin-top: 25px;
-            border: 2px solid #f39c12; /* Gemini 特色邊框 */
+        .tile::before {
+            content: ''; position: absolute; width: 100.5%; height: var(--depth);
+            bottom: 0; left: 0;
+            background: var(--tile-bottom-color); 
+            transform-origin: bottom; transform: rotateX(-90deg);
+            border: 1px solid #d0c0a0; border-radius: 2px;
         }
-        .gemini-header {
-            display: flex; align-items: center; gap: 10px;
-            font-size: 1.2rem; font-weight: bold; color: var(--text);
-            margin-bottom: 15px; border-bottom: 2px solid #f39c12; padding-bottom: 10px;
+        .tile::after {
+            content: ''; position: absolute; width: var(--depth); height: 100.5%;
+            top: 0; right: 0;
+            background: var(--tile-side-color);
+            transform-origin: right; transform: rotateY(90deg);
+            border: 1px solid #d0c0a0; border-radius: 2px;
         }
-        .gemini-content { font-size: 1.05rem; line-height: 1.7; color: var(--text); opacity: 0.95; }
-        .gemini-content h1, .gemini-content h2, .gemini-content h3 { 
-            color: var(--primary); margin-top: 20px; margin-bottom: 10px; font-size: 1.1em; 
+
+        .tile.locked::before, .tile.locked::after { background: #ccc; border-color: #aaa; }
+        .tile.locked { background-color: #e6e6e6; color: #999; box-shadow: none; }
+        .tile.locked img, .tile.locked .t-icon { opacity: 0.4; }
+
+        .tile.selected { 
+            background-color: #fff9c4; 
+            transform: translateZ(calc(var(--base-z) + 20px)) !important; 
+            box-shadow: 0 0 10px #ffeb3b, inset 0 2px 3px rgba(255,255,255,1); 
+            border: 2px solid #ffee58;
         }
-        .gemini-content strong { color: #c0392b; background: #fff5e6; padding: 0 4px; }
+
+        .t-suit { position: absolute; top: 1px; right: 2px; font-size: 10px; color: #999; line-height: 1; backface-visibility: hidden; }
+        .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; backface-visibility: hidden; }
+        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #444; backface-visibility: hidden; }
         
-        .ai-loading { text-align: center; padding: 30px; font-style: italic; color: #888; display: none; }
-        .ai-spinner {
-            display: inline-block; width: 24px; height: 24px;
-            border: 3px solid #eee; border-top: 3px solid var(--gemini-title-border);
-            border-radius: 50%; animation: spin 1s linear infinite; margin-right: 12px; vertical-align: middle;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .c-red { color: #e53935; } .c-blue { color: #1e88e5; } .c-green { color: #43a047; }
 
-        .footer-note {
-            text-align: right; font-size: 0.8rem; color: #aaa;
-            border-top: 1px solid #eee; padding-top: 15px; font-style: italic; margin-top: 30px;
+        /* 彈窗 */
+        #msg-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); 
+            display: none; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 200; text-align: center; padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+        .overlay-box {
+            background: #fff; padding: 30px; border-radius: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 5px solid #ffd54f;
+            max-width: 90%; color: #333;
+        }
+        .overlay-title { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #ffb300; text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0,0,0,0.1); }
+        .overlay-verse { 
+            font-size: 22px; color: #0288d1; line-height: 1.6; 
+            background: #e0f2f1; padding: 20px; border-radius: 20px; 
+            width: 100%; margin-bottom: 20px; border: 2px dashed #b2dfdb;
+            font-weight: bold;
         }
 
-        /* V30: 手機版響應式調整 (重要) */
-        @media (max-width: 768px) { 
-            /* 在手機上，強制變回垂直堆疊，否則放不下 */
-            .bottom-controls-wrapper {
-                flex-direction: column-reverse; /* 選單在上，按鈕在下 */
-                gap: 15px;
-            }
-            .nav-buttons-group, .selectors-group {
-                width: 100%; /* 填滿寬度 */
-            }
-            .selectors-group { grid-template-columns: 1fr; } /* 選單也變單欄 */
-            .action-area { grid-template-columns: 1fr; }
+        #watermark {
+            /* v23: 調整水印位置 */
+            position: absolute; bottom: 95px; left: 20px; font-size: 11px;
+            color: rgba(255, 255, 255, 0.3); pointer-events: none; z-index: 150; font-weight: bold;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="tile-card main-control-card">
-        <h1>📖 聖經研讀</h1>
-        <div class="subtitle">資料來源：和合本繁體 (Github/cokcok1)</div>
+<header>
+    <select id="map-select" onchange="changeMap(this.value)">
+        <option value="random">🎲 無限隨機</option>
+        <option value="turtle">🐢 經典龜背</option>
+        <option value="castle">🏰 堅固堡壘</option>
+        <option value="cross">✝️ 榮耀十架</option>
+        <option value="bridge">🌉 恩典之橋</option>
+        <option value="towers">🗼 雙子塔</option>
+    </select>
+    <div id="status">剩餘: 0</div>
+</header>
 
-        <div id="loadingArea" class="loading-container">
-            <div id="loadingText">正在下載資料庫 (4.5MB)...</div>
-            <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
-        </div>
+<div id="game-viewport">
+    <div id="game-board"></div>
+    </div>
 
-        <div class="tools-row" id="toolsRow" style="display:none;">
-            <input type="text" id="searchInput" class="search-input" placeholder="輸入關鍵字 (如: 愛人如己)">
-            <button class="tile-btn search-btn" onclick="searchBible()">🔍</button>
-        </div>
+<footer>
+    <div class="footer-btns">
+        <button class="btn btn-blue" onclick="forceNewGame()">🔄 新局</button>
+        <button class="btn" onclick="shuffleActiveTiles()">🔀 洗牌</button>
+        <button class="btn" onclick="autoHint()">💡 提示</button>
+    </div>
+    <div id="joystick-zone">
+        <div id="joystick-knob"></div>
+        <div id="joystick-hint">視角</div>
+    </div>
+</footer>
 
-        <div id="searchResults" class="search-results"></div>
+<div id="watermark">Powered by Google Gemini v23</div>
 
-        <div class="bottom-controls-wrapper">
-            
-            <div class="nav-buttons-group">
-                <button class="tile-btn nav-arrow-btn" onclick="prevChapter()" title="上一章">❮</button>
-                <button class="tile-btn read-btn" onclick="displayScripture()">閱讀經文</button>
-                <button class="tile-btn nav-arrow-btn" onclick="nextChapter()" title="下一章">❯</button>
-            </div>
-
-            <div id="controlGrid" class="selectors-group">
-                <select id="bookSelect" class="full-width" onchange="updateChapters()"><option>載入中...</option></select>
-                
-                <div style="display: contents;"> <select id="chapterSelect" onchange="updateStartVerses()"><option>-</option></select>
-                    
-                    <div class="verse-group">
-                        <select id="startVerseSelect" style="flex-grow:1;" onchange="updateEndVerses()"><option>-</option></select>
-                        <span id="toLabel" style="display:none;">至</span>
-                        <select id="endVerseSelect" style="flex-grow:1; display:none;"><option>-</option></select>
-                    </div>
-                </div>
-            </div>
-
-        </div> </div>
-
-    <div id="resultCard" class="tile-card scripture-card">
-        
-        <div id="actionArea" class="action-area">
-            <button class="tile-btn action-btn ai-btn" onclick="callGeminiAPI()">✨ Gemini解經<br>(VPN/非香港用戶)</button>
-            <button class="tile-btn action-btn grok-btn" onclick="openGrok()">🚀 複製並前往Grok</button>
-            <button class="tile-btn action-btn copy-btn" id="copyBtn" onclick="copyPrompt()">📋 僅複製指令</button>
-        </div>
-
-        <div class="ref-title" id="displayRef"></div>
-        <div class="scripture-text" id="displayText"></div>
-
-        <button id="contextBtn" class="tile-btn context-btn" onclick="switchToWholeChapter()">📖 閱讀整章 (顯示上下文)</button>
-
-        <div id="geminiSection" class="tile-card gemini-section">
-            <div class="gemini-header">
-                <span>🤖 Gemini 2.0 Flash 解讀</span>
-            </div>
-            <div id="aiLoading" class="ai-loading">
-                <div class="ai-spinner"></div> 正在連線 Google Gemini 思考神學意涵...
-            </div>
-            <div id="geminiResult" class="gemini-content"></div>
-        </div>
-
-        <div class="footer-note" id="footerVer">Powered by Google Gemini AI解釋內容只供參考 2025-12-30 (V30)</div>
+<div id="msg-overlay">
+    <div class="overlay-box">
+        <div id="overlay-title" class="overlay-title"></div>
+        <div id="overlay-verse" class="overlay-verse"></div>
+        <button id="overlay-btn" class="btn" style="width: 220px; height: 50px; font-size: 20px;" onclick="forceNewGame()">挑戰下一關</button>
     </div>
 </div>
 
-<textarea id="hiddenPrompt" style="display:none;"></textarea>
-
 <script>
-    const GEMINI_API_URL = 'https://little-thunder-4b7b.imsklam1.workers.dev';
-    const BIBLE_URL = 'https://cokcok1.github.io/bible-ai/chinese_union_trad_trad.txt';
+    const rawTiles = [
+        {t:"摩西", i:"🌊", s:"萬", c:"c-red"}, {t:"大衛", i:"👑", s:"萬", c:"c-red"},
+        {t:"保羅", i:"📜", s:"萬", c:"c-red"}, {t:"彼得", i:"🐟", s:"萬", c:"c-red"},
+        {t:"約拿", i:"🐋", s:"萬", c:"c-red"}, {t:"馬利亞", i:"🤰", s:"萬", c:"c-red"},
+        {t:"亞伯蘭", i:"🐑", s:"萬", c:"c-red"}, {t:"但以理", i:"🦁", s:"萬", c:"c-red"},
+        {t:"教會", i:"⛪", s:"筒", c:"c-blue"}, {t:"西奈", i:"⛰️", s:"筒", c:"c-blue"},
+        {t:"紅海", i:"🌊", s:"筒", c:"c-blue"}, {t:"伊甸", i:"🍎", s:"筒", c:"c-blue"},
+        {t:"加利利", i:"🛶", s:"筒", c:"c-blue"}, {t:"聖殿", i:"🏛️", s:"筒", c:"c-blue"},
+        {t:"耶利哥", i:"🧱", s:"筒", c:"c-blue"}, {t:"方舟", i:"🚢", s:"筒", c:"c-blue"},
+        {t:"十架", i:"✝️", s:"索", c:"c-green"}, {t:"聖經", i:"📖", s:"索", c:"c-green"},
+        {t:"五餅", i:"🍞", s:"索", c:"c-green"}, {t:"二魚", i:"🐟", s:"索", c:"c-green"},
+        {t:"寶血", i:"🍷", s:"索", c:"c-green"}, {t:"聖靈", i:"🕊️", s:"索", c:"c-green"},
+        {t:"信", i:"🛡️", s:"番", c:"#333"}, {t:"望", i:"⚓", s:"番", c:"#333"},
+        {t:"愛", i:"❤️", s:"番", c:"#333"}, {t:"阿們", i:"🙏", s:"番", c:"#333"},
+        {t:"禱告", i:"🤲", s:"番", c:"#333"}, {t:"復活", i:"🌅", s:"番", c:"#333"}
+    ];
     
-    let bibleData = {};
-    let bookOrder = [];
+    const winVerses = ["流淚撒種的，必歡呼收割。(詩 126:5)", "那美好的仗我已經打過了。(提後 4:7)", "靠著那加給我力量的，凡事都能做。(腓 4:13)", "你們是世上的光。(太 5:14)", "得勝的，我要賜他在我寶座上與我同坐。(啟 3:21)"];
+    const loseVerses = ["我的恩典是夠你用的。(林後 12:9)", "應當一無掛慮，只要凡事藉著禱告。(腓 4:6)", "你們要休息，要知道我是神。(詩 46:10)", "萬事都互相效力。(羅 8:28)"];
 
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('footerVer').innerText = `Powered by Google Gemini AI解釋內容只供參考 ${today} (V30)`;
-
-    window.onload = async function() {
-        try {
-            const response = await fetch(BIBLE_URL);
-            if (!response.ok) throw new Error("網絡下載失敗");
-            const reader = response.body.getReader();
-            const contentLength = +response.headers.get('Content-Length');
-            let receivedLength = 0;
-            let chunks = [];
-            while(true) {
-                const {done, value} = await reader.read();
-                if (done) break;
-                chunks.push(value);
-                receivedLength += value.length;
-                if (contentLength) document.getElementById('progressFill').style.width = (receivedLength / contentLength * 100) + "%";
-            }
-            document.getElementById('loadingText').innerText = "解析結構中...";
-            let text = new TextDecoder("utf-8").decode(concatUint8Arrays(chunks));
-            parseBibleText(text);
-            document.getElementById('loadingArea').style.display = 'none';
-            // V30: 這裡要指向新的 selectors-group
-            document.getElementById('controlGrid').className += ' active';
-            document.getElementById('toolsRow').style.display = 'flex';
-            initSelectors();
-        } catch (e) {
-            document.getElementById('loadingText').innerText = "錯誤：" + e.message;
-        }
+    const MapBlueprints = {
+        turtle: () => generatePyramid(6, 8, [6,6, 4,4, 2,2, 1,1]), 
+        castle: () => generateWall(6, 8),
+        cross: () => generateCross(),
+        bridge: () => generateBridge(),
+        towers: () => generateTowers(),
+        random: () => generateChaos()
     };
+    function generatePyramid(rows, cols, layerSizes) { let slots=[]; let cl=0; for(let i=0;i<layerSizes.length;i+=2){ let h=layerSizes[i], w=layerSizes[i+1]; let sr=Math.floor((rows-h)/2), sc=Math.floor((cols-w)/2); for(let r=0;r<h;r++) for(let c=0;c<w;c++) slots.push([cl, sr+r, sc+c]); cl++; } return slots; }
+    function generateWall(rows, cols) { let slots=[]; for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) { slots.push([0, r, c]); if(r===0||r===rows-1||c===0||c===cols-1) slots.push([1, r, c]); } return slots; }
+    function generateCross() { let slots=[]; for(let r=0;r<8;r++) { slots.push([0,r,3]); slots.push([0,r,4]); slots.push([1,r,3]); } for(let c=0;c<8;c++) { slots.push([0,2,c]); slots.push([0,3,c]); slots.push([1,2,c]); } slots.push([2,2,3]); slots.push([2,3,3]); return slots; }
+    function generateBridge() { let slots=[]; for(let c=0;c<10;c++) { slots.push([0,2,c]); slots.push([0,3,c]); if(c<3||c>6) { slots.push([1,2,c]); slots.push([1,3,c]); slots.push([2,2,c]); } } return slots; }
+    function generateTowers() { let slots=[]; for(let r=0;r<6;r++) for(let c=0;c<8;c++) { if(c<2||c>5) { slots.push([0,r,c]); slots.push([1,r,c]); if(r>1&&r<4) slots.push([2,r,c]); } else if(r===2||r===3) slots.push([0,r,c]); } return slots; }
+    function generateChaos() { let slots=[]; for(let r=0;r<6;r++) for(let c=0;c<8;c++) slots.push([0,r,c]); for(let i=0;i<32;i++) slots.push([Math.floor(Math.random()*2)+1, Math.floor(Math.random()*4)+1, Math.floor(Math.random()*6)+1]); return slots; }
 
-    function concatUint8Arrays(arrays) {
-        let totalLength = arrays.reduce((acc, val) => acc + val.length, 0);
-        let result = new Uint8Array(totalLength);
-        let len = 0;
-        for (let arr of arrays) { result.set(arr, len); len += arr.length; }
-        return result;
+    let tiles = [];
+    let selectedTile = null;
+    let tileW = 42, tileH = 56;
+    let globalScale = 1;
+    let viewRotX = 30;
+    let viewRotZ = 0;
+
+    function changeMap(val) { startGame(val); }
+    function forceNewGame() { startGame(document.getElementById('map-select').value); }
+
+    function startGame(mapType) {
+        document.getElementById('msg-overlay').style.display = 'none';
+        const board = document.getElementById('game-board');
+        board.innerHTML = ''; tiles = []; selectedTile = null;
+        viewRotX = 30; viewRotZ = 0; 
+
+        let slots = MapBlueprints[mapType]();
+        if(slots.length % 2 !== 0) slots.pop();
+        let minC = Infinity, minR = Infinity;
+        slots.forEach(s => { if(s[1]<minR) minR=s[1]; if(s[2]<minC) minC=s[2]; });
+        slots.forEach(s => { s[1]-=minR; s[2]-=minC; });
+
+        let virtualTiles = slots.map((s, i) => ({ id: i, z: s[0], r: s[1], c: s[2], active: true }));
+        let pairs = [], tempTiles, success = false, attempt = 0;
+        while(!success && attempt < 20) {
+            tempTiles = JSON.parse(JSON.stringify(virtualTiles)); pairs = []; let possible = true;
+            while(tempTiles.some(t => t.active)) {
+                let available = getAvailableTiles(tempTiles);
+                if(available.length < 2) { possible = false; break; }
+                let t1 = available.splice(Math.floor(Math.random()*available.length), 1)[0];
+                let t2 = available.splice(Math.floor(Math.random()*available.length), 1)[0];
+                pairs.push([t1.id, t2.id]); t1.active = false; t2.active = false;
+            }
+            if(possible) success = true; attempt++;
+        }
+        if(!success) for(let i=0;i<virtualTiles.length;i+=2) pairs.push([i,i+1]);
+
+        let totalPairs = pairs.length, cardInventory = [], shuffledTypes = [...rawTiles].sort(()=>Math.random()-0.5);
+        let typeIndex = 0;
+        for(let i=0; i<totalPairs; i+=2) {
+            let card = shuffledTypes[typeIndex % shuffledTypes.length];
+            cardInventory.push(card); if(i+1<totalPairs) cardInventory.push(card);
+            typeIndex++;
+        }
+        cardInventory.sort(()=>Math.random()-0.5);
+        let finalTilesData = new Array(virtualTiles.length);
+        pairs.forEach((pair, idx) => { finalTilesData[pair[0]] = finalTilesData[pair[1]] = cardInventory[idx]; });
+
+        renderTiles(virtualTiles, finalTilesData);
+        setTimeout(fitBoard, 50);
+        updateStatusText();
     }
 
-    function parseBibleText(rawText) {
-        const lines = rawText.split('\n');
-        const lineRegex = /^(.+?)\s+(\d+):(\d+)\s+(.*)$/;
-        lines.forEach(line => {
-            line = line.trim();
-            if (!line) return;
-            const match = line.match(lineRegex);
-            if (match) {
-                const book = match[1];
-                const chapter = parseInt(match[2]);
-                const verse = parseInt(match[3]);
-                const content = match[4];
-                if (!bibleData[book]) { bibleData[book] = {}; bookOrder.push(book); }
-                if (!bibleData[book][chapter]) { bibleData[book][chapter] = {}; }
-                bibleData[book][chapter][verse] = content;
-            }
+    function getAvailableTiles(tileSet) { return tileSet.filter(t => t.active && !checkLockedInSet(t, tileSet)); }
+    function checkLockedInSet(tile, tileSet) {
+        let hasTop=false, hasLeft=false, hasRight=false;
+        for(let other of tileSet) {
+            if(!other.active || other.id === tile.id) continue;
+            if(other.z === tile.z+1 && other.r === tile.r && other.c === tile.c) hasTop = true;
+            if(other.z === tile.z && other.r === tile.r) { if(other.c === tile.c-1) hasLeft=true; if(other.c === tile.c+1) hasRight=true; }
+        }
+        return hasTop || (hasLeft && hasRight);
+    }
+
+    function renderTiles(slots, dataMap) {
+        const board = document.getElementById('game-board');
+        let maxX=0, maxY=0;
+        slots.forEach((slot, index) => {
+            if(slot.c > maxX) maxX = slot.c; if(slot.r > maxY) maxY = slot.r;
+            const el = document.createElement('div');
+            el.className = 'tile';
+            
+            const card = dataMap[index];
+            el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
+            
+            let left = slot.c * tileW; 
+            let top = slot.r * tileH; 
+            let zHeight = slot.z * 14; 
+            
+            el.style.left = left + 'px'; 
+            el.style.top = top + 'px'; 
+            el.style.transform = `translateZ(${zHeight}px)`; 
+            el.style.setProperty('--base-z', zHeight + 'px');
+            el.style.zIndex = slot.z * 10 + slot.r; 
+            
+            const tileObj = { el: el, data: card, z: slot.z, r: slot.r, c: slot.c, active: true, id: index };
+            el.onclick = () => onTileClick(tileObj);
+            board.appendChild(el);
+            tiles.push(tileObj);
         });
+        board.style.width = (maxX + 1) * tileW + 'px';
+        board.style.height = (maxY + 1) * tileH + 'px';
+        updateLockStatus();
     }
 
-    function searchBible() {
-        const rawKeyword = document.getElementById('searchInput').value.trim();
-        const resultsDiv = document.getElementById('searchResults');
-        
-        if (!rawKeyword) { alert("請輸入搜尋關鍵字"); return; }
-        const cleanKeyword = rawKeyword.replace(/\s+/g, '');
-        if (cleanKeyword.length < 1) return;
-
-        resultsDiv.style.display = 'block';
-        resultsDiv.innerHTML = '<div style="padding:15px; color:#888; text-align:center;">🔍 正在搜尋全本聖經...</div>';
-
-        setTimeout(() => {
-            let results = [];
-            let count = 0;
-            const maxResults = 100;
-
-            for (let book of bookOrder) {
-                for (let chap in bibleData[book]) {
-                    for (let ver in bibleData[book][chap]) {
-                        const originalText = bibleData[book][chap][ver];
-                        const cleanText = originalText.replace(/\s+/g, '');
-                        
-                        if (cleanText.includes(cleanKeyword)) {
-                            results.push({ book, chap, ver, text: originalText });
-                            count++;
-                            if (count >= maxResults) break;
-                        }
-                    }
-                    if (count >= maxResults) break;
-                }
-                if (count >= maxResults) break;
-            }
-
-            if (results.length === 0) {
-                resultsDiv.innerHTML = `<div style="padding:15px; color:var(--primary); text-align:center;">找不到關於「${rawKeyword}」的經文。</div>`;
-            } else {
-                let html = `<div style="padding:10px 20px; border-bottom:2px solid #eee; color:var(--primary); font-weight:bold;">
-                    找到 ${results.length}${count >= maxResults ? '+' : ''} 處經文 (點擊跳轉):
-                    <button style="float:right; border:none; background:none; color:#999; cursor:pointer; font-size:1.2rem;" onclick="closeSearch()">✕</button>
-                </div>`;
-                
-                const escapedKeyword = cleanKeyword.split('').map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('\\s*');
-                const highlightRegex = new RegExp(`(${escapedKeyword})`, 'g');
-
-                results.forEach(res => {
-                    const highlighted = res.text.replace(highlightRegex, `<span style="background:var(--highlight-color); font-weight:bold; padding:2px 4px; border-radius:4px;">$1</span>`);
-                    html += `<div class="result-item" onclick="jumpToScripture('${res.book}', ${res.chap}, ${res.ver})">
-                        <span class="result-ref">${res.book} ${res.chap}:${res.ver}</span>
-                        <div class="result-text">${highlighted}</div>
-                    </div>`;
-                });
-                resultsDiv.innerHTML = html;
-            }
-        }, 50);
-    }
-
-    function closeSearch() {
-        document.getElementById('searchResults').style.display = 'none';
-    }
-
-    function jumpToScripture(book, chap, ver) {
-        bookSel.value = book;
-        updateChapters();
-        chapSel.value = chap;
-        updateStartVerses();
-        startVerSel.value = ver;
-        updateEndVerses();
-        
-        document.getElementById('searchInput').value = '';
-        
-        displayScripture();
-        closeSearch();
-        document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function switchToWholeChapter() {
-        startVerSel.value = 'all';
-        updateEndVerses();
-        displayScripture();
-    }
-
-    // --- 原有邏輯 ---
-    const bookSel = document.getElementById('bookSelect');
-    const chapSel = document.getElementById('chapterSelect');
-    const startVerSel = document.getElementById('startVerseSelect');
-    const endVerSel = document.getElementById('endVerseSelect');
-
-    function initSelectors() {
-        bookSel.innerHTML = "";
-        bookOrder.forEach(bk => {
-            let op = document.createElement('option');
-            op.value = bk; op.text = bk; bookSel.add(op);
-        });
-        updateChapters();
-    }
-
-    function updateChapters() {
-        const book = bookSel.value;
-        chapSel.innerHTML = "";
-        const chaps = Object.keys(bibleData[book]).map(Number).sort((a,b)=>a-b);
-        chaps.forEach(ch => {
-            let op = document.createElement('option');
-            op.value = ch; op.text = `第 ${ch} 章`; chapSel.add(op);
-        });
-        updateStartVerses();
-    }
-
-    function updateStartVerses() {
-        const book = bookSel.value;
-        const chap = chapSel.value;
-        startVerSel.innerHTML = '<option value="all">整章 (Whole Chapter)</option>';
-        if (bibleData[book] && bibleData[book][chap]) {
-            const verses = Object.keys(bibleData[book][chap]).map(Number).sort((a,b)=>a-b);
-            verses.forEach(v => {
-                let op = document.createElement('option');
-                op.value = v; op.text = `第 ${v} 節`; startVerSel.add(op);
-            });
+    function updateLockStatus() { tiles.forEach(t => { if(!t.active) return; t.isLocked = checkLocked(t); t.el.classList.toggle('locked', t.isLocked); }); }
+    
+    function checkLocked(tile) {
+        let hasTop=false, hasLeft=false, hasRight=false;
+        for(let other of tiles) {
+            if(!other.active || other === tile) continue;
+            if(other.z === tile.z+1 && other.r === tile.r && other.c === tile.c) hasTop = true;
+            if(other.z === tile.z && other.r === tile.r) { if(other.c === tile.c-1) hasLeft=true; if(other.c === tile.c+1) hasRight=true; }
         }
-        updateEndVerses();
+        return hasTop || (hasLeft && hasRight);
     }
 
-    function updateEndVerses() {
-        const startVal = startVerSel.value;
-        if (startVal === "all") {
-            document.getElementById('toLabel').style.display = "none";
-            endVerSel.style.display = "none";
-            return;
-        }
-        document.getElementById('toLabel').style.display = "block";
-        endVerSel.style.display = "block";
-        endVerSel.innerHTML = "";
-        const book = bookSel.value;
-        const chap = chapSel.value;
-        const startNum = parseInt(startVal);
-        if (bibleData[book] && bibleData[book][chap]) {
-            const verses = Object.keys(bibleData[book][chap]).map(Number).sort((a,b)=>a-b);
-            verses.forEach(v => {
-                if (v >= startNum) {
-                    let op = document.createElement('option');
-                    op.value = v; op.text = `第 ${v} 節`; endVerSel.add(op);
-                }
-            });
-        }
+    function onTileClick(tile) {
+        if(!tile.active || tile.isLocked) return;
+        if(selectedTile === tile) { tile.el.classList.remove('selected'); selectedTile = null; }
+        else if(selectedTile) {
+            if(tile.data.t === selectedTile.data.t) {
+                tile.active=false; selectedTile.active=false;
+                tile.el.style.display='none'; selectedTile.el.style.display='none'; 
+                selectedTile = null;
+                updateLockStatus(); updateStatusText(); checkGameState();
+            } else { selectedTile.el.classList.remove('selected'); selectedTile = tile; tile.el.classList.add('selected'); }
+        } else { selectedTile = tile; tile.el.classList.add('selected'); }
     }
 
-    function nextChapter() {
-        const currentBook = bookSel.value;
-        const currentChap = parseInt(chapSel.value);
-        if (bibleData[currentBook][currentChap + 1]) {
-            chapSel.value = currentChap + 1;
+    function checkGameState() { if(tiles.filter(t=>t.active).length===0) showModal('win'); else if(!hasAvailableMoves()) showModal('lose'); }
+    function hasAvailableMoves() {
+        let free = tiles.filter(t=>t.active && !t.isLocked);
+        for(let i=0;i<free.length;i++) for(let j=i+1;j<free.length;j++) if(free[i].data.t === free[j].data.t) return true;
+        return false;
+    }
+
+    function showModal(type) {
+        const overlay = document.getElementById('msg-overlay'), title = document.getElementById('overlay-title'), verse = document.getElementById('overlay-verse'), btn = document.getElementById('overlay-btn');
+        if(type==='win') {
+            title.innerText="🎉 哈利路亞！(勝利)"; title.style.color="#ffb300"; verse.innerText=winVerses[Math.floor(Math.random()*winVerses.length)];
+            btn.innerText="挑戰下一關 🚀"; btn.onclick=()=>{ document.getElementById('map-select').value=['random','turtle','castle','cross','bridge','towers'][Math.floor(Math.random()*6)]; startGame(document.getElementById('map-select').value); };
+            btn.className = "btn"; 
         } else {
-            const bookIdx = bookOrder.indexOf(currentBook);
-            if (bookIdx < bookOrder.length - 1) {
-                const nextBook = bookOrder[bookIdx + 1];
-                bookSel.value = nextBook;
-                updateChapters();
-                chapSel.value = 1;
-            } else {
-                alert("已經是最後一章了");
-                return;
-            }
+            title.innerText="💪 恩典夠用 (暫時無路)"; title.style.color="#4fc3f7"; verse.innerText=loseVerses[Math.floor(Math.random()*loseVerses.length)];
+            btn.innerText="重新開始 🔄"; btn.onclick=()=>forceNewGame();
+            btn.className = "btn btn-blue"; 
         }
-        updateStartVerses(); displayScripture();
+        overlay.style.display='flex';
     }
 
-    function prevChapter() {
-        const currentBook = bookSel.value;
-        const currentChap = parseInt(chapSel.value);
-        if (currentChap > 1) {
-            chapSel.value = currentChap - 1;
-        } else {
-            const bookIdx = bookOrder.indexOf(currentBook);
-            if (bookIdx > 0) {
-                const prevBook = bookOrder[bookIdx - 1];
-                bookSel.value = prevBook;
-                updateChapters();
-                const chaps = Object.keys(bibleData[prevBook]).map(Number);
-                chapSel.value = Math.max(...chaps);
-            } else {
-                alert("已經是第一章了");
-                return;
-            }
+    function shuffleActiveTiles() {
+        let active=tiles.filter(t=>t.active), datas=active.map(t=>t.data), attempt=0, solvable=false;
+        let freeIndices=active.map((t,i)=>!checkLocked(t)?i:-1).filter(i=>i!==-1);
+        while(!solvable && attempt<50) {
+            datas.sort(()=>Math.random()-0.5); let seen=new Set();
+            for(let i of freeIndices) { if(seen.has(datas[i].t)) { solvable=true; break; } seen.add(datas[i].t); }
+            attempt++;
         }
-        updateStartVerses(); displayScripture();
+        active.forEach((t,i)=>{ t.data=datas[i]; t.el.classList.remove('selected'); t.el.innerHTML=`<div class="t-suit">${t.data.s}</div><div class="t-icon ${t.data.c}">${t.data.i}</div><div class="t-text ${t.data.c}">${t.data.t}</div>`; });
+        selectedTile=null; document.getElementById('game-board').style.opacity=0.5; setTimeout(()=>document.getElementById('game-board').style.opacity=1, 300);
     }
 
-    function displayScripture() {
-        document.getElementById('geminiSection').style.display = 'none';
-        document.getElementById('geminiResult').innerHTML = '';
-        
-        const book = bookSel.value;
-        const chap = chapSel.value;
-        const startVer = startVerSel.value;
-        let displayText = "";
-        let refText = "";
-        const contextBtn = document.getElementById('contextBtn');
-        
-        if (startVer === "all") {
-            refText = `${book} 第 ${chap} 章`;
-            const verses = bibleData[book][chap];
-            Object.keys(verses).map(Number).sort((a,b)=>a-b).forEach(v => {
-                displayText += `<span class='verse-num'>[${v}]</span>${verses[v]}\n`;
-            });
-            contextBtn.style.display = "none";
-        } else {
-            const startNum = parseInt(startVer);
-            const endNum = parseInt(endVerSel.value);
-            if (startNum === endNum) {
-                 refText = `${book} 第 ${chap} 章 第 ${startNum} 節`;
-            } else {
-                 refText = `${book} 第 ${chap} 章 ${startNum}-${endNum} 節`;
-            }
-            for (let i = startNum; i <= endNum; i++) {
-                if (bibleData[book][chap][i]) {
-                    displayText += `<span class='verse-num'>[${i}]</span>${bibleData[book][chap][i]}\n`;
-                }
-            }
-            contextBtn.style.display = "block";
+    function autoHint() {
+        let free=tiles.filter(t=>t.active && !t.isLocked);
+        for(let i=0;i<free.length;i++) for(let j=i+1;j<free.length;j++) if(free[i].data.t === free[j].data.t) {
+            free[i].el.style.background='#b3e5fc'; free[j].el.style.background='#b3e5fc';
+            setTimeout(()=>{ free[i].el.style.background=''; free[j].el.style.background=''; }, 1500); return;
         }
-
-        document.getElementById('resultCard').style.display = 'block';
-        document.getElementById('displayRef').innerText = refText;
-        document.getElementById('displayText').innerHTML = displayText;
-        document.getElementById('actionArea').style.display = 'grid';
-
-        generateHiddenPrompt(refText, "");
+        alert("目前無解，請按「洗牌」！");
     }
 
-    function generateHiddenPrompt(ref, text) {
-        const prompt = `請用中文（繁體）並以基督教信仰和聖經真理為基礎，解釋聖經【${ref}】。
+    function updateStatusText() { document.getElementById('status').innerText = "剩餘: " + tiles.filter(t => t.active).length; }
 
-請提供：
-- 【經文概要】概述此章內容與主要事件。
-- 【經文解釋】詳細闡述該節的含義。
-- 【神學重點】指出核心神學信息、救恩啟示及屬靈信息。
-- 【歷史文化背景】補充與理解本章相關的背景資料。
-- 【引用】列出其他聖經相關經文，並說明其關聯。
-- 【屬靈應用】提供如何將此章的信息應用於信徒生活。
-- 【默想與反思問題】提出2-3個引導思考與靈修的問題。`;
-        document.getElementById('hiddenPrompt').value = prompt;
+    function applyViewTransform() {
+        const board = document.getElementById('game-board');
+        if(!board) return;
+        // v23: 恢復垂直居中 (-50%)
+        board.style.transform = `translate(-50%, -50%) rotateX(${viewRotX}deg) rotateZ(${viewRotZ}deg) scale(${globalScale})`;
     }
 
-    async function callGeminiAPI() {
-        const prompt = document.getElementById('hiddenPrompt').value;
-        if(!prompt) { alert("請先閱讀經文"); return; }
-        const section = document.getElementById('geminiSection');
-        const loading = document.getElementById('aiLoading');
-        const result = document.getElementById('geminiResult');
-        
-        section.style.display = 'block';
-        loading.style.display = 'block';
-        result.innerHTML = '';
-        section.scrollIntoView({ behavior: 'smooth' });
+    function fitBoard() {
+        const board = document.getElementById('game-board');
+        const view = document.getElementById('game-viewport');
+        if(!board || !view) return;
+        board.style.transform = 'none';
+        const boardW = board.scrollWidth; const boardH = board.scrollHeight;
+        const viewW = view.clientWidth; const viewH = view.clientHeight;
+        globalScale = Math.min((viewW - 40) / boardW, (viewH - 40) / boardH);
+        applyViewTransform();
+    }
+    window.addEventListener('resize', fitBoard);
 
-        try {
-            const payload = { contents: [{ parts: [{ text: prompt }] }] };
-            const response = await fetch(GEMINI_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+    // Joystick
+    const joystickZone = document.getElementById('joystick-zone');
+    const joystickKnob = document.getElementById('joystick-knob');
+    let isDragging = false;
+    let startX, startY;
+    let initialRotX, initialRotZ;
 
-            if (!response.ok) throw new Error(`Cloudflare 連線錯誤: ${response.status}`);
-            const data = await response.json();
-            if (data.error) throw new Error(data.error.message || "Google API 未知錯誤");
-            if (!data.candidates || !data.candidates[0]) throw new Error("API 回傳結構異常");
-
-            const rawMarkdown = data.candidates[0].content.parts[0].text;
-            result.innerHTML = parseMarkdown(rawMarkdown);
-        } catch (error) {
-            result.innerHTML = `<span style="color:red; font-weight:bold;">錯誤：${error.message}</span>`;
-            console.error(error);
-        } finally {
-            loading.style.display = 'none';
-        }
+    function handleStart(e) {
+        isDragging = true;
+        startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+        initialRotX = viewRotX; initialRotZ = viewRotZ;
+        joystickKnob.style.transition = 'none';
     }
 
-    function parseMarkdown(text) {
-        let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-        html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-        html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-        html = html.replace(/^\* (.*$)/gim, '<li>$1</li>');
-        html = html.replace(/^\- (.*$)/gim, '<li>$1</li>');
-        html = html.replace(/\n{3,}/g, '\n\n');
-        html = html.replace(/(<\/h[1-3]>)\n+/g, '$1');
-        html = html.replace(/\n/g, '<br>');
-        return html;
+    function handleMove(e) {
+        if (!isDragging) return;
+        e.preventDefault(); 
+        const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+        const deltaX = clientX - startX;
+        const deltaY = clientY - startY;
+        const maxDist = 30;
+        const dist = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+        const limitedDist = Math.min(dist, maxDist);
+        const angle = Math.atan2(deltaY, deltaX);
+        const knobX = Math.cos(angle) * limitedDist;
+        const knobY = Math.sin(angle) * limitedDist;
+        joystickKnob.style.transform = `translate(${knobX}px, ${knobY}px)`;
+        viewRotZ = initialRotZ + (deltaX * 0.5); 
+        viewRotX = initialRotX - (deltaY * 0.5); 
+        viewRotX = Math.max(0, Math.min(viewRotX, 60)); 
+        applyViewTransform();
     }
 
-    function openGrok() {
-        const txt = document.getElementById('hiddenPrompt').value;
-        if (!txt) { alert("請先選擇經文"); return; }
-        fallbackCopy(txt, () => {
-            alert("✅ 指令已複製！\n即將打開 Grok，請在對話框按「貼上」(Ctrl+V) 即可。");
-            window.open('https://grok.com', '_blank');
-        });
+    function handleEnd() {
+        isDragging = false;
+        joystickKnob.style.transition = 'transform 0.2s';
+        joystickKnob.style.transform = 'translate(0, 0)';
     }
 
-    function copyPrompt() {
-        const txt = document.getElementById('hiddenPrompt').value;
-        if (!txt) return;
-        const onSuccess = () => {
-            const btn = document.getElementById('copyBtn');
-            const originalText = "📋 僅複製指令";
-            btn.innerText = "✅ 成功";
-            btn.style.backgroundColor = "#27ae60";
-            setTimeout(() => { btn.innerText = originalText; btn.style.backgroundColor = ""; }, 2000);
-        };
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(txt).then(onSuccess).catch(() => fallbackCopy(txt, onSuccess));
-        } else {
-            fallbackCopy(txt, onSuccess);
-        }
-    }
+    joystickZone.addEventListener('mousedown', handleStart);
+    joystickZone.addEventListener('touchstart', handleStart, {passive: false});
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('touchmove', handleMove, {passive: false});
+    window.addEventListener('mouseup', handleEnd);
+    window.addEventListener('touchend', handleEnd);
 
-    function fallbackCopy(text, callback) {
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        textArea.style.position = "absolute";
-        textArea.style.left = "-9999px";
-        textArea.setAttribute("readonly", "");
-        document.body.appendChild(textArea);
-        if (navigator.userAgent.match(/ipad|ipod|iphone/i)) {
-            const range = document.createRange();
-            range.selectNodeContents(textArea);
-            const selection = window.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(range);
-            textArea.setSelectionRange(0, 999999);
-        } else {
-            textArea.select();
-        }
-        try { if (document.execCommand('copy')) callback(); else alert("複製失敗，請手動長按選擇"); } 
-        catch (err) { alert("瀏覽器不支援複製"); }
-        document.body.removeChild(textArea);
-    }
+    startGame('random'); 
 </script>
-
 </body>
 </html>
