@@ -13,13 +13,12 @@
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v16</title>
+    <title>福音麻雀 - v17</title>
     <style>
         :root { 
             --tile-w: 42px; 
             --tile-h: 56px; 
-            --depth-x: 3px;
-            --depth-y: 6px;
+            --depth: 8px; /* 麻雀厚度 */
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -32,7 +31,6 @@
             color: white; user-select: none; -webkit-user-select: none; touch-action: none;
         }
         
-        /* 頂部 */
         header {
             flex-shrink: 0; 
             height: calc(44px + env(safe-area-inset-top)); 
@@ -45,25 +43,21 @@
         select { padding: 4px; font-size: 14px; border-radius: 5px; border: 1px solid #999; background: #eee; max-width: 140px; }
         #status { font-size: 14px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 12px; }
         
-        /* 遊戲區 */
         #game-viewport {
             flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
-            perspective: 1200px; /* 3D 透視深度 */
+            perspective: 2000px; /* 增加透視距離，減少邊緣變形 */
             perspective-origin: center center;
         }
 
         #game-board { 
             position: absolute; 
             top: 50%; left: 50%; 
-            /* 預設旋轉，稍後會由 JS 動態控制 */
-            transform: translate(-50%, -50%) rotateX(20deg) rotateZ(0deg); 
+            /* 預設視角：稍微傾斜，讓厚度可見 */
+            transform: translate(-50%, -50%) rotateX(30deg) rotateZ(0deg); 
             transform-origin: center center;
             transform-style: preserve-3d;
-            /* 移除 transition，保證 Joystick 拖曳時即時響應 */
-            /* transition: transform 0.1s linear; */
         }
 
-        /* 底部 */
         footer { 
             flex-shrink: 0; height: calc(54px + env(safe-area-inset-bottom)); 
             padding: 5px; 
@@ -83,77 +77,78 @@
         .btn:active { transform: translateY(2px); box-shadow: none; }
         .btn-blue { background: linear-gradient(to bottom, #4FC3F7, #039BE5); box-shadow: 0 3px 0 #0277BD; color: white; }
 
-        /* --- 虛擬 Joystick 樣式 --- */
+        /* Joystick */
         #joystick-zone {
-            position: absolute;
-            bottom: 80px; /* 位於 footer 之上 */
-            right: 20px;
-            width: 100px;
-            height: 100px;
-            z-index: 150;
-            /* 半透明背景 */
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            touch-action: none; /* 防止觸發瀏覽器滾動 */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: absolute; bottom: 90px; right: 20px; width: 100px; height: 100px; z-index: 150;
+            background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
             backdrop-filter: blur(2px);
         }
-        
         #joystick-knob {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 215, 0, 0.8); /* 金色搖桿頭 */
-            border-radius: 50%;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            position: relative;
-            /* 讓使用者知道這裡可以拖動 */
+            width: 40px; height: 40px; background: rgba(255, 215, 0, 0.8); border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5); position: relative;
         }
-        
         #joystick-hint {
-            position: absolute;
-            bottom: -25px;
-            width: 100%;
-            text-align: center;
-            font-size: 10px;
-            color: rgba(255,255,255,0.6);
-            pointer-events: none;
+            position: absolute; bottom: -25px; width: 100%; text-align: center;
+            font-size: 10px; color: rgba(255,255,255,0.6); pointer-events: none;
         }
 
-        /* 麻雀牌 */
+        /* --- v17 核心：真實物理堆疊樣式 --- */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
-            background: #fff; border-radius: 4px; cursor: pointer;
+            background: #fff; border-radius: 2px; cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: transform 0.1s, opacity 0.2s; /* 優化效能 */
-            transform-style: preserve-3d;
+            /* 關鍵：保留 3D 空間 */
+            transform-style: preserve-3d; 
+            transition: transform 0.1s; /* 移除 opacity transition 以避免閃爍 */
             
-            border-right: var(--depth-x) solid #d0d0d0;
-            border-bottom: var(--depth-y) solid #b0b0b0;
-            border-top: 1px solid #fff; border-left: 1px solid #fff;
-            
-            box-shadow: 4px 4px 8px rgba(0,0,0,0.3);
+            /* 正面 */
+            border: 1px solid #ccc;
+            /* 陰影：不再偏移，而是垂直向下，模擬環境光 */
+            box-shadow: 0px 0px 1px rgba(0,0,0,0.2); 
         }
 
-        .tile[data-layer="0"] { box-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        .tile[data-layer="1"] { box-shadow: 4px 4px 8px rgba(0,0,0,0.3); }
-        .tile[data-layer="2"] { box-shadow: 6px 6px 12px rgba(0,0,0,0.35); }
-        .tile[data-layer="3"] { box-shadow: 8px 8px 16px rgba(0,0,0,0.4); }
-        .tile[data-layer="4"] { box-shadow: 10px 10px 20px rgba(0,0,0,0.45); }
-        
-        .t-suit { position: absolute; top: 1px; right: 2px; font-size: 10px; color: #888; line-height: 1; }
-        .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; }
-        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; }
-        
-        .tile.locked { filter: brightness(0.6); cursor: default; background: #ccc; box-shadow: none; border-color: #999; }
-        
-        .tile.selected { 
-            background: #fffbe6; border-color: #ff9800; 
-            transform: translateZ(15px); /* 浮得更高一點 */
-            z-index: 999 !important; box-shadow: 10px 10px 20px rgba(0,0,0,0.5) !important;
+        /* 使用 ::before 和 ::after 製作真實厚度 (Side Walls) */
+        .tile::before {
+            content: ''; position: absolute;
+            width: 100%; height: var(--depth);
+            bottom: 0; left: 0;
+            background: #d9d9d9; /* 底部厚度顏色 */
+            transform-origin: bottom;
+            transform: rotateX(-90deg);
+            border: 1px solid #bbb;
         }
+        .tile::after {
+            content: ''; position: absolute;
+            width: var(--depth); height: 100%;
+            top: 0; right: 0;
+            background: #cdcdcd; /* 右側厚度顏色 */
+            transform-origin: right;
+            transform: rotateY(90deg);
+            border: 1px solid #bbb;
+        }
+
+        /* 鎖定狀態：加深遮罩 (Overlay) */
+        .tile.locked::before, .tile.locked::after { background: #999; }
+        .tile.locked { 
+            background: #e0e0e0; /* 牌面變灰 */
+            color: #888; /* 圖案變淡 */
+        }
+        .tile.locked img, .tile.locked .t-icon { opacity: 0.5; }
+
+        /* 選中狀態：垂直浮起 */
+        .tile.selected { 
+            background: #fffbe6; 
+            border: 2px solid #ff9800;
+            /* 這裡使用 translateZ 疊加，JS 會處理基礎高度 */
+            transform: translateZ(calc(var(--base-z) + 15px)) !important; 
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        /* 內容樣式 */
+        .t-suit { position: absolute; top: 1px; right: 2px; font-size: 10px; color: #888; line-height: 1; backface-visibility: hidden; }
+        .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; backface-visibility: hidden; }
+        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; backface-visibility: hidden; }
         
         .c-red { color: #d32f2f; } .c-blue { color: #1976d2; } .c-green { color: #388e3c; }
 
@@ -170,8 +165,8 @@
         }
 
         #watermark {
-            position: absolute; bottom: 65px; left: 10px; /* 改到左下角，避開 Joystick */
-            font-size: 10px; color: rgba(255, 255, 255, 0.3); pointer-events: none; z-index: 150;
+            position: absolute; bottom: 65px; left: 10px; font-size: 10px;
+            color: rgba(255, 255, 255, 0.3); pointer-events: none; z-index: 150;
         }
     </style>
 </head>
@@ -191,11 +186,7 @@
 
 <div id="game-viewport">
     <div id="game-board"></div>
-    
-    <div id="joystick-zone">
-        <div id="joystick-knob"></div>
-        <div id="joystick-hint">調整視角</div>
-    </div>
+    <div id="joystick-zone"><div id="joystick-knob"></div><div id="joystick-hint">調整視角</div></div>
 </div>
 
 <footer>
@@ -204,7 +195,7 @@
     <button class="btn" onclick="autoHint()">💡 提示</button>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v16</div>
+<div id="watermark">Powered by Google Gemini v17</div>
 
 <div id="msg-overlay">
     <div id="overlay-title" class="overlay-title" style="color:#FFD700;">哈利路亞！</div>
@@ -251,12 +242,9 @@
     let tiles = [];
     let selectedTile = null;
     let tileW = 42, tileH = 56;
-    let offsetX = 0, offsetY = -8; 
-
-    // --- 視角變數 ---
     let globalScale = 1;
-    let viewRotX = 20; // 預設傾斜
-    let viewRotZ = 0;  // 預設旋轉
+    let viewRotX = 30; // 預設更斜一點，顯示厚度
+    let viewRotZ = 0;
 
     function changeMap(val) { startGame(val); }
     function forceNewGame() { startGame(document.getElementById('map-select').value); }
@@ -264,12 +252,8 @@
     function startGame(mapType) {
         document.getElementById('msg-overlay').style.display = 'none';
         const board = document.getElementById('game-board');
-        board.innerHTML = '';
-        tiles = [];
-        selectedTile = null;
-
-        // Reset Rotation slightly for new game but keep scale
-        viewRotX = 20; viewRotZ = 0;
+        board.innerHTML = ''; tiles = []; selectedTile = null;
+        viewRotX = 30; viewRotZ = 0; // 重置視角
 
         let slots = MapBlueprints[mapType]();
         if(slots.length % 2 !== 0) slots.pop();
@@ -313,6 +297,7 @@
         let hasTop=false, hasLeft=false, hasRight=false;
         for(let other of tileSet) {
             if(!other.active || other.id === tile.id) continue;
+            // 邏輯回歸：嚴格檢查網格覆蓋
             if(other.z === tile.z+1 && other.r === tile.r && other.c === tile.c) hasTop = true;
             if(other.z === tile.z && other.r === tile.r) { if(other.c === tile.c-1) hasLeft=true; if(other.c === tile.c+1) hasRight=true; }
         }
@@ -326,13 +311,22 @@
             if(slot.c > maxX) maxX = slot.c; if(slot.r > maxY) maxY = slot.r;
             const el = document.createElement('div');
             el.className = 'tile';
-            el.setAttribute('data-layer', slot.z);
+            
             const card = dataMap[index];
             el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
             
-            let left = slot.c * tileW + (slot.z * offsetX);
-            let top = slot.r * tileH + (slot.z * offsetY); 
-            el.style.left = left + 'px'; el.style.top = top + 'px'; el.style.zIndex = slot.z * 10 + slot.r; 
+            // v17 關鍵修正：取消 Visual Offset，改用 TranslateZ 垂直堆疊
+            let left = slot.c * tileW; 
+            let top = slot.r * tileH; 
+            let zHeight = slot.z * 8; // 8px 是 --depth 定義的厚度
+            
+            el.style.left = left + 'px'; 
+            el.style.top = top + 'px'; 
+            // 基礎高度 + Z軸堆疊
+            el.style.transform = `translateZ(${zHeight}px)`; 
+            // 儲存基礎高度給 hover 效果用
+            el.style.setProperty('--base-z', zHeight + 'px');
+            el.style.zIndex = slot.z * 10 + slot.r; 
             
             const tileObj = { el: el, data: card, z: slot.z, r: slot.r, c: slot.c, active: true, id: index };
             el.onclick = () => onTileClick(tileObj);
@@ -345,6 +339,8 @@
     }
 
     function updateLockStatus() { tiles.forEach(t => { if(!t.active) return; t.isLocked = checkLocked(t); t.el.classList.toggle('locked', t.isLocked); }); }
+    
+    // 檢查邏輯與渲染位置現在 1:1 對應
     function checkLocked(tile) {
         let hasTop=false, hasLeft=false, hasRight=false;
         for(let other of tiles) {
@@ -361,10 +357,9 @@
         else if(selectedTile) {
             if(tile.data.t === selectedTile.data.t) {
                 tile.active=false; selectedTile.active=false;
-                tile.el.style.opacity=0; selectedTile.el.style.opacity=0;
-                tile.el.style.transform="scale(0)"; selectedTile.el.style.transform="scale(0)";
+                tile.el.style.display='none'; selectedTile.el.style.display='none'; // 立即隱藏
                 selectedTile = null;
-                setTimeout(() => { tile.el.style.display='none'; updateLockStatus(); updateStatusText(); checkGameState(); }, 150);
+                updateLockStatus(); updateStatusText(); checkGameState();
             } else { selectedTile.el.classList.remove('selected'); selectedTile = tile; tile.el.classList.add('selected'); }
         } else { selectedTile = tile; tile.el.classList.add('selected'); }
     }
@@ -411,12 +406,10 @@
 
     function updateStatusText() { document.getElementById('status').innerText = "剩餘: " + tiles.filter(t => t.active).length; }
 
-    // --- 核心：視角控制與渲染 ---
-    
+    // --- 視角控制 ---
     function applyViewTransform() {
         const board = document.getElementById('game-board');
         if(!board) return;
-        // 組合：平移置中 + 旋轉(X, Z) + 縮放
         board.style.transform = `translate(-50%, -50%) rotateX(${viewRotX}deg) rotateZ(${viewRotZ}deg) scale(${globalScale})`;
     }
 
@@ -424,25 +417,15 @@
         const board = document.getElementById('game-board');
         const view = document.getElementById('game-viewport');
         if(!board || !view) return;
-        
-        // 暫時重置以獲取原始尺寸
         board.style.transform = 'none';
-        const boardW = board.scrollWidth;
-        const boardH = board.scrollHeight;
-        
-        const viewW = view.clientWidth;
-        const viewH = view.clientHeight;
-
-        // 計算最大比例 (留邊距)
+        const boardW = board.scrollWidth; const boardH = board.scrollHeight;
+        const viewW = view.clientWidth; const viewH = view.clientHeight;
         globalScale = Math.min((viewW - 40) / boardW, (viewH - 40) / boardH);
-        
-        // 應用變換
         applyViewTransform();
     }
-    
     window.addEventListener('resize', fitBoard);
 
-    // --- Joystick 邏輯 ---
+    // Joystick Logic
     const joystickZone = document.getElementById('joystick-zone');
     const joystickKnob = document.getElementById('joystick-knob');
     let isDragging = false;
@@ -453,41 +436,27 @@
         isDragging = true;
         startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
         startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-        initialRotX = viewRotX;
-        initialRotZ = viewRotZ;
+        initialRotX = viewRotX; initialRotZ = viewRotZ;
         joystickKnob.style.transition = 'none';
     }
 
     function handleMove(e) {
         if (!isDragging) return;
-        e.preventDefault(); // 防止滾動
-        
+        e.preventDefault(); 
         const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
         const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-        
         const deltaX = clientX - startX;
         const deltaY = clientY - startY;
-        
-        // 限制搖桿移動範圍 (視覺)
         const maxDist = 30;
         const dist = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
         const limitedDist = Math.min(dist, maxDist);
         const angle = Math.atan2(deltaY, deltaX);
-        
         const knobX = Math.cos(angle) * limitedDist;
         const knobY = Math.sin(angle) * limitedDist;
-        
         joystickKnob.style.transform = `translate(${knobX}px, ${knobY}px)`;
-
-        // 更新視角
-        // X移動 -> Rotate Z (左右旋轉)
-        // Y移動 -> Rotate X (上下傾斜)
-        viewRotZ = initialRotZ + (deltaX * 0.5); // 靈敏度 0.5
-        viewRotX = initialRotX - (deltaY * 0.5); // 向上拖是增加仰角
-        
-        // 限制角度範圍，避免翻車
-        viewRotX = Math.max(0, Math.min(viewRotX, 60)); // 0度(平視) 到 60度(俯視)
-        
+        viewRotZ = initialRotZ + (deltaX * 0.5); 
+        viewRotX = initialRotX - (deltaY * 0.5); 
+        viewRotX = Math.max(0, Math.min(viewRotX, 60)); 
         applyViewTransform();
     }
 
@@ -497,13 +466,10 @@
         joystickKnob.style.transform = 'translate(0, 0)';
     }
 
-    // 事件綁定
     joystickZone.addEventListener('mousedown', handleStart);
     joystickZone.addEventListener('touchstart', handleStart, {passive: false});
-    
     window.addEventListener('mousemove', handleMove);
     window.addEventListener('touchmove', handleMove, {passive: false});
-    
     window.addEventListener('mouseup', handleEnd);
     window.addEventListener('touchend', handleEnd);
 
