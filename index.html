@@ -13,11 +13,12 @@
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v25</title>
+    <title>福音麻雀 - v23</title>
     <style>
         :root { 
             --tile-w: 42px; 
             --tile-h: 56px; 
+            --depth: 14px;
             --bg-color: #065f35; 
             --ui-cloud-bg: rgba(0, 0, 0, 0.6); 
             --text-dark: #fff;
@@ -25,6 +26,8 @@
             --btn-yellow-2: #ffb300;
             --btn-blue-1: #4fc3f7;
             --btn-blue-2: #0288d1;
+            --tile-side-color: #f0e6d2; 
+            --tile-bottom-color: #e8dabf;
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -32,7 +35,6 @@
         body {
             margin: 0; 
             background-color: var(--bg-color);
-            /* 經典蓆紋背景 */
             background-image: repeating-linear-gradient(45deg, #065f35 0, #065f35 1px, #054a29 0, #054a29 5px);
             font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
             overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
@@ -63,8 +65,7 @@
         #game-board { 
             position: absolute; 
             top: 50%; left: 50%; 
-            /* v25: 恢復 v11 風格的視角，只有輕微傾斜 (10deg) */
-            transform: translate(-50%, -50%) rotateX(10deg) rotateZ(0deg); 
+            transform: translate(-50%, -50%) rotateX(30deg) rotateZ(0deg); 
             transform-origin: center center;
             transform-style: preserve-3d;
         }
@@ -86,7 +87,10 @@
         }
 
         .footer-btns {
-            display: flex; flex: 1; justify-content: space-around; margin-right: 10px;
+            display: flex;
+            flex: 1; 
+            justify-content: space-around;
+            margin-right: 10px; 
         }
         
         .btn {
@@ -105,17 +109,22 @@
         }
         .btn-blue:active { transform: translateY(3px); box-shadow: 0 2px 0 #01579b; }
 
-        /* Joystick (保持 v23 的佈局) */
         #joystick-zone {
-            position: relative; width: 60px; height: 60px; z-index: 150; flex-shrink: 0;
+            position: relative; 
+            bottom: auto; right: auto;
+            width: 60px; height: 60px; 
+            z-index: 150;
+            flex-shrink: 0; 
             background: rgba(0, 0, 0, 0.3); 
             border: 2px solid rgba(255, 255, 255, 0.4);
             border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
             backdrop-filter: blur(3px); box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         #joystick-knob {
-            width: 28px; height: 28px; background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
-            border-radius: 50%; border: 2px solid #fff; box-shadow: 0 3px 5px rgba(0,0,0,0.3); position: relative;
+            width: 28px; height: 28px; 
+            background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
+            border-radius: 50%; border: 2px solid #fff;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.3); position: relative;
         }
         #joystick-hint {
             position: absolute; bottom: -15px; width: 100%; text-align: center;
@@ -123,50 +132,49 @@
              text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
         }
 
-        /* --- v25 核心：還原 v11/v14 經典樣式 --- */
+        /* 麻雀牌樣式 */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
             background-color: #ffffff; 
-            border-radius: 4px; /* 經典圓角 */
+            border-radius: 5px; 
             cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: transform 0.1s;
-            
-            /* v25: 使用邊框模擬厚度 (Fake 3D)，這是最乾淨的做法 */
-            border-right: 2px solid #1a5e2e; /* 側面深綠 */
-            border-bottom: 5px solid #0d3d1e; /* 底部更深綠 */
-            border-top: 1px solid #fff;
-            border-left: 1px solid #fff;
-            
-            /* 經典陰影 */
-            box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
-            
-            /* 保持 3D 空間以便 Joystick 運作，但不做複雜模型 */
-            transform-style: preserve-3d;
+            transform-style: preserve-3d; transition: transform 0.1s;
+            box-shadow: inset 0 2px 3px rgba(255,255,255,1), inset 0 -2px 3px rgba(0,0,0,0.05);
+            border: none;
         }
 
-        /* 鎖定狀態 */
-        .tile.locked { 
-            filter: brightness(0.65) contrast(0.9); /* 經典變暗 */
-            cursor: default;
-            background-color: #e0e0e0;
+        .tile::before {
+            content: ''; position: absolute; width: 100.5%; height: var(--depth);
+            bottom: 0; left: 0;
+            background: var(--tile-bottom-color); 
+            transform-origin: bottom; transform: rotateX(-90deg);
+            border: 1px solid #d0c0a0; border-radius: 2px;
+        }
+        .tile::after {
+            content: ''; position: absolute; width: var(--depth); height: 100.5%;
+            top: 0; right: 0;
+            background: var(--tile-side-color);
+            transform-origin: right; transform: rotateY(90deg);
+            border: 1px solid #d0c0a0; border-radius: 2px;
         }
 
-        /* 選中狀態 */
+        .tile.locked::before, .tile.locked::after { background: #ccc; border-color: #aaa; }
+        .tile.locked { background-color: #e6e6e6; color: #999; box-shadow: none; }
+        .tile.locked img, .tile.locked .t-icon { opacity: 0.4; }
+
         .tile.selected { 
             background-color: #fff9c4; 
-            /* 簡單的 Z 軸浮起 */
-            transform: translateZ(20px) !important; 
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
-            border-color: #ff9800; /* 邊框變色 */
-            z-index: 9999 !important;
+            transform: translateZ(calc(var(--base-z) + 20px)) !important; 
+            box-shadow: 0 0 10px #ffeb3b, inset 0 2px 3px rgba(255,255,255,1); 
+            border: 2px solid #ffee58;
         }
 
-        .t-suit { position: absolute; top: 1px; right: 2px; font-size: 10px; color: #888; line-height: 1; backface-visibility: hidden; }
+        .t-suit { position: absolute; top: 1px; right: 2px; font-size: 10px; color: #999; line-height: 1; backface-visibility: hidden; }
         .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; backface-visibility: hidden; }
         .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #444; backface-visibility: hidden; }
         
-        .c-red { color: #d32f2f; } .c-blue { color: #1976d2; } .c-green { color: #388e3c; }
+        .c-red { color: #e53935; } .c-blue { color: #1e88e5; } .c-green { color: #43a047; }
 
         /* 彈窗 */
         #msg-overlay {
@@ -226,7 +234,7 @@
     </div>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v25</div>
+<div id="watermark">Powered by Google Gemini v23</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
@@ -276,8 +284,7 @@
     let selectedTile = null;
     let tileW = 42, tileH = 56;
     let globalScale = 1;
-    // v25: 預設視角改為接近平視 (10度)
-    let viewRotX = 10;
+    let viewRotX = 30;
     let viewRotZ = 0;
 
     function changeMap(val) { startGame(val); }
@@ -287,7 +294,7 @@
         document.getElementById('msg-overlay').style.display = 'none';
         const board = document.getElementById('game-board');
         board.innerHTML = ''; tiles = []; selectedTile = null;
-        viewRotX = 10; viewRotZ = 0; 
+        viewRotX = 30; viewRotZ = 0; 
 
         let slots = MapBlueprints[mapType]();
         if(slots.length % 2 !== 0) slots.pop();
@@ -348,14 +355,14 @@
             const card = dataMap[index];
             el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
             
-            // v25: 恢復 v11/v14 的渲染邏輯，不使用 translateZ，只用 zIndex 和邊框模擬
             let left = slot.c * tileW; 
             let top = slot.r * tileH; 
+            let zHeight = slot.z * 14; 
             
             el.style.left = left + 'px'; 
             el.style.top = top + 'px'; 
-            // 重要：這裡使用 translateZ 只是為了堆疊層級，不是為了畫盒子
-            el.style.transform = `translateZ(${slot.z * 10}px)`; 
+            el.style.transform = `translateZ(${zHeight}px)`; 
+            el.style.setProperty('--base-z', zHeight + 'px');
             el.style.zIndex = slot.z * 10 + slot.r; 
             
             const tileObj = { el: el, data: card, z: slot.z, r: slot.r, c: slot.c, active: true, id: index };
