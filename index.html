@@ -13,14 +13,15 @@
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v32 高清水晶版</title>
+    <title>福音麻雀 - v33 天空水晶版</title>
     <style>
         :root { 
             --tile-w: 44px; 
             --tile-h: 58px; 
             --depth: 12px; 
-            --bg-color: #054a29; 
-            --ui-cloud-bg: rgba(0, 0, 0, 0.6); 
+            /* 背景色改為天空藍，作為漸變的後備 */
+            --bg-color: #87ceeb; 
+            --ui-cloud-bg: rgba(255, 255, 255, 0.3); /* UI 背景調亮一點配合天空 */
             --text-dark: #fff;
             --btn-yellow-1: #ffd54f;
             --btn-yellow-2: #ffb300;
@@ -33,29 +34,40 @@
         body {
             margin: 0; 
             background-color: var(--bg-color);
-            background-image: linear-gradient(to bottom, #065f35, #044224);
+            /* v33: 全新天空背景漸變 */
+            background-image: 
+                radial-gradient(circle at top left, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 50%), /* 陽光光暈 */
+                linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%); /* 藍天漸變 */
+            background-size: cover;
+            background-attachment: fixed; /* 背景固定，增加層次感 */
             font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
             overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
             color: var(--text-dark); user-select: none; -webkit-user-select: none; touch-action: none;
         }
         
+        /* UI 元素調整為更亮的毛玻璃，適應天空背景 */
+        header, footer, .overlay-box, #joystick-zone, #status, select {
+            backdrop-filter: blur(10px) saturate(120%);
+            -webkit-backdrop-filter: blur(10px) saturate(120%);
+            background: rgba(255, 255, 255, 0.25) !important;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
         header {
             flex-shrink: 0; 
             height: calc(50px + env(safe-area-inset-top)); 
             padding: 5px 15px;
             padding-top: calc(5px + env(safe-area-inset-top)); 
-            background: var(--ui-cloud-bg); 
             display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 15px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
             border-bottom-left-radius: 20px;
             border-bottom-right-radius: 20px;
             margin: 0 10px 5px 10px;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        select { padding: 6px 10px; font-size: 14px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.2); max-width: 140px; color: #fff; font-weight: bold; box-shadow: inset 0 2px 5px rgba(0,0,0,0.3); backdrop-filter: blur(5px); }
+        select { padding: 6px 10px; font-size: 14px; border-radius: 15px; max-width: 140px; color: #fff; font-weight: bold; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
         option { background: #333; color: #fff; }
-        #status { font-size: 15px; font-weight: bold; background: rgba(255, 213, 79, 0.9); color: #d84315; padding: 6px 15px; border-radius: 20px; box-shadow: 0 3px 0 #ffca28, 0 5px 10px rgba(0,0,0,0.3); }
+        #status { font-size: 15px; font-weight: bold; background: rgba(255, 213, 79, 0.85) !important; color: #d84315; padding: 6px 15px; border-radius: 20px; box-shadow: 0 3px 0 #ffca28, 0 5px 10px rgba(0,0,0,0.2); text-shadow: none; }
         
         #game-viewport {
             flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
@@ -76,17 +88,14 @@
             height: calc(80px + env(safe-area-inset-bottom)); 
             padding: 5px 10px; 
             padding-bottom: max(5px, env(safe-area-inset-bottom));
-            background: var(--ui-cloud-bg); 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             z-index: 100;
-            box-shadow: 0 -8px 16px rgba(0,0,0,0.4);
+            box-shadow: 0 -8px 20px rgba(0,0,0,0.2);
             border-top-left-radius: 25px;
             border-top-right-radius: 25px;
             margin: 5px 10px 0 10px;
-            backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255,255,255,0.1);
         }
 
         .footer-btns {
@@ -98,122 +107,123 @@
             border: 3px solid #ffffff; padding: 0;
             width: auto; flex: 1; margin: 0 3px;
             height: 44px; border-radius: 25px; font-weight: bold; font-size: 16px; 
-            box-shadow: 0 5px 0 #ff8f00, 0 10px 20px rgba(0,0,0,0.4); 
+            box-shadow: 0 5px 0 #ff8f00, 0 10px 20px rgba(0,0,0,0.2); 
             cursor: pointer; display: flex; justify-content: center; 
             align-items: center; color: #5d4037;
             transition: all 0.1s;
+            text-shadow: none;
         }
-        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #ff8f00, 0 5px 10px rgba(0,0,0,0.3); }
+        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #ff8f00, 0 5px 10px rgba(0,0,0,0.2); }
         .btn-blue { 
             background: linear-gradient(to bottom, var(--btn-blue-1), var(--btn-blue-2)); 
-            box-shadow: 0 5px 0 #01579b, 0 10px 20px rgba(0,0,0,0.4); color: white; 
+            box-shadow: 0 5px 0 #01579b, 0 10px 20px rgba(0,0,0,0.2); color: white; 
         }
-        .btn-blue:active { transform: translateY(3px); box-shadow: 0 2px 0 #01579b, 0 5px 10px rgba(0,0,0,0.3); }
+        .btn-blue:active { transform: translateY(3px); box-shadow: 0 2px 0 #01579b, 0 5px 10px rgba(0,0,0,0.2); }
 
         /* Joystick */
         #joystick-zone {
             position: relative; width: 60px; height: 60px; z-index: 150; flex-shrink: 0;
-            background: rgba(0, 0, 0, 0.4); 
-            border: 2px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.2) !important; 
+            border: 2px solid rgba(255, 255, 255, 0.6);
             border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
-            backdrop-filter: blur(5px); 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.2);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2), inset 0 2px 5px rgba(255,255,255,0.3);
         }
         #joystick-knob {
             width: 28px; height: 28px; background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
             border-radius: 50%; border: 2px solid #fff; 
-            box-shadow: 0 5px 10px rgba(0,0,0,0.5); position: relative;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3); position: relative;
         }
         #joystick-hint {
             position: absolute; bottom: -15px; width: 100%; text-align: center;
-            font-size: 9px; color: rgba(255, 255, 255, 0.7); pointer-events: none; font-weight: bold;
-             text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+            font-size: 9px; color: rgba(255, 255, 255, 0.9); pointer-events: none; font-weight: bold;
+             text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
-        /* --- v32 核心：高清水晶麻雀 (High Visibility) --- */
+        /* --- v33 核心：天空水晶麻雀 (統一厚度) --- */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
             
-            /* v32 修改：不透明度提高至 0.9 (接近實心)，保證背景不透色，字體清晰 */
-            background-color: rgba(255, 255, 255, 0.9);
+            /* 牌面保持高不透明度，確保清晰 */
+            background-color: rgba(255, 255, 255, 0.85);
             
-            /* 輕微毛玻璃增加質感 */
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
+            /* 毛玻璃效果反射天空色彩 */
+            backdrop-filter: blur(8px) saturate(120%);
+            -webkit-backdrop-filter: blur(8px) saturate(120%);
             
             border-radius: 8px;
             cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transform-style: preserve-3d; transition: transform 0.1s;
             
-            /* 邊框高光 */
+            /* 邊框調整為冰藍色調 */
             border-top: 1px solid rgba(255, 255, 255, 1.0);
             border-left: 1px solid rgba(255, 255, 255, 0.9);
-            border-bottom: 1px solid rgba(200, 200, 200, 0.5);
-            border-right: 1px solid rgba(200, 200, 200, 0.5);
+            border-bottom: 1px solid rgba(200, 230, 255, 0.6);
+            border-right: 1px solid rgba(200, 230, 255, 0.6);
 
-            /* 雙重陰影：確保與背景分離 */
+            /* 陰影調整為偏藍色調，適應天空環境 */
             box-shadow: 
-                0 2px 4px rgba(0,0,0,0.4), /* 硬陰影 */
-                0 8px 20px rgba(0, 0, 0, 0.3); /* 軟陰影 */
+                0 2px 4px rgba(0, 50, 100, 0.3), /* 硬陰影 */
+                0 8px 20px rgba(0, 50, 100, 0.2); /* 軟陰影 */
         }
 
-        /* 側面牆身 - 保持半透明水晶感 */
+        /* 側面牆身 - v33 關鍵：改為折射天空的冰藍色調，與背景形成對比 */
         .tile::before {
             content: ''; position: absolute; width: 100%; height: var(--depth);
             bottom: 0; left: 0;
-            /* 底部側面較深 */
-            background: linear-gradient(to bottom, rgba(230, 240, 230, 0.6), rgba(150, 180, 150, 0.8));
+            /* 冰藍色漸變，模擬折射天空光線 */
+            background: linear-gradient(to bottom, rgba(240, 250, 255, 0.7), rgba(180, 220, 240, 0.85));
             transform-origin: bottom; transform: rotateX(-90deg);
             border-radius: 0 0 8px 8px;
-            border: 1px solid rgba(200,200,200,0.4);
+            /* 邊框也要亮起來 */
+            border: 1px solid rgba(220, 240, 255, 0.6);
+            border-top: none;
         }
         
         .tile::after {
             content: ''; position: absolute; width: var(--depth); height: 100%;
             top: 0; right: 0;
-            background: linear-gradient(to right, rgba(240, 250, 240, 0.6), rgba(180, 220, 180, 0.7));
+            /* 冰藍色漸變 */
+            background: linear-gradient(to right, rgba(240, 250, 255, 0.7), rgba(200, 230, 250, 0.8));
             transform-origin: right; transform: rotateY(90deg);
             border-radius: 0 8px 8px 0;
-            border: 1px solid rgba(200,200,200,0.4);
+            border: 1px solid rgba(220, 240, 255, 0.6);
+            border-left: none;
         }
 
-        /* 鎖定狀態 - 明顯變暗，灰色 */
+        /* 鎖定狀態 */
         .tile.locked { 
-            background-color: rgba(220, 220, 220, 0.9); /* 也是高不透明度，但灰色 */
-            filter: grayscale(80%);
+            background-color: rgba(220, 230, 240, 0.9); /* 偏藍灰 */
+            filter: grayscale(60%) brightness(0.9);
             box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
         }
         .tile.locked img, .tile.locked .t-icon { opacity: 0.3; }
 
-        /* 選中狀態 - 高亮 */
+        /* 選中狀態 - 金色聖光 */
         .tile.selected { 
-            background-color: #fffde7; /* 實心淡黃 */
+            background-color: #fffde7; 
             transform: translateZ(calc(var(--base-z) + 30px)) scale(1.08) !important; 
             box-shadow: 
-                0 0 10px rgba(255, 235, 59, 0.8), /* 發光邊緣 */
-                0 30px 60px rgba(0,0,0,0.6); /* 巨大投影 */
+                0 0 15px rgba(255, 235, 59, 0.9), /* 發光邊緣 */
+                0 30px 60px rgba(0, 50, 100, 0.4); /* 巨大藍色投影 */
             border: 2px solid #ffca28;
             z-index: 9999 !important;
         }
 
-        /* 內容樣式 - v32: 移除模糊投影，改用銳利對比，確保清晰 */
+        /* 內容樣式 */
         .t-suit { 
             position: absolute; top: 2px; right: 4px; font-size: 10px; color: #777; line-height: 1; backface-visibility: hidden; 
             font-weight: bold;
         }
         .t-icon { 
             font-size: 28px; line-height: 1; margin-top: 2px; backface-visibility: hidden; 
-            /* 輕微深色投影，增加立體感但保持清晰 */
-            filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3)); 
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); 
         }
         .t-text { 
             font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; backface-visibility: hidden; 
-            /* 銳利的白色描邊效果，確保在任何背景下都清晰 */
             text-shadow: 0 1px 0 rgba(255,255,255,1);
         }
         
-        /* 針對不同顏色微調 */
         .c-red { color: #d32f2f; } 
         .c-blue { color: #1565c0; } 
         .c-green { color: #2e7d32; }
@@ -221,14 +231,14 @@
         /* 彈窗 */
         #msg-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6); 
+            background: rgba(0, 50, 100, 0.4); /* 配合天空的深藍色遮罩 */
             display: none; flex-direction: column;
             justify-content: center; align-items: center; z-index: 200; text-align: center; padding: 20px;
             backdrop-filter: blur(15px);
         }
         .overlay-box {
-            background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 30px;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.6);
+            background: rgba(255, 255, 255, 0.9); padding: 30px; border-radius: 30px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.7);
             max-width: 90%; color: #333;
         }
         .overlay-title { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #ffb300; text-shadow: 0 2px 5px rgba(0,0,0,0.2); }
@@ -241,8 +251,8 @@
 
         #watermark {
             position: absolute; bottom: 95px; left: 20px; font-size: 11px;
-            color: rgba(255, 255, 255, 0.4); pointer-events: none; z-index: 150; font-weight: bold;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            color: rgba(255, 255, 255, 0.6); pointer-events: none; z-index: 150; font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
     </style>
 </head>
@@ -276,7 +286,7 @@
     </div>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v32 (High Visibility Crystal)</div>
+<div id="watermark">Powered by Google Gemini v33 (Heavenly Sky Crystal)</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
