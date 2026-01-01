@@ -13,15 +13,14 @@
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v33 天空水晶版</title>
+    <title>福音麻雀 - v33 UI修正版</title>
     <style>
         :root { 
             --tile-w: 44px; 
             --tile-h: 58px; 
             --depth: 12px; 
-            /* 背景色改為天空藍，作為漸變的後備 */
             --bg-color: #87ceeb; 
-            --ui-cloud-bg: rgba(255, 255, 255, 0.3); /* UI 背景調亮一點配合天空 */
+            --ui-cloud-bg: rgba(255, 255, 255, 0.3);
             --text-dark: #fff;
             --btn-yellow-1: #ffd54f;
             --btn-yellow-2: #ffb300;
@@ -34,19 +33,19 @@
         body {
             margin: 0; 
             background-color: var(--bg-color);
-            /* v33: 全新天空背景漸變 */
+            /* 天空背景 */
             background-image: 
-                radial-gradient(circle at top left, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 50%), /* 陽光光暈 */
-                linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%); /* 藍天漸變 */
+                radial-gradient(circle at top left, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 50%),
+                linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
             background-size: cover;
-            background-attachment: fixed; /* 背景固定，增加層次感 */
+            background-attachment: fixed;
             font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
             overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
             color: var(--text-dark); user-select: none; -webkit-user-select: none; touch-action: none;
         }
         
-        /* UI 元素調整為更亮的毛玻璃，適應天空背景 */
-        header, footer, .overlay-box, #joystick-zone, #status, select {
+        /* UI 元素毛玻璃 */
+        header, footer, .overlay-box, #joystick-zone, #status {
             backdrop-filter: blur(10px) saturate(120%);
             -webkit-backdrop-filter: blur(10px) saturate(120%);
             background: rgba(255, 255, 255, 0.25) !important;
@@ -65,8 +64,24 @@
             border-bottom-right-radius: 20px;
             margin: 0 10px 5px 10px;
         }
-        select { padding: 6px 10px; font-size: 14px; border-radius: 15px; max-width: 140px; color: #fff; font-weight: bold; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
+
+        /* --- v33 UI修正: 加深選單背景色 --- */
+        select { 
+            padding: 6px 10px; 
+            font-size: 14px; 
+            border-radius: 15px; 
+            border: 1px solid rgba(255, 255, 255, 0.6); 
+            /* 這裡改為深藍色半透明，增加對比度 */
+            background: rgba(0, 60, 120, 0.6); 
+            max-width: 140px; 
+            color: #fff; 
+            font-weight: bold; 
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
         option { background: #333; color: #fff; }
+        
         #status { font-size: 15px; font-weight: bold; background: rgba(255, 213, 79, 0.85) !important; color: #d84315; padding: 6px 15px; border-radius: 20px; box-shadow: 0 3px 0 #ffca28, 0 5px 10px rgba(0,0,0,0.2); text-shadow: none; }
         
         #game-viewport {
@@ -142,96 +157,59 @@
         /* --- v33 核心：天空水晶麻雀 (統一厚度) --- */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
-            
-            /* 牌面保持高不透明度，確保清晰 */
             background-color: rgba(255, 255, 255, 0.85);
-            
-            /* 毛玻璃效果反射天空色彩 */
             backdrop-filter: blur(8px) saturate(120%);
             -webkit-backdrop-filter: blur(8px) saturate(120%);
-            
-            border-radius: 8px;
-            cursor: pointer;
+            border-radius: 8px; cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transform-style: preserve-3d; transition: transform 0.1s;
-            
-            /* 邊框調整為冰藍色調 */
             border-top: 1px solid rgba(255, 255, 255, 1.0);
             border-left: 1px solid rgba(255, 255, 255, 0.9);
             border-bottom: 1px solid rgba(200, 230, 255, 0.6);
             border-right: 1px solid rgba(200, 230, 255, 0.6);
-
-            /* 陰影調整為偏藍色調，適應天空環境 */
-            box-shadow: 
-                0 2px 4px rgba(0, 50, 100, 0.3), /* 硬陰影 */
-                0 8px 20px rgba(0, 50, 100, 0.2); /* 軟陰影 */
+            box-shadow: 0 2px 4px rgba(0, 50, 100, 0.3), 0 8px 20px rgba(0, 50, 100, 0.2);
         }
 
-        /* 側面牆身 - v33 關鍵：改為折射天空的冰藍色調，與背景形成對比 */
         .tile::before {
             content: ''; position: absolute; width: 100%; height: var(--depth);
             bottom: 0; left: 0;
-            /* 冰藍色漸變，模擬折射天空光線 */
             background: linear-gradient(to bottom, rgba(240, 250, 255, 0.7), rgba(180, 220, 240, 0.85));
             transform-origin: bottom; transform: rotateX(-90deg);
             border-radius: 0 0 8px 8px;
-            /* 邊框也要亮起來 */
-            border: 1px solid rgba(220, 240, 255, 0.6);
-            border-top: none;
+            border: 1px solid rgba(220, 240, 255, 0.6); border-top: none;
         }
-        
         .tile::after {
             content: ''; position: absolute; width: var(--depth); height: 100%;
             top: 0; right: 0;
-            /* 冰藍色漸變 */
             background: linear-gradient(to right, rgba(240, 250, 255, 0.7), rgba(200, 230, 250, 0.8));
             transform-origin: right; transform: rotateY(90deg);
             border-radius: 0 8px 8px 0;
-            border: 1px solid rgba(220, 240, 255, 0.6);
-            border-left: none;
+            border: 1px solid rgba(220, 240, 255, 0.6); border-left: none;
         }
 
-        /* 鎖定狀態 */
         .tile.locked { 
-            background-color: rgba(220, 230, 240, 0.9); /* 偏藍灰 */
+            background-color: rgba(220, 230, 240, 0.9);
             filter: grayscale(60%) brightness(0.9);
             box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
         }
         .tile.locked img, .tile.locked .t-icon { opacity: 0.3; }
 
-        /* 選中狀態 - 金色聖光 */
         .tile.selected { 
             background-color: #fffde7; 
             transform: translateZ(calc(var(--base-z) + 30px)) scale(1.08) !important; 
-            box-shadow: 
-                0 0 15px rgba(255, 235, 59, 0.9), /* 發光邊緣 */
-                0 30px 60px rgba(0, 50, 100, 0.4); /* 巨大藍色投影 */
-            border: 2px solid #ffca28;
-            z-index: 9999 !important;
+            box-shadow: 0 0 15px rgba(255, 235, 59, 0.9), 0 30px 60px rgba(0, 50, 100, 0.4);
+            border: 2px solid #ffca28; z-index: 9999 !important;
         }
 
-        /* 內容樣式 */
-        .t-suit { 
-            position: absolute; top: 2px; right: 4px; font-size: 10px; color: #777; line-height: 1; backface-visibility: hidden; 
-            font-weight: bold;
-        }
-        .t-icon { 
-            font-size: 28px; line-height: 1; margin-top: 2px; backface-visibility: hidden; 
-            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); 
-        }
-        .t-text { 
-            font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; backface-visibility: hidden; 
-            text-shadow: 0 1px 0 rgba(255,255,255,1);
-        }
+        .t-suit { position: absolute; top: 2px; right: 4px; font-size: 10px; color: #777; line-height: 1; backface-visibility: hidden; font-weight: bold; }
+        .t-icon { font-size: 28px; line-height: 1; margin-top: 2px; backface-visibility: hidden; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
+        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; backface-visibility: hidden; text-shadow: 0 1px 0 rgba(255,255,255,1); }
         
-        .c-red { color: #d32f2f; } 
-        .c-blue { color: #1565c0; } 
-        .c-green { color: #2e7d32; }
+        .c-red { color: #d32f2f; } .c-blue { color: #1565c0; } .c-green { color: #2e7d32; }
 
-        /* 彈窗 */
         #msg-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 50, 100, 0.4); /* 配合天空的深藍色遮罩 */
+            background: rgba(0, 50, 100, 0.4); 
             display: none; flex-direction: column;
             justify-content: center; align-items: center; z-index: 200; text-align: center; padding: 20px;
             backdrop-filter: blur(15px);
@@ -286,7 +264,7 @@
     </div>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v33 (Heavenly Sky Crystal)</div>
+<div id="watermark">Powered by Google Gemini v33 (Heavenly Sky Crystal + UI Fix)</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
@@ -297,7 +275,6 @@
 </div>
 
 <script>
-    // 36種麻雀資料庫
     const rawTiles = [
         {t:"摩西", i:"🌊", s:"萬", c:"c-red"}, {t:"大衛", i:"👑", s:"萬", c:"c-red"},
         {t:"保羅", i:"📜", s:"萬", c:"c-red"}, {t:"彼得", i:"🐟", s:"萬", c:"c-red"},
