@@ -13,12 +13,11 @@
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v28</title>
+    <title>福音麻雀 - v29</title>
     <style>
         :root { 
             --tile-w: 42px; 
             --tile-h: 56px; 
-            /* v28: 採用 v23/v25 的經典配色與尺寸 */
             --bg-color: #054a29; 
             --ui-cloud-bg: rgba(0, 0, 0, 0.6); 
             --text-dark: #fff;
@@ -32,7 +31,7 @@
 
         body {
             margin: 0; 
-            /* v28: 純深綠色背景，移除所有紋理，最清晰不眼花 */
+            /* 純深綠色背景 */
             background-color: var(--bg-color);
             font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
             overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
@@ -46,13 +45,14 @@
             padding-top: calc(5px + env(safe-area-inset-top)); 
             background: var(--ui-cloud-bg); 
             display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            /* v29: 更深邃柔和的陰影 */
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
             border-bottom-left-radius: 20px;
             border-bottom-right-radius: 20px;
             margin: 0 10px 5px 10px;
         }
-        select { padding: 6px 10px; font-size: 14px; border-radius: 15px; border: 2px solid #555; background: #eee; max-width: 140px; color: #333; font-weight: bold; }
-        #status { font-size: 15px; font-weight: bold; background: #ffe082; color: #d84315; padding: 6px 15px; border-radius: 20px; box-shadow: 0 2px 0 #ffca28; }
+        select { padding: 6px 10px; font-size: 14px; border-radius: 15px; border: 2px solid #555; background: #eee; max-width: 140px; color: #333; font-weight: bold; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
+        #status { font-size: 15px; font-weight: bold; background: #ffe082; color: #d84315; padding: 6px 15px; border-radius: 20px; box-shadow: 0 3px 0 #ffca28, 0 5px 10px rgba(0,0,0,0.2); }
         
         #game-viewport {
             flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
@@ -63,7 +63,7 @@
         #game-board { 
             position: absolute; 
             top: 50%; left: 50%; 
-            /* v28: 採用接近平視的經典視角 (10度) */
+            /* 經典視角 (10度) */
             transform: translate(-50%, -50%) rotateX(10deg) rotateZ(0deg); 
             transform-origin: center center;
             transform-style: preserve-3d;
@@ -79,7 +79,8 @@
             justify-content: space-between; 
             align-items: center; 
             z-index: 100;
-            box-shadow: 0 -4px 8px rgba(0,0,0,0.3);
+            /* v29: 更深邃柔和的陰影 */
+            box-shadow: 0 -8px 16px rgba(0,0,0,0.3);
             border-top-left-radius: 25px;
             border-top-right-radius: 25px;
             margin: 5px 10px 0 10px;
@@ -94,28 +95,34 @@
             border: 3px solid #ffffff; padding: 0;
             width: auto; flex: 1; margin: 0 3px;
             height: 44px; border-radius: 25px; font-weight: bold; font-size: 16px; 
-            box-shadow: 0 5px 0 #ff8f00; cursor: pointer; display: flex; justify-content: center; 
+            /* v29: 增加底部柔和陰影，增強懸浮感 */
+            box-shadow: 0 5px 0 #ff8f00, 0 8px 12px rgba(0,0,0,0.3); 
+            cursor: pointer; display: flex; justify-content: center; 
             align-items: center; color: #5d4037;
             transition: all 0.1s;
         }
-        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #ff8f00; }
+        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #ff8f00, 0 4px 6px rgba(0,0,0,0.2); }
         .btn-blue { 
             background: linear-gradient(to bottom, var(--btn-blue-1), var(--btn-blue-2)); 
-            box-shadow: 0 5px 0 #01579b; color: white; 
+            box-shadow: 0 5px 0 #01579b, 0 8px 12px rgba(0,0,0,0.3); color: white; 
         }
-        .btn-blue:active { transform: translateY(3px); box-shadow: 0 2px 0 #01579b; }
+        .btn-blue:active { transform: translateY(3px); box-shadow: 0 2px 0 #01579b, 0 4px 6px rgba(0,0,0,0.2); }
 
-        /* Joystick (經典佈局) */
+        /* Joystick */
         #joystick-zone {
             position: relative; width: 60px; height: 60px; z-index: 150; flex-shrink: 0;
             background: rgba(0, 0, 0, 0.3); 
             border: 2px solid rgba(255, 255, 255, 0.4);
             border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
-            backdrop-filter: blur(3px); box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            backdrop-filter: blur(3px); 
+            /* v29: 更強的立體陰影 */
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4), inset 0 2px 5px rgba(255,255,255,0.2);
         }
         #joystick-knob {
             width: 28px; height: 28px; background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
-            border-radius: 50%; border: 2px solid #fff; box-shadow: 0 3px 5px rgba(0,0,0,0.3); position: relative;
+            border-radius: 50%; border: 2px solid #fff; 
+            /* v29: 旋鈕的立體感增強 */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4); position: relative;
         }
         #joystick-hint {
             position: absolute; bottom: -15px; width: 100%; text-align: center;
@@ -132,13 +139,17 @@
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: transform 0.1s;
             
-            /* 模擬厚度 (Fake 3D Border) - 最清晰的方案 */
-            border-right: 2px solid #1a5e2e; /* 側面深綠 */
-            border-bottom: 5px solid #0d3d1e; /* 底部更深綠 */
-            border-top: 1px solid #fff;
-            border-left: 1px solid #fff;
+            /* 模擬厚度 (Fake 3D Border) */
+            border-right: 2px solid #1a5e2e; 
+            border-bottom: 5px solid #0d3d1e; 
+            border-top: 1px solid #f0f0f0; /* 微調頂部邊框光澤 */
+            border-left: 1px solid #f0f0f0;
             
-            box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+            /* v29 核心改動：雙重陰影增強立體感 */
+            box-shadow: 
+                2px 3px 1px rgba(0, 0, 0, 0.2), /* 緊貼的硬陰影，強調接觸面 */
+                5px 7px 12px rgba(0, 0, 0, 0.3); /* 柔和的擴散陰影，增加份量感 */
+            
             transform-style: preserve-3d;
         }
 
@@ -146,18 +157,22 @@
             filter: brightness(0.65) contrast(0.9); 
             cursor: default;
             background-color: #e0e0e0;
+            box-shadow: 1px 2px 1px rgba(0,0,0,0.2), 3px 5px 8px rgba(0,0,0,0.2); /* 鎖定時陰影稍弱 */
         }
 
         .tile.selected { 
             background-color: #fff9c4; 
             transform: translateZ(20px) !important; 
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+            /* 選中時更強烈的浮起陰影 */
+            box-shadow: 
+                5px 5px 2px rgba(0,0,0,0.2),
+                10px 15px 25px rgba(0,0,0,0.5);
             border-color: #ff9800; 
             z-index: 9999 !important;
         }
 
         .t-suit { position: absolute; top: 1px; right: 2px; font-size: 10px; color: #888; line-height: 1; backface-visibility: hidden; }
-        .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; backface-visibility: hidden; }
+        .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; backface-visibility: hidden; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1)); /* 微調圖案立體感 */ }
         .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #444; backface-visibility: hidden; }
         
         .c-red { color: #d32f2f; } .c-blue { color: #1976d2; } .c-green { color: #388e3c; }
@@ -172,7 +187,8 @@
         }
         .overlay-box {
             background: #fff; padding: 30px; border-radius: 30px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 5px solid #ffd54f;
+            /* 更深的彈窗陰影 */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 5px solid #ffd54f;
             max-width: 90%; color: #333;
         }
         .overlay-title { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #ffb300; text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0,0,0,0.1); }
@@ -220,7 +236,7 @@
     </div>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v28 (36 Tiles Edition)</div>
+<div id="watermark">Powered by Google Gemini v29 (Enhanced 3D Shadows)</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
@@ -231,9 +247,8 @@
 </div>
 
 <script>
-    // --- v28 擴充版資料庫 (共36種) ---
+    // --- 36種麻雀資料庫 ---
     const rawTiles = [
-        // 舊有的 28 種
         {t:"摩西", i:"🌊", s:"萬", c:"c-red"}, {t:"大衛", i:"👑", s:"萬", c:"c-red"},
         {t:"保羅", i:"📜", s:"萬", c:"c-red"}, {t:"彼得", i:"🐟", s:"萬", c:"c-red"},
         {t:"約拿", i:"🐋", s:"萬", c:"c-red"}, {t:"馬利亞", i:"🤰", s:"萬", c:"c-red"},
@@ -248,11 +263,9 @@
         {t:"信", i:"🛡️", s:"番", c:"#333"}, {t:"望", i:"⚓", s:"番", c:"#333"},
         {t:"愛", i:"❤️", s:"番", c:"#333"}, {t:"阿們", i:"🙏", s:"番", c:"#333"},
         {t:"禱告", i:"🤲", s:"番", c:"#333"}, {t:"復活", i:"🌅", s:"番", c:"#333"},
-        
-        // v28 新增的 8 種 (湊夠36種)
         {t:"挪亞", i:"🌈", s:"萬", c:"c-red"}, {t:"約書亞", i:"🎺", s:"萬", c:"c-red"},
         {t:"以利亞", i:"🔥", s:"萬", c:"c-red"}, 
-        {t:"葡萄", i:"🍇", s:"索", c:"c-green"}, {t:"磐石", i:"🪨", s:"索", c:"c-green"}, // 磐石歸類為索或筒皆可，這裡放索平衡
+        {t:"葡萄", i:"🍇", s:"索", c:"c-green"}, {t:"磐石", i:"🪨", s:"索", c:"c-green"},
         {t:"亮光", i:"💡", s:"筒", c:"c-blue"}, {t:"天國", i:"☁️", s:"筒", c:"c-blue"},
         {t:"喜樂", i:"😄", s:"番", c:"#333"}
     ];
@@ -279,7 +292,7 @@
     let selectedTile = null;
     let tileW = 42, tileH = 56;
     let globalScale = 1;
-    // v28: 預設視角 10度 (接近平視)
+    // v29: 預設視角 10度
     let viewRotX = 10;
     let viewRotZ = 0;
 
@@ -313,7 +326,6 @@
         }
         if(!success) for(let i=0;i<virtualTiles.length;i+=2) pairs.push([i,i+1]);
 
-        // 嚴格庫存分配 (適配 36 種)
         let totalPairs = pairs.length, cardInventory = [], shuffledTypes = [...rawTiles].sort(()=>Math.random()-0.5);
         let typeIndex = 0;
         for(let i=0; i<totalPairs; i+=2) {
@@ -352,7 +364,6 @@
             const card = dataMap[index];
             el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
             
-            // v28 (基於 v25): 經典渲染
             let left = slot.c * tileW; 
             let top = slot.r * tileH; 
             
