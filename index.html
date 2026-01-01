@@ -16,12 +16,11 @@
     <title>福音麻雀 - v28</title>
     <style>
         :root { 
-            --tile-w: 44px; 
-            --tile-h: 58px; 
-            --depth: 12px; 
+            --tile-w: 42px; 
+            --tile-h: 56px; 
+            /* v28: 採用 v23/v25 的經典配色與尺寸 */
             --bg-color: #054a29; 
-            --ui-glass-bg: rgba(255, 255, 255, 0.2);
-            --ui-glass-border: rgba(255, 255, 255, 0.3);
+            --ui-cloud-bg: rgba(0, 0, 0, 0.6); 
             --text-dark: #fff;
             --btn-yellow-1: #ffd54f;
             --btn-yellow-2: #ffb300;
@@ -33,34 +32,27 @@
 
         body {
             margin: 0; 
+            /* v28: 純深綠色背景，移除所有紋理，最清晰不眼花 */
             background-color: var(--bg-color);
-            background-image: linear-gradient(to bottom, #065f35, #054a29);
             font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
             overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
             color: var(--text-dark); user-select: none; -webkit-user-select: none; touch-action: none;
         }
         
-        header, footer, .overlay-box, #joystick-zone {
-            backdrop-filter: blur(10px) saturate(150%);
-            -webkit-backdrop-filter: blur(10px) saturate(150%);
-            background-color: var(--ui-glass-bg) !important;
-            border: 1px solid var(--ui-glass-border);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
         header {
             flex-shrink: 0; 
             height: calc(50px + env(safe-area-inset-top)); 
             padding: 5px 15px;
             padding-top: calc(5px + env(safe-area-inset-top)); 
+            background: var(--ui-cloud-bg); 
             display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             border-bottom-left-radius: 20px;
             border-bottom-right-radius: 20px;
             margin: 0 10px 5px 10px;
         }
-        select { padding: 6px 10px; font-size: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.3); max-width: 140px; color: #fff; font-weight: bold; backdrop-filter: blur(5px); }
-        option { background: #333; color: #fff; }
-        #status { font-size: 15px; font-weight: bold; background: rgba(255, 213, 79, 0.8); color: #d84315; padding: 6px 15px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.4); }
+        select { padding: 6px 10px; font-size: 14px; border-radius: 15px; border: 2px solid #555; background: #eee; max-width: 140px; color: #333; font-weight: bold; }
+        #status { font-size: 15px; font-weight: bold; background: #ffe082; color: #d84315; padding: 6px 15px; border-radius: 20px; box-shadow: 0 2px 0 #ffca28; }
         
         #game-viewport {
             flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
@@ -71,7 +63,8 @@
         #game-board { 
             position: absolute; 
             top: 50%; left: 50%; 
-            transform: translate(-50%, -50%) rotateX(30deg) rotateZ(0deg); 
+            /* v28: 採用接近平視的經典視角 (10度) */
+            transform: translate(-50%, -50%) rotateX(10deg) rotateZ(0deg); 
             transform-origin: center center;
             transform-style: preserve-3d;
         }
@@ -81,10 +74,12 @@
             height: calc(80px + env(safe-area-inset-bottom)); 
             padding: 5px 10px; 
             padding-bottom: max(5px, env(safe-area-inset-bottom));
+            background: var(--ui-cloud-bg); 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             z-index: 100;
+            box-shadow: 0 -4px 8px rgba(0,0,0,0.3);
             border-top-left-radius: 25px;
             border-top-right-radius: 25px;
             margin: 5px 10px 0 10px;
@@ -95,31 +90,32 @@
         }
         
         .btn {
-            background: linear-gradient(to bottom, rgba(255, 213, 79, 0.9), rgba(255, 179, 0, 0.9)); 
-            border: 2px solid rgba(255,255,255,0.7); padding: 0;
+            background: linear-gradient(to bottom, var(--btn-yellow-1), var(--btn-yellow-2)); 
+            border: 3px solid #ffffff; padding: 0;
             width: auto; flex: 1; margin: 0 3px;
-            height: 44px; border-radius: 22px; font-weight: bold; font-size: 16px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.4); 
-            cursor: pointer; display: flex; justify-content: center; 
+            height: 44px; border-radius: 25px; font-weight: bold; font-size: 16px; 
+            box-shadow: 0 5px 0 #ff8f00; cursor: pointer; display: flex; justify-content: center; 
             align-items: center; color: #5d4037;
             transition: all 0.1s;
-            backdrop-filter: blur(5px);
         }
-        .btn:active { transform: translateY(3px); box-shadow: 0 2px 3px rgba(0,0,0,0.1); }
+        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #ff8f00; }
         .btn-blue { 
-            background: linear-gradient(to bottom, rgba(79, 195, 247, 0.9), rgba(3, 155, 229, 0.9));
-            color: white; 
+            background: linear-gradient(to bottom, var(--btn-blue-1), var(--btn-blue-2)); 
+            box-shadow: 0 5px 0 #01579b; color: white; 
         }
+        .btn-blue:active { transform: translateY(3px); box-shadow: 0 2px 0 #01579b; }
 
+        /* Joystick (經典佈局) */
         #joystick-zone {
-            position: relative; bottom: auto; right: auto;
-            width: 60px; height: 60px; z-index: 150; flex-shrink: 0;
+            position: relative; width: 60px; height: 60px; z-index: 150; flex-shrink: 0;
+            background: rgba(0, 0, 0, 0.3); 
+            border: 2px solid rgba(255, 255, 255, 0.4);
             border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
+            backdrop-filter: blur(3px); box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         #joystick-knob {
-            width: 28px; height: 28px; background: radial-gradient(circle at 30% 30%, rgba(255, 204, 128, 0.9), rgba(255, 152, 0, 0.9));
-            border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); box-shadow: 0 3px 5px rgba(0,0,0,0.2); position: relative;
-            backdrop-filter: blur(2px);
+            width: 28px; height: 28px; background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
+            border-radius: 50%; border: 2px solid #fff; box-shadow: 0 3px 5px rgba(0,0,0,0.3); position: relative;
         }
         #joystick-hint {
             position: absolute; bottom: -15px; width: 100%; text-align: center;
@@ -127,101 +123,70 @@
              text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
         }
 
-        /* --- v28 核心：水晶麻雀 (厚度增強版) --- */
+        /* --- 麻雀牌樣式 (經典純白+綠厚底) --- */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
-            background-color: rgba(255, 255, 255, 0.65);
-            backdrop-filter: blur(8px) saturate(150%);
-            -webkit-backdrop-filter: blur(8px) saturate(150%);
-            border-radius: 8px;
+            background-color: #ffffff; 
+            border-radius: 4px; 
             cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transform-style: preserve-3d; transition: transform 0.1s;
+            transition: transform 0.1s;
             
-            border-top: 1px solid rgba(255, 255, 255, 0.8);
-            border-left: 1px solid rgba(255, 255, 255, 0.8);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            border-right: 1px solid rgba(255, 255, 255, 0.3);
+            /* 模擬厚度 (Fake 3D Border) - 最清晰的方案 */
+            border-right: 2px solid #1a5e2e; /* 側面深綠 */
+            border-bottom: 5px solid #0d3d1e; /* 底部更深綠 */
+            border-top: 1px solid #fff;
+            border-left: 1px solid #fff;
             
-            /* v28: 加深底部投影，增加貼地感 */
-            box-shadow: 
-                inset 0 0 15px rgba(255, 255, 255, 0.5),
-                0 6px 15px rgba(0, 0, 0, 0.25); 
-        }
-
-        /* 側面牆身 (Bottom) - v28: 加深顏色和不透明度，製造厚重感 */
-        .tile::before {
-            content: ''; position: absolute; width: 100.5%; height: var(--depth);
-            bottom: 0; left: -0.25%;
-            /* v28: 使用更深的漸變，模擬底部陰影 */
-            background: linear-gradient(to bottom, rgba(200, 220, 200, 0.6) 0%, rgba(100, 130, 100, 0.7) 100%);
-            transform-origin: bottom; transform: rotateX(-90deg);
-            /* v28: 加深邊框 */
-            border: 1px solid rgba(150, 180, 150, 0.6);
-            border-radius: 4px;
-            backdrop-filter: blur(5px);
-        }
-        
-        /* 側面牆身 (Right) */
-        .tile::after {
-            content: ''; position: absolute; width: var(--depth); height: 100.5%;
-            top: -0.25%; right: 0;
-            background: linear-gradient(to right, rgba(255,255,255,0.5), rgba(220, 240, 220, 0.4));
-            transform-origin: right; transform: rotateY(90deg);
-            /* v28: 加深邊框 */
-            border: 1px solid rgba(180, 200, 180, 0.5);
-            border-radius: 4px;
-            backdrop-filter: blur(5px);
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+            transform-style: preserve-3d;
         }
 
         .tile.locked { 
-            background-color: rgba(200, 200, 200, 0.5);
-            backdrop-filter: blur(4px) grayscale(50%);
-            box-shadow: none;
-            border-color: rgba(255,255,255,0.2);
+            filter: brightness(0.65) contrast(0.9); 
+            cursor: default;
+            background-color: #e0e0e0;
         }
-        .tile.locked img, .tile.locked .t-icon { opacity: 0.3; }
 
         .tile.selected { 
-            background-color: rgba(255, 249, 196, 0.8);
-            transform: translateZ(calc(var(--base-z) + 20px)) scale(1.05) !important;
-            box-shadow: 
-                inset 0 0 20px rgba(255, 235, 59, 0.6),
-                0 0 15px rgba(255, 235, 59, 0.8);
-            border: 2px solid rgba(255, 238, 88, 0.9);
-            z-index: 999;
+            background-color: #fff9c4; 
+            transform: translateZ(20px) !important; 
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+            border-color: #ff9800; 
+            z-index: 9999 !important;
         }
 
-        .t-suit { position: absolute; top: 2px; right: 3px; font-size: 10px; color: #999; line-height: 1; backface-visibility: hidden; text-shadow: 0 1px 1px rgba(0,0,0,0.1); }
-        .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; backface-visibility: hidden; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15)); }
-        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #444; backface-visibility: hidden; text-shadow: 0 1px 1px rgba(255,255,255,0.5), 0 1px 3px rgba(0,0,0,0.1); }
+        .t-suit { position: absolute; top: 1px; right: 2px; font-size: 10px; color: #888; line-height: 1; backface-visibility: hidden; }
+        .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; backface-visibility: hidden; }
+        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #444; backface-visibility: hidden; }
         
-        .c-red { color: #e53935; } .c-blue { color: #1e88e5; } .c-green { color: #43a047; }
+        .c-red { color: #d32f2f; } .c-blue { color: #1976d2; } .c-green { color: #388e3c; }
 
+        /* 彈窗 */
         #msg-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6); 
+            background: rgba(0, 0, 0, 0.85); 
             display: none; flex-direction: column;
             justify-content: center; align-items: center; z-index: 200; text-align: center; padding: 20px;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(5px);
         }
         .overlay-box {
-            background: rgba(255, 255, 255, 0.85); padding: 30px; border-radius: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.6);
-            max-width: 90%; color: #333; backdrop-filter: blur(15px) saturate(120%);
+            background: #fff; padding: 30px; border-radius: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 5px solid #ffd54f;
+            max-width: 90%; color: #333;
         }
-        .overlay-title { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #ffb300; text-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .overlay-title { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #ffb300; text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0,0,0,0.1); }
         .overlay-verse { 
             font-size: 22px; color: #0288d1; line-height: 1.6; 
-            background: rgba(224, 242, 241, 0.7); padding: 20px; border-radius: 20px; 
-            width: 100%; margin-bottom: 20px; border: 1px solid rgba(178, 223, 219, 0.8);
-            font-weight: bold; backdrop-filter: blur(5px);
+            background: #e0f2f1; padding: 20px; border-radius: 20px; 
+            width: 100%; margin-bottom: 20px; border: 2px dashed #b2dfdb;
+            font-weight: bold;
         }
 
         #watermark {
             position: absolute; bottom: 95px; left: 20px; font-size: 11px;
-            color: rgba(255, 255, 255, 0.4); pointer-events: none; z-index: 150; font-weight: bold;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            color: rgba(255, 255, 255, 0.3); pointer-events: none; z-index: 150; font-weight: bold;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
         }
     </style>
 </head>
@@ -255,7 +220,7 @@
     </div>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v28</div>
+<div id="watermark">Powered by Google Gemini v28 (36 Tiles Edition)</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
@@ -266,7 +231,9 @@
 </div>
 
 <script>
+    // --- v28 擴充版資料庫 (共36種) ---
     const rawTiles = [
+        // 舊有的 28 種
         {t:"摩西", i:"🌊", s:"萬", c:"c-red"}, {t:"大衛", i:"👑", s:"萬", c:"c-red"},
         {t:"保羅", i:"📜", s:"萬", c:"c-red"}, {t:"彼得", i:"🐟", s:"萬", c:"c-red"},
         {t:"約拿", i:"🐋", s:"萬", c:"c-red"}, {t:"馬利亞", i:"🤰", s:"萬", c:"c-red"},
@@ -280,7 +247,14 @@
         {t:"寶血", i:"🍷", s:"索", c:"c-green"}, {t:"聖靈", i:"🕊️", s:"索", c:"c-green"},
         {t:"信", i:"🛡️", s:"番", c:"#333"}, {t:"望", i:"⚓", s:"番", c:"#333"},
         {t:"愛", i:"❤️", s:"番", c:"#333"}, {t:"阿們", i:"🙏", s:"番", c:"#333"},
-        {t:"禱告", i:"🤲", s:"番", c:"#333"}, {t:"復活", i:"🌅", s:"番", c:"#333"}
+        {t:"禱告", i:"🤲", s:"番", c:"#333"}, {t:"復活", i:"🌅", s:"番", c:"#333"},
+        
+        // v28 新增的 8 種 (湊夠36種)
+        {t:"挪亞", i:"🌈", s:"萬", c:"c-red"}, {t:"約書亞", i:"🎺", s:"萬", c:"c-red"},
+        {t:"以利亞", i:"🔥", s:"萬", c:"c-red"}, 
+        {t:"葡萄", i:"🍇", s:"索", c:"c-green"}, {t:"磐石", i:"🪨", s:"索", c:"c-green"}, // 磐石歸類為索或筒皆可，這裡放索平衡
+        {t:"亮光", i:"💡", s:"筒", c:"c-blue"}, {t:"天國", i:"☁️", s:"筒", c:"c-blue"},
+        {t:"喜樂", i:"😄", s:"番", c:"#333"}
     ];
     
     const winVerses = ["流淚撒種的，必歡呼收割。(詩 126:5)", "那美好的仗我已經打過了。(提後 4:7)", "靠著那加給我力量的，凡事都能做。(腓 4:13)", "你們是世上的光。(太 5:14)", "得勝的，我要賜他在我寶座上與我同坐。(啟 3:21)"];
@@ -303,9 +277,10 @@
 
     let tiles = [];
     let selectedTile = null;
-    let tileW = 44, tileH = 58; /* v27: 配合新樣式微調尺寸 */
+    let tileW = 42, tileH = 56;
     let globalScale = 1;
-    let viewRotX = 30;
+    // v28: 預設視角 10度 (接近平視)
+    let viewRotX = 10;
     let viewRotZ = 0;
 
     function changeMap(val) { startGame(val); }
@@ -315,7 +290,7 @@
         document.getElementById('msg-overlay').style.display = 'none';
         const board = document.getElementById('game-board');
         board.innerHTML = ''; tiles = []; selectedTile = null;
-        viewRotX = 30; viewRotZ = 0; 
+        viewRotX = 10; viewRotZ = 0; 
 
         let slots = MapBlueprints[mapType]();
         if(slots.length % 2 !== 0) slots.pop();
@@ -338,6 +313,7 @@
         }
         if(!success) for(let i=0;i<virtualTiles.length;i+=2) pairs.push([i,i+1]);
 
+        // 嚴格庫存分配 (適配 36 種)
         let totalPairs = pairs.length, cardInventory = [], shuffledTypes = [...rawTiles].sort(()=>Math.random()-0.5);
         let typeIndex = 0;
         for(let i=0; i<totalPairs; i+=2) {
@@ -376,14 +352,13 @@
             const card = dataMap[index];
             el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
             
+            // v28 (基於 v25): 經典渲染
             let left = slot.c * tileW; 
             let top = slot.r * tileH; 
-            let zHeight = slot.z * 12; /* v27: 配合水晶厚度 */
             
             el.style.left = left + 'px'; 
             el.style.top = top + 'px'; 
-            el.style.transform = `translateZ(${zHeight}px)`; 
-            el.style.setProperty('--base-z', zHeight + 'px');
+            el.style.transform = `translateZ(${slot.z * 10}px)`; 
             el.style.zIndex = slot.z * 10 + slot.r; 
             
             const tileObj = { el: el, data: card, z: slot.z, r: slot.r, c: slot.c, active: true, id: index };
@@ -483,7 +458,6 @@
     }
     window.addEventListener('resize', fitBoard);
 
-    // Joystick
     const joystickZone = document.getElementById('joystick-zone');
     const joystickKnob = document.getElementById('joystick-knob');
     let isDragging = false;
