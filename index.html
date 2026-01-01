@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <meta name="theme-color" content="#87ceeb">
     <meta name="apple-mobile-web-app-title" content="福音麻雀">
     <meta name="application-name" content="福音麻雀">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#054a29">
     
     <link rel="manifest" href="manifest.json">
     
-    <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
-    <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
+    <link rel="apple-touch-icon" href="mj.png">
+    <link rel="icon" type="image/png" href="mj.png">
 
-    <title>福音麻雀 - v33 (PWA修復版)</title>
+    <title>福音麻雀 - v34</title>
     <style>
         :root { 
             --tile-w: 44px; 
@@ -36,7 +36,6 @@
         body {
             margin: 0; 
             background-color: var(--bg-color);
-            /* 天空背景 */
             background-image: 
                 radial-gradient(circle at top left, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 50%),
                 linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
@@ -136,7 +135,6 @@
         }
         .btn-blue:active { transform: translateY(3px); box-shadow: 0 2px 0 #01579b, 0 5px 10px rgba(0,0,0,0.2); }
 
-        /* Joystick */
         #joystick-zone {
             position: relative; width: 60px; height: 60px; z-index: 150; flex-shrink: 0;
             background: rgba(255, 255, 255, 0.2) !important; 
@@ -155,11 +153,12 @@
              text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
-        /* 麻雀牌 - 水晶風格 */
+        /* --- 高清水晶麻雀 --- */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
-            background-color: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(8px) saturate(120%); -webkit-backdrop-filter: blur(8px) saturate(120%);
+            background-color: rgba(255, 255, 255, 0.85); /* 高清晰度 */
+            backdrop-filter: blur(8px) saturate(120%);
+            -webkit-backdrop-filter: blur(8px) saturate(120%);
             border-radius: 8px; cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transform-style: preserve-3d; transition: transform 0.1s;
@@ -175,18 +174,21 @@
             bottom: 0; left: 0;
             background: linear-gradient(to bottom, rgba(240, 250, 255, 0.7), rgba(180, 220, 240, 0.85));
             transform-origin: bottom; transform: rotateX(-90deg);
-            border-radius: 0 0 8px 8px; border: 1px solid rgba(220, 240, 255, 0.6); border-top: none;
+            border-radius: 0 0 8px 8px;
+            border: 1px solid rgba(220, 240, 255, 0.6); border-top: none;
         }
         .tile::after {
             content: ''; position: absolute; width: var(--depth); height: 100%;
             top: 0; right: 0;
             background: linear-gradient(to right, rgba(240, 250, 255, 0.7), rgba(200, 230, 250, 0.8));
             transform-origin: right; transform: rotateY(90deg);
-            border-radius: 0 8px 8px 0; border: 1px solid rgba(220, 240, 255, 0.6); border-left: none;
+            border-radius: 0 8px 8px 0;
+            border: 1px solid rgba(220, 240, 255, 0.6); border-left: none;
         }
 
         .tile.locked { 
-            background-color: rgba(220, 230, 240, 0.9); filter: grayscale(60%) brightness(0.9);
+            background-color: rgba(220, 230, 240, 0.9);
+            filter: grayscale(60%) brightness(0.9);
             box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
         }
         .tile.locked img, .tile.locked .t-icon { opacity: 0.3; }
@@ -261,7 +263,7 @@
     </div>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v33 (PWA Fix)</div>
+<div id="watermark">Powered by Google Gemini v34 (PWA Fixed)</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
@@ -383,13 +385,17 @@
             if(slot.c > maxX) maxX = slot.c; if(slot.r > maxY) maxY = slot.r;
             const el = document.createElement('div');
             el.className = 'tile';
+            
             const card = dataMap[index];
             el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
             
             let left = slot.c * tileW; 
             let top = slot.r * tileH; 
-            let zHeight = slot.z * 12; 
-            el.style.left = left + 'px'; el.style.top = top + 'px'; 
+            let zSpacing = 12; 
+            let zHeight = slot.z * zSpacing;
+            
+            el.style.left = left + 'px'; 
+            el.style.top = top + 'px'; 
             el.style.transform = `translateZ(${zHeight}px)`; 
             el.style.setProperty('--base-z', zHeight + 'px');
             el.style.zIndex = slot.z * 10 + slot.r; 
@@ -538,12 +544,15 @@
     window.addEventListener('mouseup', handleEnd);
     window.addEventListener('touchend', handleEnd);
 
-    // 2. 關鍵修正：註冊 Service Worker (PWA 必須)
+    // 2. 註冊 Service Worker (PWA 關鍵)
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./service-worker.js')
-                .then(reg => console.log('SW registered!', reg))
-                .catch(err => console.log('SW failed', err));
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('./sw.js')
+                .then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
         });
     }
 
