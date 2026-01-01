@@ -13,11 +13,12 @@
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v29</title>
+    <title>福音麻雀 - v30 水晶立體版</title>
     <style>
         :root { 
-            --tile-w: 42px; 
-            --tile-h: 56px; 
+            --tile-w: 44px; /* 稍微加大配合圓角 */
+            --tile-h: 58px; 
+            --depth: 12px; /* 水晶的物理厚度 */
             --bg-color: #054a29; 
             --ui-cloud-bg: rgba(0, 0, 0, 0.6); 
             --text-dark: #fff;
@@ -31,8 +32,9 @@
 
         body {
             margin: 0; 
-            /* 純深綠色背景 */
             background-color: var(--bg-color);
+            /* 增加微妙的漸變，讓玻璃通透效果更明顯 */
+            background-image: linear-gradient(to bottom, #065f35, #044224);
             font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
             overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
             color: var(--text-dark); user-select: none; -webkit-user-select: none; touch-action: none;
@@ -45,14 +47,16 @@
             padding-top: calc(5px + env(safe-area-inset-top)); 
             background: var(--ui-cloud-bg); 
             display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 15px;
-            /* v29: 更深邃柔和的陰影 */
             box-shadow: 0 8px 16px rgba(0,0,0,0.3);
             border-bottom-left-radius: 20px;
             border-bottom-right-radius: 20px;
             margin: 0 10px 5px 10px;
+            /* UI 也加入輕微毛玻璃感 */
+            backdrop-filter: blur(5px);
         }
-        select { padding: 6px 10px; font-size: 14px; border-radius: 15px; border: 2px solid #555; background: #eee; max-width: 140px; color: #333; font-weight: bold; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
-        #status { font-size: 15px; font-weight: bold; background: #ffe082; color: #d84315; padding: 6px 15px; border-radius: 20px; box-shadow: 0 3px 0 #ffca28, 0 5px 10px rgba(0,0,0,0.2); }
+        select { padding: 6px 10px; font-size: 14px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.2); max-width: 140px; color: #fff; font-weight: bold; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); backdrop-filter: blur(5px); }
+        option { background: #333; color: #fff; }
+        #status { font-size: 15px; font-weight: bold; background: rgba(255, 213, 79, 0.9); color: #d84315; padding: 6px 15px; border-radius: 20px; box-shadow: 0 3px 0 #ffca28, 0 5px 10px rgba(0,0,0,0.2); }
         
         #game-viewport {
             flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
@@ -63,7 +67,6 @@
         #game-board { 
             position: absolute; 
             top: 50%; left: 50%; 
-            /* 經典視角 (10度) */
             transform: translate(-50%, -50%) rotateX(10deg) rotateZ(0deg); 
             transform-origin: center center;
             transform-style: preserve-3d;
@@ -79,11 +82,11 @@
             justify-content: space-between; 
             align-items: center; 
             z-index: 100;
-            /* v29: 更深邃柔和的陰影 */
             box-shadow: 0 -8px 16px rgba(0,0,0,0.3);
             border-top-left-radius: 25px;
             border-top-right-radius: 25px;
             margin: 5px 10px 0 10px;
+            backdrop-filter: blur(5px);
         }
 
         .footer-btns {
@@ -95,7 +98,6 @@
             border: 3px solid #ffffff; padding: 0;
             width: auto; flex: 1; margin: 0 3px;
             height: 44px; border-radius: 25px; font-weight: bold; font-size: 16px; 
-            /* v29: 增加底部柔和陰影，增強懸浮感 */
             box-shadow: 0 5px 0 #ff8f00, 0 8px 12px rgba(0,0,0,0.3); 
             cursor: pointer; display: flex; justify-content: center; 
             align-items: center; color: #5d4037;
@@ -115,13 +117,11 @@
             border: 2px solid rgba(255, 255, 255, 0.4);
             border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
             backdrop-filter: blur(3px); 
-            /* v29: 更強的立體陰影 */
             box-shadow: 0 6px 15px rgba(0,0,0,0.4), inset 0 2px 5px rgba(255,255,255,0.2);
         }
         #joystick-knob {
             width: 28px; height: 28px; background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
             border-radius: 50%; border: 2px solid #fff; 
-            /* v29: 旋鈕的立體感增強 */
             box-shadow: 0 4px 8px rgba(0,0,0,0.4); position: relative;
         }
         #joystick-hint {
@@ -130,73 +130,103 @@
              text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
         }
 
-        /* --- 麻雀牌樣式 (經典純白+綠厚底) --- */
+        /* --- v30 核心：iPhone 風格水晶立體麻雀 --- */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
-            background-color: #ffffff; 
-            border-radius: 4px; 
+            
+            /* 主體：半透明乳白玻璃 */
+            background-color: rgba(255, 255, 255, 0.6);
+            /* 關鍵：iOS 風格毛玻璃濾鏡 */
+            backdrop-filter: blur(10px) saturate(150%);
+            -webkit-backdrop-filter: blur(10px) saturate(150%);
+            
+            border-radius: 8px; /* 更圓潤的角落，像 App icon */
             cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: transform 0.1s;
+            transform-style: preserve-3d; transition: transform 0.1s;
             
-            /* 模擬厚度 (Fake 3D Border) */
-            border-right: 2px solid #1a5e2e; 
-            border-bottom: 5px solid #0d3d1e; 
-            border-top: 1px solid #f0f0f0; /* 微調頂部邊框光澤 */
-            border-left: 1px solid #f0f0f0;
-            
-            /* v29 核心改動：雙重陰影增強立體感 */
+            /* 精細的水晶光影效果：邊緣高光和內發光 */
+            border: 1px solid rgba(255, 255, 255, 0.5);
             box-shadow: 
-                2px 3px 1px rgba(0, 0, 0, 0.2), /* 緊貼的硬陰影，強調接觸面 */
-                5px 7px 12px rgba(0, 0, 0, 0.3); /* 柔和的擴散陰影，增加份量感 */
-            
-            transform-style: preserve-3d;
+                inset 0 1px 1px rgba(255, 255, 255, 0.8), /* 頂部強烈反光 */
+                inset 0 -5px 15px rgba(0,0,0,0.05), /* 內部微妙陰影 */
+                0 8px 20px rgba(0, 0, 0, 0.25); /* 柔和但深邃的外部投影，製造懸浮感 */
         }
 
+        /* 側面牆身 (Bottom) - 實體水晶感 */
+        .tile::before {
+            content: ''; position: absolute; width: 100%; height: var(--depth);
+            bottom: 0; left: 0;
+            /* 半透明側面，帶一點點綠色調的折射，底部較暗 */
+            background: linear-gradient(to bottom, rgba(255,255,255,0.4), rgba(180, 210, 180, 0.5));
+            transform-origin: bottom; transform: rotateX(-90deg);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-bottom: 1px solid rgba(150, 180, 150, 0.4); /* 底部邊緣更暗 */
+            border-radius: 0 0 8px 8px;
+            backdrop-filter: blur(5px);
+        }
+        
+        /* 側面牆身 (Right) - 實體水晶感 */
+        .tile::after {
+            content: ''; position: absolute; width: var(--depth); height: 100%;
+            top: 0; right: 0;
+            background: linear-gradient(to right, rgba(255,255,255,0.4), rgba(200, 230, 200, 0.4));
+            transform-origin: right; transform: rotateY(90deg);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-right: 1px solid rgba(180, 210, 180, 0.4);
+            border-radius: 0 8px 8px 0;
+            backdrop-filter: blur(5px);
+        }
+
+        /* 鎖定狀態 - 磨砂感更重，變暗 */
         .tile.locked { 
-            filter: brightness(0.65) contrast(0.9); 
-            cursor: default;
-            background-color: #e0e0e0;
-            box-shadow: 1px 2px 1px rgba(0,0,0,0.2), 3px 5px 8px rgba(0,0,0,0.2); /* 鎖定時陰影稍弱 */
+            background-color: rgba(200, 200, 200, 0.5);
+            backdrop-filter: blur(4px) grayscale(50%);
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), 0 2px 5px rgba(0,0,0,0.15);
+            border-color: rgba(255,255,255,0.2);
         }
+        .tile.locked img, .tile.locked .t-icon { opacity: 0.3; }
 
+        /* 選中狀態 - 發光水晶 */
         .tile.selected { 
-            background-color: #fff9c4; 
-            transform: translateZ(20px) !important; 
-            /* 選中時更強烈的浮起陰影 */
+            background-color: rgba(255, 249, 196, 0.7); /* 發黃光 */
+            /* 浮起並輕微放大 */
+            transform: translateZ(calc(var(--base-z) + 25px)) scale(1.05) !important; 
             box-shadow: 
-                5px 5px 2px rgba(0,0,0,0.2),
-                10px 15px 25px rgba(0,0,0,0.5);
-            border-color: #ff9800; 
+                inset 0 0 20px rgba(255, 235, 59, 0.5), /* 強烈內部金光 */
+                0 0 25px rgba(255, 235, 59, 0.6), /* 外部發光光暈 */
+                0 10px 30px rgba(0,0,0,0.3); /* 更遠的投影 */
+            border: 1px solid rgba(255, 238, 88, 0.8);
             z-index: 9999 !important;
         }
 
-        .t-suit { position: absolute; top: 1px; right: 2px; font-size: 10px; color: #888; line-height: 1; backface-visibility: hidden; }
-        .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; backface-visibility: hidden; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1)); /* 微調圖案立體感 */ }
-        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #444; backface-visibility: hidden; }
+        /* 內容嵌入感：增加文字投影，看起來鑲嵌在玻璃裡 */
+        .t-suit { position: absolute; top: 2px; right: 3px; font-size: 10px; color: #999; line-height: 1; backface-visibility: hidden; text-shadow: 0 1px 1px rgba(255,255,255,0.8), 0 -1px 1px rgba(0,0,0,0.1); }
+        .t-icon { font-size: 26px; line-height: 1; margin-top: 2px; backface-visibility: hidden; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); }
+        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #444; backface-visibility: hidden; text-shadow: 0 1px 1px rgba(255,255,255,0.8), 0 1px 2px rgba(0,0,0,0.2); }
         
-        .c-red { color: #d32f2f; } .c-blue { color: #1976d2; } .c-green { color: #388e3c; }
+        .c-red { color: #e53935; } .c-blue { color: #1e88e5; } .c-green { color: #43a047; }
 
-        /* 彈窗 */
+        /* 彈窗 - 也全面玻璃化 */
         #msg-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); 
+            background: rgba(0, 0, 0, 0.5); 
             display: none; flex-direction: column;
             justify-content: center; align-items: center; z-index: 200; text-align: center; padding: 20px;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
         }
         .overlay-box {
-            background: #fff; padding: 30px; border-radius: 30px;
+            background: rgba(255, 255, 255, 0.8); padding: 30px; border-radius: 30px;
             /* 更深的彈窗陰影 */
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 5px solid #ffd54f;
-            max-width: 90%; color: #333;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.5);
+            max-width: 90%; color: #333; backdrop-filter: blur(20px) saturate(120%);
         }
-        .overlay-title { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #ffb300; text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0,0,0,0.1); }
+        .overlay-title { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #ffb300; text-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .overlay-verse { 
             font-size: 22px; color: #0288d1; line-height: 1.6; 
-            background: #e0f2f1; padding: 20px; border-radius: 20px; 
-            width: 100%; margin-bottom: 20px; border: 2px dashed #b2dfdb;
-            font-weight: bold;
+            background: rgba(224, 242, 241, 0.6); padding: 20px; border-radius: 20px; 
+            width: 100%; margin-bottom: 20px; border: 1px solid rgba(178, 223, 219, 0.7);
+            font-weight: bold; backdrop-filter: blur(5px);
         }
 
         #watermark {
@@ -236,7 +266,7 @@
     </div>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v29 (Enhanced 3D Shadows)</div>
+<div id="watermark">Powered by Google Gemini v30 (iPhone Crystal 3D)</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
@@ -247,7 +277,7 @@
 </div>
 
 <script>
-    // --- 36種麻雀資料庫 ---
+    // 36種麻雀資料庫
     const rawTiles = [
         {t:"摩西", i:"🌊", s:"萬", c:"c-red"}, {t:"大衛", i:"👑", s:"萬", c:"c-red"},
         {t:"保羅", i:"📜", s:"萬", c:"c-red"}, {t:"彼得", i:"🐟", s:"萬", c:"c-red"},
@@ -290,10 +320,10 @@
 
     let tiles = [];
     let selectedTile = null;
-    let tileW = 42, tileH = 56;
+    let tileW = 44, tileH = 58; /* v30: 配合新樣式微調尺寸 */
     let globalScale = 1;
-    // v29: 預設視角 10度
-    let viewRotX = 10;
+    // v30: 預設視角調整為 25度，更有利於觀察水晶立體感
+    let viewRotX = 25;
     let viewRotZ = 0;
 
     function changeMap(val) { startGame(val); }
@@ -303,7 +333,7 @@
         document.getElementById('msg-overlay').style.display = 'none';
         const board = document.getElementById('game-board');
         board.innerHTML = ''; tiles = []; selectedTile = null;
-        viewRotX = 10; viewRotZ = 0; 
+        viewRotX = 25; viewRotZ = 0; 
 
         let slots = MapBlueprints[mapType]();
         if(slots.length % 2 !== 0) slots.pop();
@@ -366,10 +396,15 @@
             
             let left = slot.c * tileW; 
             let top = slot.r * tileH; 
+            // v30: 使用物理厚度計算Z軸間距
+            let zSpacing = 12; 
+            let zHeight = slot.z * zSpacing;
             
             el.style.left = left + 'px'; 
             el.style.top = top + 'px'; 
-            el.style.transform = `translateZ(${slot.z * 10}px)`; 
+            // v30: 重新啓用 translateZ 以呈現真實 3D 厚度
+            el.style.transform = `translateZ(${zHeight}px)`; 
+            el.style.setProperty('--base-z', zHeight + 'px');
             el.style.zIndex = slot.z * 10 + slot.r; 
             
             const tileObj = { el: el, data: card, z: slot.z, r: slot.r, c: slot.c, active: true, id: index };
