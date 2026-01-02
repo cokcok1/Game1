@@ -15,22 +15,26 @@
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v35 復原版</title>
+    <title>福音麻雀 - v36 經典實體版</title>
     <style>
         :root { 
             --tile-w: 44px; 
             --tile-h: 58px; 
-            --depth: 12px; 
-            --bg-color: #87ceeb; 
-            --ui-cloud-bg: rgba(255, 255, 255, 0.3);
+            --depth: 12px; /* 保持厚度 */
+            /* v36: 純深綠色背景 */
+            --bg-color: #054a29;
+            /* UI 背景改為不透明的深綠色調，配合檯面 */
+            --ui-bg: #085e35;
             --text-dark: #fff;
             --btn-yellow-1: #ffd54f;
             --btn-yellow-2: #ffb300;
             --btn-blue-1: #4fc3f7;
             --btn-blue-2: #0288d1;
-            /* 復原按鈕顏色 (橙色系) */
             --btn-orange-1: #ffab91;
             --btn-orange-2: #d84315;
+            /* 麻雀側面顏色 - 實心綠背 */
+            --tile-side-bottom: #0a3d22;
+            --tile-side-right: #0e4f2d;
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -38,22 +42,20 @@
         body {
             margin: 0; 
             background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(circle at top left, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 50%),
-                linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
-            background-size: cover;
-            background-attachment: fixed;
+            /* v36: 移除所有背景圖片和漸變 */
+            background-image: none;
             font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
             overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
             color: var(--text-dark); user-select: none; -webkit-user-select: none; touch-action: none;
         }
         
+        /* UI 元素移除毛玻璃，改為實心質感 */
         header, footer, .overlay-box, #joystick-zone, #status {
-            backdrop-filter: blur(10px) saturate(120%);
-            -webkit-backdrop-filter: blur(10px) saturate(120%);
-            background: rgba(255, 255, 255, 0.25) !important;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            background: var(--ui-bg) !important;
+            border: 2px solid rgba(0, 0, 0, 0.2); /* 改為深色邊框 */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
         header {
@@ -62,7 +64,6 @@
             padding: 5px 15px;
             padding-top: calc(5px + env(safe-area-inset-top)); 
             display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 15px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
             border-bottom-left-radius: 20px;
             border-bottom-right-radius: 20px;
             margin: 0 10px 5px 10px;
@@ -72,17 +73,16 @@
             padding: 6px 10px; 
             font-size: 14px; 
             border-radius: 15px; 
-            border: 1px solid rgba(255, 255, 255, 0.6); 
-            background: rgba(0, 60, 120, 0.6) !important; /* 深藍色背景 */
+            border: 2px solid rgba(0,0,0,0.3); 
+            background: #043a20 !important; /* 更深的綠色選單 */
             max-width: 140px; 
             color: #fff; 
             font-weight: bold; 
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
-            backdrop-filter: blur(5px);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
         }
         option { background: #333; color: #fff; }
         
-        #status { font-size: 15px; font-weight: bold; background: rgba(255, 213, 79, 0.85) !important; color: #d84315; padding: 6px 15px; border-radius: 20px; box-shadow: 0 3px 0 #ffca28, 0 5px 10px rgba(0,0,0,0.2); text-shadow: none; }
+        #status { font-size: 15px; font-weight: bold; background: rgba(255, 213, 79, 1) !important; color: #5d4037; padding: 6px 15px; border-radius: 20px; box-shadow: 0 3px 0 #ffca28, 0 5px 10px rgba(0,0,0,0.3); border: none; }
         
         #game-viewport {
             flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
@@ -107,7 +107,6 @@
             justify-content: space-between; 
             align-items: center; 
             z-index: 100;
-            box-shadow: 0 -8px 20px rgba(0,0,0,0.2);
             border-top-left-radius: 25px;
             border-top-right-radius: 25px;
             margin: 5px 10px 0 10px;
@@ -119,124 +118,159 @@
         
         .btn {
             background: linear-gradient(to bottom, var(--btn-yellow-1), var(--btn-yellow-2)); 
-            border: 3px solid #ffffff; padding: 0;
+            border: 2px solid #fff; padding: 0; /* 減少邊框寬度 */
             width: auto; flex: 1; margin: 0 3px;
             height: 44px; border-radius: 25px; font-weight: bold; font-size: 16px; 
-            box-shadow: 0 5px 0 #ff8f00, 0 10px 20px rgba(0,0,0,0.2); 
+            /* 更深的按鈕陰影 */
+            box-shadow: 0 4px 0 #e65100, 0 6px 10px rgba(0,0,0,0.4); 
             cursor: pointer; display: flex; justify-content: center; 
-            align-items: center; color: #5d4037;
+            align-items: center; color: #3e2723;
             transition: all 0.1s;
-            text-shadow: none;
         }
-        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #ff8f00, 0 5px 10px rgba(0,0,0,0.2); }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #e65100, 0 2px 5px rgba(0,0,0,0.4); }
         
         .btn-blue { 
             background: linear-gradient(to bottom, var(--btn-blue-1), var(--btn-blue-2)); 
-            box-shadow: 0 5px 0 #01579b, 0 10px 20px rgba(0,0,0,0.2); color: white; 
+            box-shadow: 0 4px 0 #01579b, 0 6px 10px rgba(0,0,0,0.4); color: white; border-color: #e1f5fe;
         }
-        .btn-blue:active { transform: translateY(3px); box-shadow: 0 2px 0 #01579b, 0 5px 10px rgba(0,0,0,0.2); }
+        .btn-blue:active { transform: translateY(3px); box-shadow: 0 1px 0 #01579b, 0 2px 5px rgba(0,0,0,0.4); }
 
-        /* 復原按鈕樣式 */
         .btn-orange {
             background: linear-gradient(to bottom, #ffcc80, #ff9800);
-            box-shadow: 0 5px 0 #e65100, 0 10px 20px rgba(0,0,0,0.2); color: #3e2723;
+            box-shadow: 0 4px 0 #bf360c, 0 6px 10px rgba(0,0,0,0.4); color: #3e2723; border-color: #fff3e0;
         }
-        .btn-orange:active { transform: translateY(3px); box-shadow: 0 2px 0 #e65100, 0 5px 10px rgba(0,0,0,0.2); }
+        .btn-orange:active { transform: translateY(3px); box-shadow: 0 1px 0 #bf360c, 0 2px 5px rgba(0,0,0,0.4); }
 
         #joystick-zone {
             position: relative; width: 60px; height: 60px; z-index: 150; flex-shrink: 0;
-            background: rgba(255, 255, 255, 0.2) !important; 
-            border: 2px solid rgba(255, 255, 255, 0.6);
+            background: rgba(0, 0, 0, 0.3) !important; 
+            border: 2px solid rgba(255, 255, 255, 0.4);
             border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2), inset 0 2px 5px rgba(255,255,255,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 2px 5px rgba(0,0,0,0.3);
         }
         #joystick-knob {
             width: 28px; height: 28px; background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
             border-radius: 50%; border: 2px solid #fff; 
-            box-shadow: 0 5px 10px rgba(0,0,0,0.3); position: relative;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.4); position: relative;
         }
         #joystick-hint {
             position: absolute; bottom: -15px; width: 100%; text-align: center;
-            font-size: 9px; color: rgba(255, 255, 255, 0.9); pointer-events: none; font-weight: bold;
-             text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            font-size: 9px; color: rgba(255, 255, 255, 0.7); pointer-events: none; font-weight: bold;
         }
 
-        /* 麻雀牌 */
+        /* --- v36 核心：經典實體麻雀 (Solid Bone & Bamboo) --- */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
-            background-color: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(8px) saturate(120%); -webkit-backdrop-filter: blur(8px) saturate(120%);
-            border-radius: 8px; cursor: pointer;
+            
+            /* 1. 牌面：實心純白，模擬骨牌/塑膠 */
+            background-color: #ffffff;
+            /* 移除毛玻璃 */
+            backdrop-filter: none; -webkit-backdrop-filter: none;
+            
+            border-radius: 4px; /* 稍微方一點，經典造型 */
+            cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transform-style: preserve-3d; transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 增加彈性動畫 */
-            border-top: 1px solid rgba(255, 255, 255, 1.0);
-            border-left: 1px solid rgba(255, 255, 255, 0.9);
-            border-bottom: 1px solid rgba(200, 230, 255, 0.6);
-            border-right: 1px solid rgba(200, 230, 255, 0.6);
-            box-shadow: 0 2px 4px rgba(0, 50, 100, 0.3), 0 8px 20px rgba(0, 50, 100, 0.2);
+            transform-style: preserve-3d; transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            
+            /* 2. 表面質感：加入微妙的倒角光澤，看起来不是死平的 */
+            box-shadow: inset 0 1px 1px rgba(255,255,255,1), inset 0 -2px 3px rgba(0,0,0,0.1);
+            
+            /* 邊框連接處 */
+            border-top: 1px solid #f0f0f0;
+            border-left: 1px solid #e0e0e0;
+            /* 右下邊界使用深綠色，與側面融合 */
+            border-bottom: 1px solid var(--tile-side-bottom);
+            border-right: 1px solid var(--tile-side-right);
         }
 
+        /* --- v36 重點：極致立體陰影 --- */
+        /* 使用伪元素在牌的下方制造多层阴影，不随牌面旋转，增强贴地感 */
+        .tile-shadow-layer {
+            position: absolute; width: 100%; height: 100%; top:0; left:0;
+            border-radius: 4px; pointer-events: none;
+            transform: translateZ(-1px); /* 放在牌底下一點點 */
+            /* 雙重陰影：一層緊實深黑(接觸面)，一層擴散柔和(環境光) */
+            box-shadow: 2px 3px 4px rgba(0,0,0,0.5), 6px 8px 15px rgba(0,0,0,0.3);
+            transition: all 0.15s;
+        }
+
+        /* 側面牆身 - v36: 實心深綠背殼 */
         .tile::before {
             content: ''; position: absolute; width: 100%; height: var(--depth);
             bottom: 0; left: 0;
-            background: linear-gradient(to bottom, rgba(240, 250, 255, 0.7), rgba(180, 220, 240, 0.85));
+            /* 實心深色 */
+            background-color: var(--tile-side-bottom);
             transform-origin: bottom; transform: rotateX(-90deg);
-            border-radius: 0 0 8px 8px;
-            border: 1px solid rgba(220, 240, 255, 0.6); border-top: none;
+            border-radius: 0 0 4px 4px;
+            /* 側面微光澤 */
+            background-image: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(0,0,0,0.2));
         }
         .tile::after {
             content: ''; position: absolute; width: var(--depth); height: 100%;
             top: 0; right: 0;
-            background: linear-gradient(to right, rgba(240, 250, 255, 0.7), rgba(200, 230, 250, 0.8));
+            /* 實心稍亮深色 */
+            background-color: var(--tile-side-right);
             transform-origin: right; transform: rotateY(90deg);
-            border-radius: 0 8px 8px 0;
-            border: 1px solid rgba(220, 240, 255, 0.6); border-left: none;
+            border-radius: 0 4px 4px 0;
+            /* 側面微光澤 */
+            background-image: linear-gradient(to right, rgba(255,255,255,0.1), rgba(0,0,0,0.1));
         }
 
         .tile.locked { 
-            background-color: rgba(220, 230, 240, 0.9);
-            filter: grayscale(60%) brightness(0.9);
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+            background-color: #e0e0e0; /* 鎖定變灰 */
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.2); /* 變暗凹陷感 */
         }
-        .tile.locked img, .tile.locked .t-icon { opacity: 0.3; }
+        .tile.locked .tile-shadow-layer {
+             box-shadow: 1px 2px 2px rgba(0,0,0,0.4), 3px 4px 8px rgba(0,0,0,0.2); /* 鎖定時陰影變淺變小 */
+        }
+        .tile.locked img, .tile.locked .t-icon { opacity: 0.4; filter: grayscale(100%); }
+        .tile.locked .t-text, .tile.locked .t-suit { color: #888; }
 
         .tile.selected { 
-            background-color: #fffde7; 
-            transform: translateZ(calc(var(--base-z) + 30px)) scale(1.08) !important; 
-            box-shadow: 0 0 15px rgba(255, 235, 59, 0.9), 0 30px 60px rgba(0, 50, 100, 0.4);
-            border: 2px solid #ffca28; z-index: 9999 !important;
+            background-color: #fff9c4; /* 選中變暖白 */
+            transform: translateZ(calc(var(--base-z) + 30px)) scale(1.05) !important; 
+            z-index: 9999 !important;
+            border-color: #ffb300;
+        }
+        /* 選中時陰影浮起、變大、變深 */
+        .tile.selected .tile-shadow-layer {
+            box-shadow: 10px 15px 30px rgba(0,0,0,0.6), 20px 30px 60px rgba(0,0,0,0.3);
+            transform: translateZ(-30px); /* 陰影留在地面 */
         }
 
-        .t-suit { position: absolute; top: 2px; right: 4px; font-size: 10px; color: #777; line-height: 1; backface-visibility: hidden; font-weight: bold; }
-        .t-icon { font-size: 28px; line-height: 1; margin-top: 2px; backface-visibility: hidden; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
-        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; backface-visibility: hidden; text-shadow: 0 1px 0 rgba(255,255,255,1); }
+        /* 內容樣式 - 回歸經典印刷質感 */
+        .t-suit { position: absolute; top: 2px; right: 4px; font-size: 10px; color: #888; line-height: 1; backface-visibility: hidden; font-weight: bold; }
+        .t-icon { font-size: 28px; line-height: 1; margin-top: 2px; backface-visibility: hidden; 
+            /* 微妙的墨水壓痕感 */
+            filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2)); 
+        }
+        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; backface-visibility: hidden; }
         
-        .c-red { color: #d32f2f; } .c-blue { color: #1565c0; } .c-green { color: #2e7d32; }
+        .c-red { color: #c62828; } .c-blue { color: #1565c0; } .c-green { color: #2e7d32; }
 
         #msg-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 50, 100, 0.4); 
+            background: rgba(0, 0, 0, 0.7); 
             display: none; flex-direction: column;
             justify-content: center; align-items: center; z-index: 200; text-align: center; padding: 20px;
-            backdrop-filter: blur(15px);
         }
         .overlay-box {
-            background: rgba(255, 255, 255, 0.9); padding: 30px; border-radius: 30px;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.7);
+            background: #fff; padding: 30px; border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7); border: 3px solid #e0e0e0;
             max-width: 90%; color: #333;
         }
-        .overlay-title { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #ffb300; text-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .overlay-title { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #ffb300; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
         .overlay-verse { 
             font-size: 22px; color: #0288d1; line-height: 1.6; 
-            background: rgba(224, 242, 241, 0.8); padding: 20px; border-radius: 20px; 
-            width: 100%; margin-bottom: 20px; border: 1px solid rgba(178, 223, 219, 0.8);
+            background: #e3f2fd; padding: 20px; border-radius: 15px; 
+            width: 100%; margin-bottom: 20px; border: 2px solid #bbdefb;
             font-weight: bold; 
         }
 
         #watermark {
             position: absolute; bottom: 95px; left: 20px; font-size: 11px;
-            color: rgba(255, 255, 255, 0.6); pointer-events: none; z-index: 150; font-weight: bold;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            color: rgba(255, 255, 255, 0.4); pointer-events: none; z-index: 150; font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         }
     </style>
 </head>
@@ -270,7 +304,7 @@
     </div>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v35 (Undo Feature)</div>
+<div id="watermark">Powered by Google Gemini v36 (Classic Solid & Deep Shadow)</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
@@ -323,7 +357,6 @@
 
     let tiles = [];
     let selectedTile = null;
-    // v35: 新增動作歷史記錄
     let moveHistory = [];
     let tileW = 44, tileH = 58; 
     let globalScale = 1;
@@ -337,7 +370,7 @@
         document.getElementById('msg-overlay').style.display = 'none';
         const board = document.getElementById('game-board');
         board.innerHTML = ''; tiles = []; selectedTile = null; 
-        moveHistory = []; // 重置歷史
+        moveHistory = [];
         viewRotX = 30; viewRotZ = 0; 
 
         let slots = MapBlueprints[mapType]();
@@ -397,7 +430,8 @@
             el.className = 'tile';
             
             const card = dataMap[index];
-            el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
+            // v36: 增加一個獨立的陰影層元素
+            el.innerHTML = `<div class="tile-shadow-layer"></div><div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
             
             let left = slot.c * tileW; 
             let top = slot.r * tileH; 
@@ -436,9 +470,7 @@
         if(selectedTile === tile) { tile.el.classList.remove('selected'); selectedTile = null; }
         else if(selectedTile) {
             if(tile.data.t === selectedTile.data.t) {
-                // 配對成功 - 記錄歷史
                 moveHistory.push([tile, selectedTile]);
-                
                 tile.active=false; selectedTile.active=false;
                 tile.el.style.display='none'; selectedTile.el.style.display='none'; 
                 selectedTile = null;
@@ -447,36 +479,15 @@
         } else { selectedTile = tile; tile.el.classList.add('selected'); }
     }
 
-    // --- v35: Undo 邏輯 ---
     function undoMove() {
-        if (moveHistory.length === 0) return; // 無步驟可復原
-        
-        // 取出最後一步
+        if (moveHistory.length === 0) return; 
         const lastMove = moveHistory.pop();
-        const tile1 = lastMove[0];
-        const tile2 = lastMove[1];
-        
-        // 恢復狀態
-        tile1.active = true;
-        tile2.active = true;
-        
-        // 恢復顯示
-        tile1.el.style.display = '';
-        tile2.el.style.display = '';
-        
-        // 重置樣式 (取消選中狀態)
-        tile1.el.classList.remove('selected');
-        tile2.el.classList.remove('selected');
-        
-        // 清除當前選取 (避免混亂)
-        if(selectedTile) {
-            selectedTile.el.classList.remove('selected');
-            selectedTile = null;
-        }
-        
-        // 更新盤面
-        updateLockStatus();
-        updateStatusText();
+        const tile1 = lastMove[0]; const tile2 = lastMove[1];
+        tile1.active = true; tile2.active = true;
+        tile1.el.style.display = ''; tile2.el.style.display = '';
+        tile1.el.classList.remove('selected'); tile2.el.classList.remove('selected');
+        if(selectedTile) { selectedTile.el.classList.remove('selected'); selectedTile = null; }
+        updateLockStatus(); updateStatusText();
     }
 
     function checkGameState() { if(tiles.filter(t=>t.active).length===0) showModal('win'); else if(!hasAvailableMoves()) showModal('lose'); }
@@ -506,12 +517,10 @@
             free[i].el.style.background='#b3e5fc'; free[j].el.style.background='#b3e5fc';
             setTimeout(()=>{ free[i].el.style.background=''; free[j].el.style.background=''; }, 1500); return;
         }
-        alert("目前無解，請按「洗牌」！"); // 提示改用洗牌
+        alert("目前無解，請按「洗牌」！");
     }
     
-    // 保留洗牌函數，雖然按鈕移除了，但 autoHint 提示無解時可能需要邏輯支持
     function shuffleActiveTiles() {
-        // (此函數暫時保留，若日後想加回按鈕可用)
         let active=tiles.filter(t=>t.active), datas=active.map(t=>t.data), attempt=0, solvable=false;
         let freeIndices=active.map((t,i)=>!checkLocked(t)?i:-1).filter(i=>i!==-1);
         while(!solvable && attempt<50) {
@@ -519,9 +528,12 @@
             for(let i of freeIndices) { if(seen.has(datas[i].t)) { solvable=true; break; } seen.add(datas[i].t); }
             attempt++;
         }
-        active.forEach((t,i)=>{ t.data=datas[i]; t.el.classList.remove('selected'); t.el.innerHTML=`<div class="t-suit">${t.data.s}</div><div class="t-icon ${t.data.c}">${t.data.i}</div><div class="t-text ${t.data.c}">${t.data.t}</div>`; });
+        active.forEach((t,i)=>{ t.data=datas[i]; t.el.classList.remove('selected'); 
+            // v36: 確保洗牌後陰影層存在
+            t.el.innerHTML=`<div class="tile-shadow-layer"></div><div class="t-suit">${t.data.s}</div><div class="t-icon ${t.data.c}">${t.data.i}</div><div class="t-text ${t.data.c}">${t.data.t}</div>`; 
+        });
         selectedTile=null; document.getElementById('game-board').style.opacity=0.5; setTimeout(()=>document.getElementById('game-board').style.opacity=1, 300);
-        moveHistory = []; // 洗牌後清空歷史，因為牌面變了，復原會邏輯錯誤
+        moveHistory = [];
     }
 
     function updateStatusText() { document.getElementById('status').innerText = "剩餘: " + tiles.filter(t => t.active).length; }
