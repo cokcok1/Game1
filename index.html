@@ -15,12 +15,12 @@
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v37 真實平整版</title>
+    <title>福音麻雀 - v37</title>
     <style>
         :root { 
             --tile-w: 44px; 
             --tile-h: 58px; 
-            --depth: 12px;
+            --depth: 14px; /* 保持厚度 */
             --bg-color: #054a29;
             --ui-bg: #085e35;
             --text-dark: #fff;
@@ -30,6 +30,7 @@
             --btn-blue-2: #0288d1;
             --btn-orange-1: #ffab91;
             --btn-orange-2: #d84315;
+            /* 實體麻雀側面顏色 (深綠色背) */
             --tile-side-bottom: #0a3d22;
             --tile-side-right: #0e4f2d;
         }
@@ -39,15 +40,15 @@
         body {
             margin: 0; 
             background-color: var(--bg-color);
-            background-image: none;
+            background-image: none; /* 純色背景 */
             font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
             overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
             color: var(--text-dark); user-select: none; -webkit-user-select: none; touch-action: none;
         }
         
+        /* UI 樣式保持 v36 */
         header, footer, .overlay-box, #joystick-zone, #status {
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
+            backdrop-filter: none; -webkit-backdrop-filter: none;
             background: var(--ui-bg) !important;
             border: 2px solid rgba(0, 0, 0, 0.2);
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
@@ -59,21 +60,14 @@
             padding: 5px 15px;
             padding-top: calc(5px + env(safe-area-inset-top)); 
             display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 15px;
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
             margin: 0 10px 5px 10px;
         }
 
         select { 
-            padding: 6px 10px; 
-            font-size: 14px; 
-            border-radius: 15px; 
-            border: 2px solid rgba(0,0,0,0.3); 
-            background: #043a20 !important;
-            max-width: 140px; 
-            color: #fff; 
-            font-weight: bold; 
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            padding: 6px 10px; font-size: 14px; border-radius: 15px; 
+            border: 2px solid rgba(0,0,0,0.3); background: #043a20 !important;
+            max-width: 140px; color: #fff; font-weight: bold; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
         }
         option { background: #333; color: #fff; }
         
@@ -81,44 +75,30 @@
         
         #game-viewport {
             flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
-            perspective: 2000px;
-            perspective-origin: center center;
+            perspective: 2000px; perspective-origin: center center;
         }
 
         #game-board { 
-            position: absolute; 
-            top: 50%; left: 50%; 
+            position: absolute; top: 50%; left: 50%; 
             transform: translate(-50%, -50%) rotateX(30deg) rotateZ(0deg); 
-            transform-origin: center center;
-            transform-style: preserve-3d;
+            transform-origin: center center; transform-style: preserve-3d;
         }
 
         footer { 
-            flex-shrink: 0; 
-            height: calc(80px + env(safe-area-inset-bottom)); 
-            padding: 5px 10px; 
-            padding-bottom: max(5px, env(safe-area-inset-bottom));
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            z-index: 100;
-            border-top-left-radius: 25px;
-            border-top-right-radius: 25px;
-            margin: 5px 10px 0 10px;
+            flex-shrink: 0; height: calc(80px + env(safe-area-inset-bottom)); 
+            padding: 5px 10px; padding-bottom: max(5px, env(safe-area-inset-bottom));
+            display: flex; justify-content: space-between; align-items: center; z-index: 100;
+            border-top-left-radius: 25px; border-top-right-radius: 25px; margin: 5px 10px 0 10px;
         }
 
-        .footer-btns {
-            display: flex; flex: 1; justify-content: space-around; margin-right: 10px;
-        }
+        .footer-btns { display: flex; flex: 1; justify-content: space-around; margin-right: 10px; }
         
         .btn {
             background: linear-gradient(to bottom, var(--btn-yellow-1), var(--btn-yellow-2)); 
-            border: 2px solid #fff; padding: 0;
-            width: auto; flex: 1; margin: 0 3px;
+            border: 2px solid #fff; padding: 0; width: auto; flex: 1; margin: 0 3px;
             height: 44px; border-radius: 25px; font-weight: bold; font-size: 16px; 
             box-shadow: 0 4px 0 #e65100, 0 6px 10px rgba(0,0,0,0.4); 
-            cursor: pointer; display: flex; justify-content: center; 
-            align-items: center; color: #3e2723;
+            cursor: pointer; display: flex; justify-content: center; align-items: center; color: #3e2723;
             transition: all 0.1s;
         }
         .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #e65100, 0 2px 5px rgba(0,0,0,0.4); }
@@ -138,111 +118,114 @@
         #joystick-zone {
             position: relative; width: 60px; height: 60px; z-index: 150; flex-shrink: 0;
             background: rgba(0, 0, 0, 0.3) !important; 
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
+            border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 50%; 
+            touch-action: none; display: flex; justify-content: center; align-items: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 2px 5px rgba(0,0,0,0.3);
         }
         #joystick-knob {
             width: 28px; height: 28px; background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
-            border-radius: 50%; border: 2px solid #fff; 
-            box-shadow: 0 3px 5px rgba(0,0,0,0.4); position: relative;
+            border-radius: 50%; border: 2px solid #fff; box-shadow: 0 3px 5px rgba(0,0,0,0.4); position: relative;
         }
         #joystick-hint {
             position: absolute; bottom: -15px; width: 100%; text-align: center;
             font-size: 9px; color: rgba(255, 255, 255, 0.7); pointer-events: none; font-weight: bold;
         }
 
-        /* --- v37 核心：真實平整牌面 (Flat Surface) --- */
+        /* --- v37 核心：真實平整實心麻雀 --- */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
             
-            /* 實心純白牌面 */
+            /* 1. 牌面：實心純白，完全平整 */
             background-color: #ffffff;
             backdrop-filter: none; -webkit-backdrop-filter: none;
             
-            border-radius: 4px;
+            /* v37: 圓角極小，看起來更像方正的骨牌 */
+            border-radius: 3px; 
+            
             cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transform-style: preserve-3d; transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d; transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             
-            /* v37: 移除所有內部凹陷陰影，只保留極細微的邊緣高光 */
-            box-shadow: inset 0 0.5px 0.5px rgba(255,255,255,0.8);
-            
-            /* 邊框連接處 */
-            border-top: 1px solid #f0f0f0;
-            border-left: 1px solid #e0e0e0;
-            border-bottom: 1px solid var(--tile-side-bottom);
-            border-right: 1px solid var(--tile-side-right);
+            /* v37: 移除四周的 "Frame" 邊框，只保留極微弱的頂部高光，消除「圍牆感」 */
+            box-shadow: inset 0 1px 0 rgba(255,255,255,1);
+            border: none; /* 移除邊框，讓表面平整延伸到邊緣 */
         }
 
-        /* 保持 v36 的極致立體陰影層 */
+        /* v37: 獨立的陰影層 (貼地感) */
         .tile-shadow-layer {
             position: absolute; width: 100%; height: 100%; top:0; left:0;
-            border-radius: 4px; pointer-events: none;
+            border-radius: 3px; pointer-events: none;
             transform: translateZ(-1px);
-            box-shadow: 2px 3px 4px rgba(0,0,0,0.5), 6px 8px 15px rgba(0,0,0,0.3);
+            /* 雙重陰影：接觸面黑，擴散面柔和 */
+            box-shadow: 1px 2px 2px rgba(0,0,0,0.4), 5px 5px 10px rgba(0,0,0,0.3);
             transition: all 0.15s;
         }
 
-        /* 保持 v36 的實心深綠背殼 */
+        /* v37: 側面牆身 (Bottom) - 實心深綠，無縫連接 */
         .tile::before {
             content: ''; position: absolute; width: 100%; height: var(--depth);
             bottom: 0; left: 0;
             background-color: var(--tile-side-bottom);
             transform-origin: bottom; transform: rotateX(-90deg);
-            border-radius: 0 0 4px 4px;
-            background-image: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(0,0,0,0.2));
+            border-radius: 0 0 3px 3px;
+            /* 側面加一點雜色質感，不那麼像塑膠 */
+            background-image: linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(0,0,0,0.1));
         }
+        
+        /* v37: 側面牆身 (Right) */
         .tile::after {
             content: ''; position: absolute; width: var(--depth); height: 100%;
             top: 0; right: 0;
             background-color: var(--tile-side-right);
             transform-origin: right; transform: rotateY(90deg);
-            border-radius: 0 4px 4px 0;
-            background-image: linear-gradient(to right, rgba(255,255,255,0.1), rgba(0,0,0,0.1));
+            border-radius: 0 3px 3px 0;
+            background-image: linear-gradient(to right, rgba(255,255,255,0.05), rgba(0,0,0,0.1));
         }
 
+        /* 鎖定狀態：平整變灰 */
         .tile.locked { 
-            background-color: #e0e0e0;
-            /* v37: 鎖定時也保持平整，只是變暗 */
-            box-shadow: none; 
+            background-color: #ddd; 
+            color: #999;
         }
-        .tile.locked .tile-shadow-layer {
-             box-shadow: 1px 2px 2px rgba(0,0,0,0.4), 3px 4px 8px rgba(0,0,0,0.2);
-        }
+        .tile.locked .tile-shadow-layer { box-shadow: none; } /* 鎖住時幾乎無陰影 */
+        .tile.locked::before { background-color: #08301b; } /* 側面也變暗 */
+        .tile.locked::after { background-color: #0b4024; }
         .tile.locked img, .tile.locked .t-icon { opacity: 0.4; filter: grayscale(100%); }
-        .tile.locked .t-text, .tile.locked .t-suit { color: #888; }
 
+        /* 選中狀態：浮起 */
         .tile.selected { 
-            background-color: #fff9c4;
-            transform: translateZ(calc(var(--base-z) + 30px)) scale(1.05) !important; 
+            background-color: #fff9c4; 
+            transform: translateZ(calc(var(--base-z) + 20px)) !important; 
             z-index: 9999 !important;
-            border-color: #ffb300;
+            /* 選中時才加邊框高亮 */
+            border: 2px solid #ffb300;
         }
         .tile.selected .tile-shadow-layer {
-            box-shadow: 10px 15px 30px rgba(0,0,0,0.6), 20px 30px 60px rgba(0,0,0,0.3);
-            transform: translateZ(-30px);
+            box-shadow: 10px 15px 30px rgba(0,0,0,0.5), 20px 30px 50px rgba(0,0,0,0.2);
+            transform: translateZ(-20px);
         }
 
-        /* v37 內容樣式 - 模擬刻痕/印刷質感 */
+        /* --- v37 內容刻痕效果 (Engraved Look) --- */
+        /* 不用凹陷牌面，而是讓字有「向下壓」的陰影 */
         .t-suit { 
-            position: absolute; top: 2px; right: 4px; font-size: 10px; color: #888; line-height: 1; backface-visibility: hidden; font-weight: bold; 
-            /* 微小的底部高光，模擬刻痕邊緣 */
-            text-shadow: 0 0.5px 0 rgba(255,255,255,0.8);
+            position: absolute; top: 2px; right: 3px; font-size: 10px; color: #666; line-height: 1; backface-visibility: hidden; font-weight: bold; 
+            /* 頂部內陰影 + 底部高光 = 刻痕感 */
+            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
         }
         .t-icon { 
             font-size: 28px; line-height: 1; margin-top: 2px; backface-visibility: hidden; 
-            /* 關鍵：使用 drop-shadow 模擬圖案的刻痕深度感 */
-            filter: drop-shadow(0 0.5px 0.5px rgba(0,0,0,0.2)); 
+            /* 圖案稍微有點厚度投影 */
+            filter: drop-shadow(0 1px 0 rgba(255,255,255,1)) drop-shadow(0 1px 1px rgba(0,0,0,0.1));
         }
         .t-text { 
-            font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; backface-visibility: hidden; 
-            /* 微小的底部高光 */
-            text-shadow: 0 0.5px 0 rgba(255,255,255,0.8);
+            font-size: 11px; font-weight: 900; margin-top: 0px; color: #222; backface-visibility: hidden; 
+            /* 刻痕感 */
+            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
         }
         
         .c-red { color: #c62828; } .c-blue { color: #1565c0; } .c-green { color: #2e7d32; }
 
+        /* 彈窗 */
         #msg-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7); 
@@ -299,7 +282,7 @@
     </div>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v37 (Real Flat Surface)</div>
+<div id="watermark">Powered by Google Gemini v37 (Real Flat Solid)</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
@@ -505,15 +488,6 @@
         overlay.style.display='flex';
     }
 
-    function autoHint() {
-        let free=tiles.filter(t=>t.active && !t.isLocked);
-        for(let i=0;i<free.length;i++) for(let j=i+1;j<free.length;j++) if(free[i].data.t === free[j].data.t) {
-            free[i].el.style.background='#b3e5fc'; free[j].el.style.background='#b3e5fc';
-            setTimeout(()=>{ free[i].el.style.background=''; free[j].el.style.background=''; }, 1500); return;
-        }
-        alert("目前無解，請按「洗牌」！");
-    }
-    
     function shuffleActiveTiles() {
         let active=tiles.filter(t=>t.active), datas=active.map(t=>t.data), attempt=0, solvable=false;
         let freeIndices=active.map((t,i)=>!checkLocked(t)?i:-1).filter(i=>i!==-1);
@@ -527,6 +501,15 @@
         });
         selectedTile=null; document.getElementById('game-board').style.opacity=0.5; setTimeout(()=>document.getElementById('game-board').style.opacity=1, 300);
         moveHistory = [];
+    }
+
+    function autoHint() {
+        let free=tiles.filter(t=>t.active && !t.isLocked);
+        for(let i=0;i<free.length;i++) for(let j=i+1;j<free.length;j++) if(free[i].data.t === free[j].data.t) {
+            free[i].el.style.background='#b3e5fc'; free[j].el.style.background='#b3e5fc';
+            setTimeout(()=>{ free[i].el.style.background=''; free[j].el.style.background=''; }, 1500); return;
+        }
+        alert("目前無解，請按「洗牌」！");
     }
 
     function updateStatusText() { document.getElementById('status').innerText = "剩餘: " + tiles.filter(t => t.active).length; }
