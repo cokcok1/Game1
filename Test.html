@@ -9,31 +9,32 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#2c1e12"> <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#054a29">
+    
+    <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v39 紙盒金字塔版</title>
+    <title>福音麻雀 - v36 經典實體版</title>
     <style>
         :root { 
-            --tile-w: 46px;
-            --tile-h: 60px; 
-            --depth: 16px; /* 增加厚度，讓紙盒感更強 */
-            
-            /* v39: 背景改為深木紋色調 */
-            --bg-color: #3e2723;
-            --ui-bg: #5d4037;
+            --tile-w: 44px; 
+            --tile-h: 58px; 
+            --depth: 12px; /* 保持厚度 */
+            /* v36: 純深綠色背景 */
+            --bg-color: #054a29;
+            /* UI 背景改為不透明的深綠色調，配合檯面 */
+            --ui-bg: #085e35;
             --text-dark: #fff;
-            
-            /* v39: 紙盒材質顏色定義 */
-            --cardboard-face: #d2b48c; /* 紙箱表面啡黃色 */
-            --cardboard-side: #a1887f; /* 紙箱側面深啡色 */
-            --cardboard-ink: #3e2723;  /* 印刷墨水深啡色 */
-            
-            /* UI 按鈕色 (保持不變，稍微調暗配合背景) */
-            --btn-yellow-1: #ffb300; --btn-yellow-2: #ff8f00;
-            --btn-blue-1: #039be5; --btn-blue-2: #0277bd;
-            --btn-orange-1: #ff7043; --btn-orange-2: #d84315;
+            --btn-yellow-1: #ffd54f;
+            --btn-yellow-2: #ffb300;
+            --btn-blue-1: #4fc3f7;
+            --btn-blue-2: #0288d1;
+            --btn-orange-1: #ffab91;
+            --btn-orange-2: #d84315;
+            /* 麻雀側面顏色 - 實心綠背 */
+            --tile-side-bottom: #0a3d22;
+            --tile-side-right: #0e4f2d;
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -41,18 +42,20 @@
         body {
             margin: 0; 
             background-color: var(--bg-color);
-            /* v39: 加入一點粗糙的紋理背景 */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%239C92AC' fill-opacity='0.1' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+            /* v36: 移除所有背景圖片和漸變 */
+            background-image: none;
             font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
             overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
             color: var(--text-dark); user-select: none; -webkit-user-select: none; touch-action: none;
         }
         
+        /* UI 元素移除毛玻璃，改為實心質感 */
         header, footer, .overlay-box, #joystick-zone, #status {
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
             background: var(--ui-bg) !important;
-            border: 2px solid rgba(0, 0, 0, 0.3);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            color: #efebe9;
+            border: 2px solid rgba(0, 0, 0, 0.2); /* 改為深色邊框 */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
         header {
@@ -61,199 +64,213 @@
             padding: 5px 15px;
             padding-top: calc(5px + env(safe-area-inset-top)); 
             display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 15px;
-            border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; /* UI也變得方正一點 */
-            margin: 0 5px 5px 5px;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            margin: 0 10px 5px 10px;
         }
 
         select { 
-            padding: 6px 10px; font-size: 14px; border-radius: 5px; 
-            border: 2px solid rgba(0,0,0,0.4); background: #4e342e !important;
-            max-width: 140px; color: #fff; font-weight: bold; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            padding: 6px 10px; 
+            font-size: 14px; 
+            border-radius: 15px; 
+            border: 2px solid rgba(0,0,0,0.3); 
+            background: #043a20 !important; /* 更深的綠色選單 */
+            max-width: 140px; 
+            color: #fff; 
+            font-weight: bold; 
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
         }
-        option { background: #3e2723; color: #fff; }
+        option { background: #333; color: #fff; }
         
-        #status { font-size: 15px; font-weight: bold; background: var(--btn-yellow-1) !important; color: #3e2723; padding: 6px 15px; border-radius: 5px; box-shadow: 0 3px 0 var(--btn-yellow-2), 0 5px 10px rgba(0,0,0,0.4); border: none; }
+        #status { font-size: 15px; font-weight: bold; background: rgba(255, 213, 79, 1) !important; color: #5d4037; padding: 6px 15px; border-radius: 20px; box-shadow: 0 3px 0 #ffca28, 0 5px 10px rgba(0,0,0,0.3); border: none; }
         
         #game-viewport {
             flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
-            perspective: 2500px; /* 增加透視感，讓金字塔更宏偉 */
+            perspective: 2000px;
             perspective-origin: center center;
         }
 
         #game-board { 
             position: absolute; 
             top: 50%; left: 50%; 
-            /* v39: 預設視角調整，拉高一點看清層次 */
-            transform: translate(-50%, -50%) rotateX(40deg) rotateZ(0deg); 
-            transform-origin: center center; transform-style: preserve-3d;
+            transform: translate(-50%, -50%) rotateX(30deg) rotateZ(0deg); 
+            transform-origin: center center;
+            transform-style: preserve-3d;
         }
 
         footer { 
-            flex-shrink: 0; height: calc(80px + env(safe-area-inset-bottom)); 
-            padding: 5px 10px; padding-bottom: max(5px, env(safe-area-inset-bottom));
-            display: flex; justify-content: space-between; align-items: center; z-index: 100;
-            border-top-left-radius: 10px; border-top-right-radius: 10px; margin: 5px 5px 0 5px;
+            flex-shrink: 0; 
+            height: calc(80px + env(safe-area-inset-bottom)); 
+            padding: 5px 10px; 
+            padding-bottom: max(5px, env(safe-area-inset-bottom));
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            z-index: 100;
+            border-top-left-radius: 25px;
+            border-top-right-radius: 25px;
+            margin: 5px 10px 0 10px;
         }
 
-        .footer-btns { display: flex; flex: 1; justify-content: space-around; margin-right: 10px; }
+        .footer-btns {
+            display: flex; flex: 1; justify-content: space-around; margin-right: 10px;
+        }
         
         .btn {
             background: linear-gradient(to bottom, var(--btn-yellow-1), var(--btn-yellow-2)); 
-            border: 2px solid #3e2723; padding: 0; width: auto; flex: 1; margin: 0 3px;
-            height: 44px; border-radius: 5px; font-weight: bold; font-size: 16px; 
-            box-shadow: 0 4px 0 #3e2723, 0 6px 10px rgba(0,0,0,0.5); 
-            cursor: pointer; display: flex; justify-content: center; align-items: center; color: #3e2723;
+            border: 2px solid #fff; padding: 0; /* 減少邊框寬度 */
+            width: auto; flex: 1; margin: 0 3px;
+            height: 44px; border-radius: 25px; font-weight: bold; font-size: 16px; 
+            /* 更深的按鈕陰影 */
+            box-shadow: 0 4px 0 #e65100, 0 6px 10px rgba(0,0,0,0.4); 
+            cursor: pointer; display: flex; justify-content: center; 
+            align-items: center; color: #3e2723;
             transition: all 0.1s;
         }
-        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #3e2723, 0 2px 5px rgba(0,0,0,0.5); }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #e65100, 0 2px 5px rgba(0,0,0,0.4); }
         
         .btn-blue { 
             background: linear-gradient(to bottom, var(--btn-blue-1), var(--btn-blue-2)); 
-            box-shadow: 0 4px 0 #01579b, 0 6px 10px rgba(0,0,0,0.5); color: white; border-color: #01579b;
+            box-shadow: 0 4px 0 #01579b, 0 6px 10px rgba(0,0,0,0.4); color: white; border-color: #e1f5fe;
         }
-        .btn-blue:active { transform: translateY(3px); box-shadow: 0 1px 0 #01579b, 0 2px 5px rgba(0,0,0,0.5); }
+        .btn-blue:active { transform: translateY(3px); box-shadow: 0 1px 0 #01579b, 0 2px 5px rgba(0,0,0,0.4); }
 
         .btn-orange {
-            background: linear-gradient(to bottom, var(--btn-orange-1), var(--btn-orange-2));
-            box-shadow: 0 4px 0 #bf360c, 0 6px 10px rgba(0,0,0,0.5); color: #fff; border-color: #bf360c;
+            background: linear-gradient(to bottom, #ffcc80, #ff9800);
+            box-shadow: 0 4px 0 #bf360c, 0 6px 10px rgba(0,0,0,0.4); color: #3e2723; border-color: #fff3e0;
         }
-        .btn-orange:active { transform: translateY(3px); box-shadow: 0 1px 0 #bf360c, 0 2px 5px rgba(0,0,0,0.5); }
+        .btn-orange:active { transform: translateY(3px); box-shadow: 0 1px 0 #bf360c, 0 2px 5px rgba(0,0,0,0.4); }
 
         #joystick-zone {
             position: relative; width: 60px; height: 60px; z-index: 150; flex-shrink: 0;
-            background: rgba(0, 0, 0, 0.4) !important; 
-            border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 50%; 
-            touch-action: none; display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.6), inset 0 2px 5px rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.3) !important; 
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 2px 5px rgba(0,0,0,0.3);
         }
         #joystick-knob {
-            width: 28px; height: 28px; background: var(--btn-yellow-1);
-            border-radius: 50%; border: 2px solid #3e2723; box-shadow: 0 3px 5px rgba(0,0,0,0.5); position: relative;
+            width: 28px; height: 28px; background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
+            border-radius: 50%; border: 2px solid #fff; 
+            box-shadow: 0 3px 5px rgba(0,0,0,0.4); position: relative;
         }
         #joystick-hint {
             position: absolute; bottom: -15px; width: 100%; text-align: center;
-            font-size: 9px; color: rgba(255, 255, 255, 0.6); pointer-events: none; font-weight: bold;
+            font-size: 9px; color: rgba(255, 255, 255, 0.7); pointer-events: none; font-weight: bold;
         }
 
-        /* --- v39 核心：實體紙盒麻雀 (Cardboard Box) --- */
+        /* --- v36 核心：經典實體麻雀 (Solid Bone & Bamboo) --- */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
             
-            /* 牌面：紙板啡黃色，啞光 */
-            background-color: var(--cardboard-face);
-            /* v39: 直角，無圓潤感 */
-            border-radius: 1px; 
+            /* 1. 牌面：實心純白，模擬骨牌/塑膠 */
+            background-color: #ffffff;
+            /* 移除毛玻璃 */
+            backdrop-filter: none; -webkit-backdrop-filter: none;
             
+            border-radius: 4px; /* 稍微方一點，經典造型 */
             cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            /* 移除所有高光，只保留極細微的紙板紋理感 */
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
-            /* 邊緣用深色線條勾勒紙盒接縫 */
-            border: 1px solid rgba(0,0,0,0.2);
+            transform-style: preserve-3d; transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             
-            transform-style: preserve-3d; transition: transform 0.15s;
+            /* 2. 表面質感：加入微妙的倒角光澤，看起来不是死平的 */
+            box-shadow: inset 0 1px 1px rgba(255,255,255,1), inset 0 -2px 3px rgba(0,0,0,0.1);
+            
+            /* 邊框連接處 */
+            border-top: 1px solid #f0f0f0;
+            border-left: 1px solid #e0e0e0;
+            /* 右下邊界使用深綠色，與側面融合 */
+            border-bottom: 1px solid var(--tile-side-bottom);
+            border-right: 1px solid var(--tile-side-right);
         }
 
-        /* 獨立陰影層 (方正的陰影) */
+        /* --- v36 重點：極致立體陰影 --- */
+        /* 使用伪元素在牌的下方制造多层阴影，不随牌面旋转，增强贴地感 */
         .tile-shadow-layer {
             position: absolute; width: 100%; height: 100%; top:0; left:0;
-            border-radius: 1px; pointer-events: none;
-            transform: translateZ(-1px);
-            background: transparent;
-            /* 結實的黑色陰影 */
-            box-shadow: 2px 2px 4px rgba(0,0,0,0.6), 5px 5px 15px rgba(0,0,0,0.3);
+            border-radius: 4px; pointer-events: none;
+            transform: translateZ(-1px); /* 放在牌底下一點點 */
+            /* 雙重陰影：一層緊實深黑(接觸面)，一層擴散柔和(環境光) */
+            box-shadow: 2px 3px 4px rgba(0,0,0,0.5), 6px 8px 15px rgba(0,0,0,0.3);
+            transition: all 0.15s;
         }
 
-        /* v39: 側面 (Bottom) - 單一深啡色紙板 */
+        /* 側面牆身 - v36: 實心深綠背殼 */
         .tile::before {
             content: ''; position: absolute; width: 100%; height: var(--depth);
             bottom: 0; left: 0;
+            /* 實心深色 */
+            background-color: var(--tile-side-bottom);
             transform-origin: bottom; transform: rotateX(-90deg);
-            border-radius: 0 0 1px 1px;
-            background-color: var(--cardboard-side);
-            /* 簡單的側面光影，不需複雜漸變 */
-            background-image: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3));
-            border: 1px solid rgba(0,0,0,0.3); border-top: none;
+            border-radius: 0 0 4px 4px;
+            /* 側面微光澤 */
+            background-image: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(0,0,0,0.2));
         }
-        
-        /* v39: 側面 (Right) - 單一深啡色紙板 */
         .tile::after {
             content: ''; position: absolute; width: var(--depth); height: 100%;
             top: 0; right: 0;
+            /* 實心稍亮深色 */
+            background-color: var(--tile-side-right);
             transform-origin: right; transform: rotateY(90deg);
-            border-radius: 0 1px 1px 0;
-            background-color: var(--cardboard-side);
-            background-image: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.2));
-            border: 1px solid rgba(0,0,0,0.3); border-left: none;
+            border-radius: 0 4px 4px 0;
+            /* 側面微光澤 */
+            background-image: linear-gradient(to right, rgba(255,255,255,0.1), rgba(0,0,0,0.1));
         }
 
-        /* 鎖定狀態：變暗的紙板 */
         .tile.locked { 
-            background-color: #a1887f; 
-            filter: brightness(0.8) sepia(0.3); /* 加點舊紙箱感覺 */
+            background-color: #e0e0e0; /* 鎖定變灰 */
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.2); /* 變暗凹陷感 */
         }
-        .tile.locked::before, .tile.locked::after { background-color: #8d6e63; }
-        .tile.locked img, .tile.locked .t-icon { opacity: 0.5; }
+        .tile.locked .tile-shadow-layer {
+             box-shadow: 1px 2px 2px rgba(0,0,0,0.4), 3px 4px 8px rgba(0,0,0,0.2); /* 鎖定時陰影變淺變小 */
+        }
+        .tile.locked img, .tile.locked .t-icon { opacity: 0.4; filter: grayscale(100%); }
+        .tile.locked .t-text, .tile.locked .t-suit { color: #888; }
 
-        /* 選中狀態：浮起 */
         .tile.selected { 
-            background-color: #ffe0b2; /* 選中變亮黃紙板 */
-            transform: translateZ(calc(var(--base-z) + 15px)) !important; 
+            background-color: #fff9c4; /* 選中變暖白 */
+            transform: translateZ(calc(var(--base-z) + 30px)) scale(1.05) !important; 
             z-index: 9999 !important;
-            border: 2px solid var(--btn-orange-2);
+            border-color: #ffb300;
         }
+        /* 選中時陰影浮起、變大、變深 */
         .tile.selected .tile-shadow-layer {
-            box-shadow: 15px 20px 40px rgba(0,0,0,0.5);
-            transform: translateZ(-15px);
+            box-shadow: 10px 15px 30px rgba(0,0,0,0.6), 20px 30px 60px rgba(0,0,0,0.3);
+            transform: translateZ(-30px); /* 陰影留在地面 */
         }
 
-        /* v39: 內容樣式 - 印刷墨水感 (無刻痕) */
-        .t-suit { 
-            position: absolute; top: 3px; right: 5px; font-size: 10px; 
-            color: var(--cardboard-ink); /* 墨水色 */
-            line-height: 1; backface-visibility: hidden; font-weight: bold; 
-            opacity: 0.7;
-            text-shadow: none; /* 移除所有立體效果 */
+        /* 內容樣式 - 回歸經典印刷質感 */
+        .t-suit { position: absolute; top: 2px; right: 4px; font-size: 10px; color: #888; line-height: 1; backface-visibility: hidden; font-weight: bold; }
+        .t-icon { font-size: 28px; line-height: 1; margin-top: 2px; backface-visibility: hidden; 
+            /* 微妙的墨水壓痕感 */
+            filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2)); 
         }
-        .t-icon { 
-            font-size: 30px; line-height: 1; margin-top: 2px; backface-visibility: hidden; 
-            color: var(--cardboard-ink); /* 墨水色 */
-            filter: none; /* 移除投影 */
-            /* 模擬印刷的輕微模糊感 */
-            text-shadow: 0 0 1px rgba(62, 39, 35, 0.5);
-        }
-        .t-text { 
-            font-size: 12px; font-weight: 900; margin-top: 2px; 
-            color: var(--cardboard-ink); /* 墨水色 */
-            backface-visibility: hidden; 
-            text-shadow: none;
-        }
+        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; backface-visibility: hidden; }
         
-        /* 顏色微調為較深沉的印刷色 */
-        .c-red { color: #b71c1c !important; } .c-blue { color: #0d47a1 !important; } .c-green { color: #1b5e20 !important; }
+        .c-red { color: #c62828; } .c-blue { color: #1565c0; } .c-green { color: #2e7d32; }
 
         #msg-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8); 
+            background: rgba(0, 0, 0, 0.7); 
             display: none; flex-direction: column;
             justify-content: center; align-items: center; z-index: 200; text-align: center; padding: 20px;
         }
         .overlay-box {
-            background: var(--cardboard-face); padding: 30px; border-radius: 5px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8); border: 4px solid #3e2723;
-            max-width: 90%; color: #3e2723;
+            background: #fff; padding: 30px; border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7); border: 3px solid #e0e0e0;
+            max-width: 90%; color: #333;
         }
-        .overlay-title { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: var(--btn-orange-2); text-shadow: none; }
+        .overlay-title { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #ffb300; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
         .overlay-verse { 
-            font-size: 22px; color: #3e2723; line-height: 1.6; 
-            background: rgba(0,0,0,0.05); padding: 20px; border-radius: 5px; 
-            width: 100%; margin-bottom: 20px; border: 2px dashed #3e2723;
+            font-size: 22px; color: #0288d1; line-height: 1.6; 
+            background: #e3f2fd; padding: 20px; border-radius: 15px; 
+            width: 100%; margin-bottom: 20px; border: 2px solid #bbdefb;
             font-weight: bold; 
         }
 
         #watermark {
             position: absolute; bottom: 95px; left: 20px; font-size: 11px;
-            color: rgba(255, 255, 255, 0.3); pointer-events: none; z-index: 150; font-weight: bold;
+            color: rgba(255, 255, 255, 0.4); pointer-events: none; z-index: 150; font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         }
     </style>
 </head>
@@ -261,10 +278,12 @@
 
 <header>
     <select id="map-select" onchange="changeMap(this.value)">
-        <option value="pyramid_brick">即 將 砌 磚 金 字 塔</option>
-        <option value="turtle_real">🐢 經典龜背 (真)</option>
         <option value="random">🎲 無限隨機</option>
+        <option value="turtle">🐢 經典龜背</option>
         <option value="castle">🏰 堅固堡壘</option>
+        <option value="cross">✝️ 榮耀十架</option>
+        <option value="bridge">🌉 恩典之橋</option>
+        <option value="towers">🗼 雙子塔</option>
     </select>
     <div id="status">剩餘: 0</div>
 </header>
@@ -285,7 +304,7 @@
     </div>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v39 (Cardboard Brick Pyramid)</div>
+<div id="watermark">Powered by Google Gemini v36 (Classic Solid & Deep Shadow)</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
@@ -322,58 +341,26 @@
     const loseVerses = ["我的恩典是夠你用的。(林後 12:9)", "應當一無掛慮，只要凡事藉著禱告。(腓 4:6)", "你們要休息，要知道我是神。(詩 46:10)", "萬事都互相效力。(羅 8:28)"];
 
     const MapBlueprints = {
-        pyramid_brick: () => generateBrickPyramid(), // v39 新增：砌磚金字塔
-        turtle_real: () => generateTrueTurtle(),
+        turtle: () => generatePyramid(6, 8, [6,6, 4,4, 2,2, 1,1]), 
         castle: () => generateWall(6, 8),
+        cross: () => generateCross(),
+        bridge: () => generateBridge(),
+        towers: () => generateTowers(),
         random: () => generateChaos()
     };
-
-    // v39: 真正的砌磚金字塔 (每層位移 0.5)
-    function generateBrickPyramid() {
-        let slots = [];
-        // Layer 0: 8x10 底座 (起始 0,0)
-        for(let r=0; r<8; r++) for(let c=0; c<10; c++) slots.push([0, r, c]);
-        
-        // Layer 1: 7x9 (起始 0.5, 0.5) - 壓在L0的十字位
-        for(let r=0; r<7; r++) for(let c=0; c<9; c++) slots.push([1, r+0.5, c+0.5]);
-
-        // Layer 2: 6x8 (起始 1.0, 1.0) - 壓在L1的十字位
-        for(let r=0; r<6; r++) for(let c=0; c<8; c++) slots.push([2, r+1, c+1]);
-
-        // Layer 3: 5x7 (起始 1.5, 1.5)
-        for(let r=0; r<5; r++) for(let c=0; c<7; c++) slots.push([3, r+1.5, c+1.5]);
-        
-        // Layer 4: 4x6 (起始 2.0, 2.0)
-        for(let r=0; r<4; r++) for(let c=0; c<6; c++) slots.push([4, r+2, c+2]);
-
-        // Layer 5: 2x4 (塔頂)
-        for(let r=1; r<3; r++) for(let c=1; c<5; c++) slots.push([5, r+2.5, c+2.5]);
-
-        return slots;
-    }
-
-    // v38: 龜背陣 (保留)
-    function generateTrueTurtle() {
-        let slots = [];
-        for(let r=0; r<8; r++) for(let c=0; c<10; c++) slots.push([0, r, c]);
-        for(let r=1; r<7; r++) for(let c=2; c<8; c++) slots.push([1, r, c]);
-        for(let r=2; r<6; r++) for(let c=3; c<7; c++) slots.push([2, r, c]);
-        for(let r=3; r<5; r++) for(let c=4; c<6; c++) slots.push([3, r, c]);
-        slots.push([4, 3.5, 4.5]);
-        slots.push([0, 3.5, -1]); slots.push([0, 3.5, 10]);
-        slots.push([0, 3.5, -2]); slots.push([0, 3.5, 11]);
-        return slots;
-    }
-
+    function generatePyramid(rows, cols, layerSizes) { let slots=[]; let cl=0; for(let i=0;i<layerSizes.length;i+=2){ let h=layerSizes[i], w=layerSizes[i+1]; let sr=Math.floor((rows-h)/2), sc=Math.floor((cols-w)/2); for(let r=0;r<h;r++) for(let c=0;c<w;c++) slots.push([cl, sr+r, sc+c]); cl++; } return slots; }
     function generateWall(rows, cols) { let slots=[]; for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) { slots.push([0, r, c]); if(r===0||r===rows-1||c===0||c===cols-1) slots.push([1, r, c]); } return slots; }
+    function generateCross() { let slots=[]; for(let r=0;r<8;r++) { slots.push([0,r,3]); slots.push([0,r,4]); slots.push([1,r,3]); } for(let c=0;c<8;c++) { slots.push([0,2,c]); slots.push([0,3,c]); slots.push([1,2,c]); } slots.push([2,2,3]); slots.push([2,3,3]); return slots; }
+    function generateBridge() { let slots=[]; for(let c=0;c<10;c++) { slots.push([0,2,c]); slots.push([0,3,c]); if(c<3||c>6) { slots.push([1,2,c]); slots.push([1,3,c]); slots.push([2,2,c]); } } return slots; }
+    function generateTowers() { let slots=[]; for(let r=0;r<6;r++) for(let c=0;c<8;c++) { if(c<2||c>5) { slots.push([0,r,c]); slots.push([1,r,c]); if(r>1&&r<4) slots.push([2,r,c]); } else if(r===2||r===3) slots.push([0,r,c]); } return slots; }
     function generateChaos() { let slots=[]; for(let r=0;r<6;r++) for(let c=0;c<8;c++) slots.push([0,r,c]); for(let i=0;i<32;i++) slots.push([Math.floor(Math.random()*2)+1, Math.floor(Math.random()*4)+1, Math.floor(Math.random()*6)+1]); return slots; }
 
     let tiles = [];
     let selectedTile = null;
     let moveHistory = [];
-    let tileW = 46, tileH = 60; 
+    let tileW = 44, tileH = 58; 
     let globalScale = 1;
-    let viewRotX = 40; // v39: 視角調高
+    let viewRotX = 30;
     let viewRotZ = 0;
 
     function changeMap(val) { startGame(val); }
@@ -382,38 +369,30 @@
     function startGame(mapType) {
         document.getElementById('msg-overlay').style.display = 'none';
         const board = document.getElementById('game-board');
-        board.innerHTML = ''; tiles = []; selectedTile = null; moveHistory = [];
-        
+        board.innerHTML = ''; tiles = []; selectedTile = null; 
+        moveHistory = [];
+        viewRotX = 30; viewRotZ = 0; 
+
         let slots = MapBlueprints[mapType]();
         if(slots.length % 2 !== 0) slots.pop();
-        
-        let minC = Infinity, maxC = -Infinity, minR = Infinity, maxR = -Infinity;
-        slots.forEach(s => { 
-            if(s[1]<minR) minR=s[1]; if(s[1]>maxR) maxR=s[1];
-            if(s[2]<minC) minC=s[2]; if(s[2]>maxC) maxC=s[2];
-        });
-        let centerR = (minR + maxR) / 2;
-        let centerC = (minC + maxC) / 2;
-        
-        let virtualTiles = slots.map((s, i) => ({ 
-            id: i, z: s[0], r: s[1] - centerR, c: s[2] - centerC, active: true 
-        }));
+        let minC = Infinity, minR = Infinity;
+        slots.forEach(s => { if(s[1]<minR) minR=s[1]; if(s[2]<minC) minC=s[2]; });
+        slots.forEach(s => { s[1]-=minR; s[2]-=minC; });
 
+        let virtualTiles = slots.map((s, i) => ({ id: i, z: s[0], r: s[1], c: s[2], active: true }));
         let pairs = [], tempTiles, success = false, attempt = 0;
-        while(!success && attempt < 50) { 
+        while(!success && attempt < 20) {
             tempTiles = JSON.parse(JSON.stringify(virtualTiles)); pairs = []; let possible = true;
             while(tempTiles.some(t => t.active)) {
                 let available = getAvailableTiles(tempTiles);
                 if(available.length < 2) { possible = false; break; }
                 let t1 = available.splice(Math.floor(Math.random()*available.length), 1)[0];
-                let t2 = available.splice(Math.floor(Math.random()*available.length), 1)[0]; 
-                tempTiles.find(t=>t.id===t1.id).active = false;
-                tempTiles.find(t=>t.id===t2.id).active = false;
-                pairs.push([t1.id, t2.id]);
+                let t2 = available.splice(Math.floor(Math.random()*available.length), 1)[0];
+                pairs.push([t1.id, t2.id]); t1.active = false; t2.active = false;
             }
             if(possible) success = true; attempt++;
         }
-        if(!success) { console.log("生成失敗，使用保底"); pairs=[]; for(let i=0;i<virtualTiles.length;i+=2) pairs.push([virtualTiles[i].id, virtualTiles[i+1].id]); }
+        if(!success) for(let i=0;i<virtualTiles.length;i+=2) pairs.push([i,i+1]);
 
         let totalPairs = pairs.length, cardInventory = [], shuffledTypes = [...rawTiles].sort(()=>Math.random()-0.5);
         let typeIndex = 0;
@@ -422,77 +401,73 @@
             cardInventory.push(card); if(i+1<totalPairs) cardInventory.push(card);
             typeIndex++;
         }
-        while(cardInventory.length < totalPairs) cardInventory.push(shuffledTypes[Math.floor(Math.random()*shuffledTypes.length)]);
         cardInventory.sort(()=>Math.random()-0.5);
-        
         let finalTilesData = new Array(virtualTiles.length);
-        pairs.forEach((pair, idx) => { 
-            finalTilesData[pair[0]] = cardInventory[idx]; 
-            finalTilesData[pair[1]] = cardInventory[idx]; 
-        });
+        pairs.forEach((pair, idx) => { finalTilesData[pair[0]] = finalTilesData[pair[1]] = cardInventory[idx]; });
 
         renderTiles(virtualTiles, finalTilesData);
         setTimeout(fitBoard, 50);
         updateStatusText();
     }
 
-    function getAvailableTiles(tileSet) { return tileSet.filter(t => t.active && !isBlocked(t, tileSet)); }
-
-    function isBlocked(tile, allTiles) {
-        // v38/v39 核心：半格判定邏輯
-        let isCovered = allTiles.some(other => 
-            other.active && other.id !== tile.id && other.z > tile.z && 
-            Math.abs(other.r - tile.r) < 1 && Math.abs(other.c - tile.c) < 1
-        );
-        if (isCovered) return true;
-
-        let leftBlocked = allTiles.some(other => 
-            other.active && other.id !== tile.id && other.z === tile.z && 
-            Math.abs(other.r - tile.r) < 1 && other.c < tile.c && (tile.c - other.c) <= 1
-        );
-        let rightBlocked = allTiles.some(other => 
-            other.active && other.id !== tile.id && other.z === tile.z && 
-            Math.abs(other.r - tile.r) < 1 && other.c > tile.c && (other.c - tile.c) <= 1
-        );
-        return leftBlocked && rightBlocked;
+    function getAvailableTiles(tileSet) { return tileSet.filter(t => t.active && !checkLockedInSet(t, tileSet)); }
+    function checkLockedInSet(tile, tileSet) {
+        let hasTop=false, hasLeft=false, hasRight=false;
+        for(let other of tileSet) {
+            if(!other.active || other.id === tile.id) continue;
+            if(other.z === tile.z+1 && other.r === tile.r && other.c === tile.c) hasTop = true;
+            if(other.z === tile.z && other.r === tile.r) { if(other.c === tile.c-1) hasLeft=true; if(other.c === tile.c+1) hasRight=true; }
+        }
+        return hasTop || (hasLeft && hasRight);
     }
-
-    function checkLocked(tileObj) { return isBlocked(tileObj, tiles); }
 
     function renderTiles(slots, dataMap) {
         const board = document.getElementById('game-board');
+        let maxX=0, maxY=0;
         slots.forEach((slot, index) => {
+            if(slot.c > maxX) maxX = slot.c; if(slot.r > maxY) maxY = slot.r;
             const el = document.createElement('div');
             el.className = 'tile';
+            
             const card = dataMap[index];
+            // v36: 增加一個獨立的陰影層元素
             el.innerHTML = `<div class="tile-shadow-layer"></div><div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
             
             let left = slot.c * tileW; 
             let top = slot.r * tileH; 
-            let zHeight = slot.z * 16; // v39: 增加層高
+            let zHeight = slot.z * 12; 
             
-            el.style.left = 0 + 'px'; el.style.top = 0 + 'px';
-            el.style.transform = `translate(${left}px, ${top}px) translateZ(${zHeight}px)`;
-            el.dataset.baseTrans = `translate(${left}px, ${top}px) translateZ(${zHeight}px)`;
-            el.style.zIndex = Math.floor(slot.z * 100 + slot.r + slot.c + 1000); 
+            el.style.left = left + 'px'; 
+            el.style.top = top + 'px'; 
+            el.style.transform = `translateZ(${zHeight}px)`; 
+            el.style.setProperty('--base-z', zHeight + 'px');
+            el.style.zIndex = slot.z * 10 + slot.r; 
             
             const tileObj = { el: el, data: card, z: slot.z, r: slot.r, c: slot.c, active: true, id: index };
             el.onclick = () => onTileClick(tileObj);
             board.appendChild(el);
             tiles.push(tileObj);
         });
+        board.style.width = (maxX + 1) * tileW + 'px';
+        board.style.height = (maxY + 1) * tileH + 'px';
         updateLockStatus();
     }
 
     function updateLockStatus() { tiles.forEach(t => { if(!t.active) return; t.isLocked = checkLocked(t); t.el.classList.toggle('locked', t.isLocked); }); }
+    
+    function checkLocked(tile) {
+        let hasTop=false, hasLeft=false, hasRight=false;
+        for(let other of tiles) {
+            if(!other.active || other === tile) continue;
+            if(other.z === tile.z+1 && other.r === tile.r && other.c === tile.c) hasTop = true;
+            if(other.z === tile.z && other.r === tile.r) { if(other.c === tile.c-1) hasLeft=true; if(other.c === tile.c+1) hasRight=true; }
+        }
+        return hasTop || (hasLeft && hasRight);
+    }
 
     function onTileClick(tile) {
         if(!tile.active || tile.isLocked) return;
-        if(selectedTile === tile) { 
-            tile.el.classList.remove('selected'); 
-            tile.el.style.transform = tile.el.dataset.baseTrans;
-            selectedTile = null; 
-        }
+        if(selectedTile === tile) { tile.el.classList.remove('selected'); selectedTile = null; }
         else if(selectedTile) {
             if(tile.data.t === selectedTile.data.t) {
                 moveHistory.push([tile, selectedTile]);
@@ -500,18 +475,8 @@
                 tile.el.style.display='none'; selectedTile.el.style.display='none'; 
                 selectedTile = null;
                 updateLockStatus(); updateStatusText(); checkGameState();
-            } else { 
-                selectedTile.el.classList.remove('selected'); 
-                selectedTile.el.style.transform = selectedTile.el.dataset.baseTrans;
-                selectedTile = tile; 
-                tile.el.classList.add('selected'); 
-                tile.el.style.transform = `${tile.el.dataset.baseTrans} translateZ(20px)`;
-            }
-        } else { 
-            selectedTile = tile; 
-            tile.el.classList.add('selected'); 
-            tile.el.style.transform = `${tile.el.dataset.baseTrans} translateZ(20px)`;
-        }
+            } else { selectedTile.el.classList.remove('selected'); selectedTile = tile; tile.el.classList.add('selected'); }
+        } else { selectedTile = tile; tile.el.classList.add('selected'); }
     }
 
     function undoMove() {
@@ -521,20 +486,13 @@
         tile1.active = true; tile2.active = true;
         tile1.el.style.display = ''; tile2.el.style.display = '';
         tile1.el.classList.remove('selected'); tile2.el.classList.remove('selected');
-        tile1.el.style.transform = tile1.el.dataset.baseTrans;
-        tile2.el.style.transform = tile2.el.dataset.baseTrans;
-        if(selectedTile) { 
-            selectedTile.el.classList.remove('selected'); 
-            selectedTile.el.style.transform = selectedTile.el.dataset.baseTrans;
-            selectedTile = null; 
-        }
+        if(selectedTile) { selectedTile.el.classList.remove('selected'); selectedTile = null; }
         updateLockStatus(); updateStatusText();
     }
 
     function checkGameState() { if(tiles.filter(t=>t.active).length===0) showModal('win'); else if(!hasAvailableMoves()) showModal('lose'); }
-    
     function hasAvailableMoves() {
-        let free = tiles.filter(t=>t.active && !checkLocked(t));
+        let free = tiles.filter(t=>t.active && !t.isLocked);
         for(let i=0;i<free.length;i++) for(let j=i+1;j<free.length;j++) if(free[i].data.t === free[j].data.t) return true;
         return false;
     }
@@ -543,16 +501,25 @@
         const overlay = document.getElementById('msg-overlay'), title = document.getElementById('overlay-title'), verse = document.getElementById('overlay-verse'), btn = document.getElementById('overlay-btn');
         if(type==='win') {
             title.innerText="🎉 哈利路亞！(勝利)"; title.style.color="#ffb300"; verse.innerText=winVerses[Math.floor(Math.random()*winVerses.length)];
-            btn.innerText="挑戰下一關 🚀"; btn.onclick=()=>{ document.getElementById('map-select').value=['pyramid_brick','turtle_real','random','castle'][Math.floor(Math.random()*4)]; startGame(document.getElementById('map-select').value); };
+            btn.innerText="挑戰下一關 🚀"; btn.onclick=()=>{ document.getElementById('map-select').value=['random','turtle','castle','cross','bridge','towers'][Math.floor(Math.random()*6)]; startGame(document.getElementById('map-select').value); };
             btn.className = "btn"; 
         } else {
-            title.innerText="💪 恩典夠用 (暫時無路)"; title.style.color="#039be5"; verse.innerText=loseVerses[Math.floor(Math.random()*loseVerses.length)];
+            title.innerText="💪 恩典夠用 (暫時無路)"; title.style.color="#4fc3f7"; verse.innerText=loseVerses[Math.floor(Math.random()*loseVerses.length)];
             btn.innerText="重新開始 🔄"; btn.onclick=()=>forceNewGame();
             btn.className = "btn btn-blue"; 
         }
         overlay.style.display='flex';
     }
 
+    function autoHint() {
+        let free=tiles.filter(t=>t.active && !t.isLocked);
+        for(let i=0;i<free.length;i++) for(let j=i+1;j<free.length;j++) if(free[i].data.t === free[j].data.t) {
+            free[i].el.style.background='#b3e5fc'; free[j].el.style.background='#b3e5fc';
+            setTimeout(()=>{ free[i].el.style.background=''; free[j].el.style.background=''; }, 1500); return;
+        }
+        alert("目前無解，請按「洗牌」！");
+    }
+    
     function shuffleActiveTiles() {
         let active=tiles.filter(t=>t.active), datas=active.map(t=>t.data), attempt=0, solvable=false;
         let freeIndices=active.map((t,i)=>!checkLocked(t)?i:-1).filter(i=>i!==-1);
@@ -561,24 +528,12 @@
             for(let i of freeIndices) { if(seen.has(datas[i].t)) { solvable=true; break; } seen.add(datas[i].t); }
             attempt++;
         }
-        active.forEach((t,i)=>{ t.data=datas[i]; t.el.classList.remove('selected'); t.el.style.transform = t.el.dataset.baseTrans;
+        active.forEach((t,i)=>{ t.data=datas[i]; t.el.classList.remove('selected'); 
+            // v36: 確保洗牌後陰影層存在
             t.el.innerHTML=`<div class="tile-shadow-layer"></div><div class="t-suit">${t.data.s}</div><div class="t-icon ${t.data.c}">${t.data.i}</div><div class="t-text ${t.data.c}">${t.data.t}</div>`; 
         });
         selectedTile=null; document.getElementById('game-board').style.opacity=0.5; setTimeout(()=>document.getElementById('game-board').style.opacity=1, 300);
         moveHistory = [];
-    }
-
-    function autoHint() {
-        let free=tiles.filter(t=>t.active && !checkLocked(t));
-        for(let i=0;i<free.length;i++) for(let j=i+1;j<free.length;j++) if(free[i].data.t === free[j].data.t) {
-            free[i].el.style.transform += " scale(1.1)"; free[j].el.style.transform += " scale(1.1)";
-            free[i].el.style.filter = "brightness(1.2)"; free[j].el.style.filter = "brightness(1.2)";
-            setTimeout(()=>{ 
-                if(free[i].active) { free[i].el.style.transform = free[i].el.dataset.baseTrans; free[i].el.style.filter = ""; }
-                if(free[j].active) { free[j].el.style.transform = free[j].el.dataset.baseTrans; free[j].el.style.filter = ""; }
-            }, 1000); return;
-        }
-        alert("目前無解，請按「洗牌」！");
     }
 
     function updateStatusText() { document.getElementById('status').innerText = "剩餘: " + tiles.filter(t => t.active).length; }
@@ -594,10 +549,9 @@
         const view = document.getElementById('game-viewport');
         if(!board || !view) return;
         board.style.transform = 'none';
-        const boardW = 700; const boardH = 700;
+        const boardW = board.scrollWidth; const boardH = board.scrollHeight;
         const viewW = view.clientWidth; const viewH = view.clientHeight;
         globalScale = Math.min((viewW - 40) / boardW, (viewH - 40) / boardH);
-        if(globalScale > 1.2) globalScale = 1.2;
         applyViewTransform();
     }
     window.addEventListener('resize', fitBoard);
@@ -656,9 +610,7 @@
         });
     }
 
-    // v39: 預設啟動新的砌磚金字塔
-    document.getElementById('map-select').value = 'pyramid_brick';
-    startGame('pyramid_brick'); 
+    startGame('random'); 
 </script>
 </body>
 </html>
