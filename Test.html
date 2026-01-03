@@ -9,32 +9,31 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#054a29">
-    
-    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c1e12"> <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v38 終極仿真版</title>
+    <title>福音麻雀 - v39 紙盒金字塔版</title>
     <style>
         :root { 
-            --tile-w: 46px; /* 稍微加寬，配合圓潤感 */
+            --tile-w: 46px;
             --tile-h: 60px; 
-            --depth: 14px; /* 厚度 */
+            --depth: 16px; /* 增加厚度，讓紙盒感更強 */
             
-            --bg-color: #054a29;
-            --ui-bg: #085e35;
+            /* v39: 背景改為深木紋色調 */
+            --bg-color: #3e2723;
+            --ui-bg: #5d4037;
             --text-dark: #fff;
             
-            /* 麻雀雙層材質顏色 */
-            --tile-bone-color: #fdfdfd; /* 上層：骨白 */
-            --tile-back-color: #004d26; /* 下層：深綠 */
-            --tile-shadow-color: rgba(0,0,0,0.5);
+            /* v39: 紙盒材質顏色定義 */
+            --cardboard-face: #d2b48c; /* 紙箱表面啡黃色 */
+            --cardboard-side: #a1887f; /* 紙箱側面深啡色 */
+            --cardboard-ink: #3e2723;  /* 印刷墨水深啡色 */
             
-            /* UI 按鈕色 */
-            --btn-yellow-1: #ffd54f; --btn-yellow-2: #ffb300;
-            --btn-blue-1: #4fc3f7; --btn-blue-2: #0288d1;
-            --btn-orange-1: #ffab91; --btn-orange-2: #d84315;
+            /* UI 按鈕色 (保持不變，稍微調暗配合背景) */
+            --btn-yellow-1: #ffb300; --btn-yellow-2: #ff8f00;
+            --btn-blue-1: #039be5; --btn-blue-2: #0277bd;
+            --btn-orange-1: #ff7043; --btn-orange-2: #d84315;
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -42,7 +41,8 @@
         body {
             margin: 0; 
             background-color: var(--bg-color);
-            background-image: none;
+            /* v39: 加入一點粗糙的紋理背景 */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%239C92AC' fill-opacity='0.1' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
             font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
             overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
             color: var(--text-dark); user-select: none; -webkit-user-select: none; touch-action: none;
@@ -50,8 +50,9 @@
         
         header, footer, .overlay-box, #joystick-zone, #status {
             background: var(--ui-bg) !important;
-            border: 2px solid rgba(0, 0, 0, 0.2);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            color: #efebe9;
         }
 
         header {
@@ -60,29 +61,30 @@
             padding: 5px 15px;
             padding-top: calc(5px + env(safe-area-inset-top)); 
             display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 15px;
-            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
-            margin: 0 10px 5px 10px;
+            border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; /* UI也變得方正一點 */
+            margin: 0 5px 5px 5px;
         }
 
         select { 
-            padding: 6px 10px; font-size: 14px; border-radius: 15px; 
-            border: 2px solid rgba(0,0,0,0.3); background: #043a20 !important;
+            padding: 6px 10px; font-size: 14px; border-radius: 5px; 
+            border: 2px solid rgba(0,0,0,0.4); background: #4e342e !important;
             max-width: 140px; color: #fff; font-weight: bold; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
         }
-        option { background: #333; color: #fff; }
+        option { background: #3e2723; color: #fff; }
         
-        #status { font-size: 15px; font-weight: bold; background: rgba(255, 213, 79, 1) !important; color: #5d4037; padding: 6px 15px; border-radius: 20px; box-shadow: 0 3px 0 #ffca28, 0 5px 10px rgba(0,0,0,0.3); border: none; }
+        #status { font-size: 15px; font-weight: bold; background: var(--btn-yellow-1) !important; color: #3e2723; padding: 6px 15px; border-radius: 5px; box-shadow: 0 3px 0 var(--btn-yellow-2), 0 5px 10px rgba(0,0,0,0.4); border: none; }
         
         #game-viewport {
             flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
-            perspective: 2000px; perspective-origin: center center;
+            perspective: 2500px; /* 增加透視感，讓金字塔更宏偉 */
+            perspective-origin: center center;
         }
 
         #game-board { 
             position: absolute; 
             top: 50%; left: 50%; 
-            /* v38: 預設視角調整，適應新立體感 */
-            transform: translate(-50%, -50%) rotateX(25deg) rotateZ(0deg); 
+            /* v39: 預設視角調整，拉高一點看清層次 */
+            transform: translate(-50%, -50%) rotateX(40deg) rotateZ(0deg); 
             transform-origin: center center; transform-style: preserve-3d;
         }
 
@@ -90,162 +92,168 @@
             flex-shrink: 0; height: calc(80px + env(safe-area-inset-bottom)); 
             padding: 5px 10px; padding-bottom: max(5px, env(safe-area-inset-bottom));
             display: flex; justify-content: space-between; align-items: center; z-index: 100;
-            border-top-left-radius: 25px; border-top-right-radius: 25px; margin: 5px 10px 0 10px;
+            border-top-left-radius: 10px; border-top-right-radius: 10px; margin: 5px 5px 0 5px;
         }
 
         .footer-btns { display: flex; flex: 1; justify-content: space-around; margin-right: 10px; }
         
         .btn {
             background: linear-gradient(to bottom, var(--btn-yellow-1), var(--btn-yellow-2)); 
-            border: 2px solid #fff; padding: 0; width: auto; flex: 1; margin: 0 3px;
-            height: 44px; border-radius: 25px; font-weight: bold; font-size: 16px; 
-            box-shadow: 0 4px 0 #e65100, 0 6px 10px rgba(0,0,0,0.4); 
+            border: 2px solid #3e2723; padding: 0; width: auto; flex: 1; margin: 0 3px;
+            height: 44px; border-radius: 5px; font-weight: bold; font-size: 16px; 
+            box-shadow: 0 4px 0 #3e2723, 0 6px 10px rgba(0,0,0,0.5); 
             cursor: pointer; display: flex; justify-content: center; align-items: center; color: #3e2723;
             transition: all 0.1s;
         }
-        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #e65100, 0 2px 5px rgba(0,0,0,0.4); }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #3e2723, 0 2px 5px rgba(0,0,0,0.5); }
         
         .btn-blue { 
             background: linear-gradient(to bottom, var(--btn-blue-1), var(--btn-blue-2)); 
-            box-shadow: 0 4px 0 #01579b, 0 6px 10px rgba(0,0,0,0.4); color: white; border-color: #e1f5fe;
+            box-shadow: 0 4px 0 #01579b, 0 6px 10px rgba(0,0,0,0.5); color: white; border-color: #01579b;
         }
-        .btn-blue:active { transform: translateY(3px); box-shadow: 0 1px 0 #01579b, 0 2px 5px rgba(0,0,0,0.4); }
+        .btn-blue:active { transform: translateY(3px); box-shadow: 0 1px 0 #01579b, 0 2px 5px rgba(0,0,0,0.5); }
 
         .btn-orange {
-            background: linear-gradient(to bottom, #ffcc80, #ff9800);
-            box-shadow: 0 4px 0 #bf360c, 0 6px 10px rgba(0,0,0,0.4); color: #3e2723; border-color: #fff3e0;
+            background: linear-gradient(to bottom, var(--btn-orange-1), var(--btn-orange-2));
+            box-shadow: 0 4px 0 #bf360c, 0 6px 10px rgba(0,0,0,0.5); color: #fff; border-color: #bf360c;
         }
-        .btn-orange:active { transform: translateY(3px); box-shadow: 0 1px 0 #bf360c, 0 2px 5px rgba(0,0,0,0.4); }
+        .btn-orange:active { transform: translateY(3px); box-shadow: 0 1px 0 #bf360c, 0 2px 5px rgba(0,0,0,0.5); }
 
         #joystick-zone {
             position: relative; width: 60px; height: 60px; z-index: 150; flex-shrink: 0;
-            background: rgba(0, 0, 0, 0.3) !important; 
-            border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 50%; 
+            background: rgba(0, 0, 0, 0.4) !important; 
+            border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 50%; 
             touch-action: none; display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 2px 5px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6), inset 0 2px 5px rgba(0,0,0,0.5);
         }
         #joystick-knob {
-            width: 28px; height: 28px; background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
-            border-radius: 50%; border: 2px solid #fff; box-shadow: 0 3px 5px rgba(0,0,0,0.4); position: relative;
+            width: 28px; height: 28px; background: var(--btn-yellow-1);
+            border-radius: 50%; border: 2px solid #3e2723; box-shadow: 0 3px 5px rgba(0,0,0,0.5); position: relative;
         }
         #joystick-hint {
             position: absolute; bottom: -15px; width: 100%; text-align: center;
-            font-size: 9px; color: rgba(255, 255, 255, 0.7); pointer-events: none; font-weight: bold;
+            font-size: 9px; color: rgba(255, 255, 255, 0.6); pointer-events: none; font-weight: bold;
         }
 
-        /* --- v38 核心：雙層仿真材質麻雀 --- */
+        /* --- v39 核心：實體紙盒麻雀 (Cardboard Box) --- */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
             
-            /* 牌面：乳白色，帶圓角 */
-            background-color: var(--tile-bone-color);
-            border-radius: 6px; 
+            /* 牌面：紙板啡黃色，啞光 */
+            background-color: var(--cardboard-face);
+            /* v39: 直角，無圓潤感 */
+            border-radius: 1px; 
             
             cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            /* 圓潤高光 */
-            box-shadow: inset 0 1px 2px rgba(255,255,255,1), inset 0 -1px 2px rgba(0,0,0,0.1);
+            /* 移除所有高光，只保留極細微的紙板紋理感 */
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+            /* 邊緣用深色線條勾勒紙盒接縫 */
+            border: 1px solid rgba(0,0,0,0.2);
             
             transform-style: preserve-3d; transition: transform 0.15s;
         }
 
-        /* v38: 獨立陰影層 (解決穿模與層次感) */
+        /* 獨立陰影層 (方正的陰影) */
         .tile-shadow-layer {
             position: absolute; width: 100%; height: 100%; top:0; left:0;
-            border-radius: 6px; pointer-events: none;
-            transform: translateZ(-2px); /* 稍微下沉 */
+            border-radius: 1px; pointer-events: none;
+            transform: translateZ(-1px);
             background: transparent;
-            /* 強烈的黑色層級陰影 */
-            box-shadow: 1px 1px 2px rgba(0,0,0,0.5), 5px 5px 10px rgba(0,0,0,0.4);
+            /* 結實的黑色陰影 */
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.6), 5px 5px 15px rgba(0,0,0,0.3);
         }
 
-        /* v38: 雙層側面 (Bottom) - 白骨+綠背 */
+        /* v39: 側面 (Bottom) - 單一深啡色紙板 */
         .tile::before {
             content: ''; position: absolute; width: 100%; height: var(--depth);
             bottom: 0; left: 0;
             transform-origin: bottom; transform: rotateX(-90deg);
-            border-radius: 0 0 6px 6px;
-            /* 關鍵：CSS 漸變模擬雙層夾心 (上白下綠) */
-            background: linear-gradient(to bottom, 
-                #e0e0e0 0%, #d0d0d0 35%, /* 骨層 (約35%) */
-                #003319 35%, #004d26 100%); /* 背層 (約65%) */
-            border: 1px solid rgba(0,0,0,0.1);
-            border-top: none;
+            border-radius: 0 0 1px 1px;
+            background-color: var(--cardboard-side);
+            /* 簡單的側面光影，不需複雜漸變 */
+            background-image: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3));
+            border: 1px solid rgba(0,0,0,0.3); border-top: none;
         }
         
-        /* v38: 雙層側面 (Right) - 白骨+綠背 */
+        /* v39: 側面 (Right) - 單一深啡色紙板 */
         .tile::after {
             content: ''; position: absolute; width: var(--depth); height: 100%;
             top: 0; right: 0;
             transform-origin: right; transform: rotateY(90deg);
-            border-radius: 0 6px 6px 0;
-            /* 關鍵：CSS 漸變模擬雙層夾心 (左白右綠) - 注意方向 */
-            background: linear-gradient(to right, 
-                #ededed 0%, #dedede 35%, 
-                #003d1e 35%, #00592e 100%);
-            border: 1px solid rgba(0,0,0,0.1);
-            border-left: none;
+            border-radius: 0 1px 1px 0;
+            background-color: var(--cardboard-side);
+            background-image: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.2));
+            border: 1px solid rgba(0,0,0,0.3); border-left: none;
         }
 
-        /* 鎖定狀態 */
+        /* 鎖定狀態：變暗的紙板 */
         .tile.locked { 
-            background-color: #ddd; 
-            filter: brightness(0.9);
+            background-color: #a1887f; 
+            filter: brightness(0.8) sepia(0.3); /* 加點舊紙箱感覺 */
         }
-        .tile.locked img, .tile.locked .t-icon { opacity: 0.4; filter: grayscale(100%); }
-        .tile.locked .t-text, .tile.locked .t-suit { color: #888; }
+        .tile.locked::before, .tile.locked::after { background-color: #8d6e63; }
+        .tile.locked img, .tile.locked .t-icon { opacity: 0.5; }
 
-        /* 選中狀態 */
+        /* 選中狀態：浮起 */
         .tile.selected { 
-            background-color: #fff9c4; 
+            background-color: #ffe0b2; /* 選中變亮黃紙板 */
             transform: translateZ(calc(var(--base-z) + 15px)) !important; 
             z-index: 9999 !important;
-            border: 2px solid #ffb300;
+            border: 2px solid var(--btn-orange-2);
         }
         .tile.selected .tile-shadow-layer {
-            box-shadow: 10px 15px 30px rgba(0,0,0,0.5), 20px 30px 50px rgba(0,0,0,0.2);
+            box-shadow: 15px 20px 40px rgba(0,0,0,0.5);
             transform: translateZ(-15px);
         }
 
-        /* 內容樣式 */
+        /* v39: 內容樣式 - 印刷墨水感 (無刻痕) */
         .t-suit { 
-            position: absolute; top: 2px; right: 4px; font-size: 10px; color: #666; line-height: 1; backface-visibility: hidden; font-weight: bold; 
-            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+            position: absolute; top: 3px; right: 5px; font-size: 10px; 
+            color: var(--cardboard-ink); /* 墨水色 */
+            line-height: 1; backface-visibility: hidden; font-weight: bold; 
+            opacity: 0.7;
+            text-shadow: none; /* 移除所有立體效果 */
         }
         .t-icon { 
-            font-size: 28px; line-height: 1; margin-top: 2px; backface-visibility: hidden; 
-            filter: drop-shadow(0 1px 0 rgba(255,255,255,1)) drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+            font-size: 30px; line-height: 1; margin-top: 2px; backface-visibility: hidden; 
+            color: var(--cardboard-ink); /* 墨水色 */
+            filter: none; /* 移除投影 */
+            /* 模擬印刷的輕微模糊感 */
+            text-shadow: 0 0 1px rgba(62, 39, 35, 0.5);
         }
         .t-text { 
-            font-size: 11px; font-weight: 900; margin-top: 0px; color: #222; backface-visibility: hidden; 
-            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+            font-size: 12px; font-weight: 900; margin-top: 2px; 
+            color: var(--cardboard-ink); /* 墨水色 */
+            backface-visibility: hidden; 
+            text-shadow: none;
         }
         
-        .c-red { color: #c62828; } .c-blue { color: #1565c0; } .c-green { color: #2e7d32; }
+        /* 顏色微調為較深沉的印刷色 */
+        .c-red { color: #b71c1c !important; } .c-blue { color: #0d47a1 !important; } .c-green { color: #1b5e20 !important; }
 
         #msg-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7); 
+            background: rgba(0, 0, 0, 0.8); 
             display: none; flex-direction: column;
             justify-content: center; align-items: center; z-index: 200; text-align: center; padding: 20px;
         }
         .overlay-box {
-            background: #fff; padding: 30px; border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.7); border: 3px solid #e0e0e0;
-            max-width: 90%; color: #333;
+            background: var(--cardboard-face); padding: 30px; border-radius: 5px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8); border: 4px solid #3e2723;
+            max-width: 90%; color: #3e2723;
         }
-        .overlay-title { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #ffb300; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
+        .overlay-title { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: var(--btn-orange-2); text-shadow: none; }
         .overlay-verse { 
-            font-size: 22px; color: #0288d1; line-height: 1.6; 
-            background: #e3f2fd; padding: 20px; border-radius: 15px; 
-            width: 100%; margin-bottom: 20px; border: 2px solid #bbdefb;
+            font-size: 22px; color: #3e2723; line-height: 1.6; 
+            background: rgba(0,0,0,0.05); padding: 20px; border-radius: 5px; 
+            width: 100%; margin-bottom: 20px; border: 2px dashed #3e2723;
             font-weight: bold; 
         }
 
         #watermark {
             position: absolute; bottom: 95px; left: 20px; font-size: 11px;
-            color: rgba(255, 255, 255, 0.4); pointer-events: none; z-index: 150; font-weight: bold;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            color: rgba(255, 255, 255, 0.3); pointer-events: none; z-index: 150; font-weight: bold;
         }
     </style>
 </head>
@@ -253,12 +261,10 @@
 
 <header>
     <select id="map-select" onchange="changeMap(this.value)">
+        <option value="pyramid_brick">即 將 砌 磚 金 字 塔</option>
         <option value="turtle_real">🐢 經典龜背 (真)</option>
         <option value="random">🎲 無限隨機</option>
         <option value="castle">🏰 堅固堡壘</option>
-        <option value="cross">✝️ 榮耀十架</option>
-        <option value="bridge">🌉 恩典之橋</option>
-        <option value="towers">🗼 雙子塔</option>
     </select>
     <div id="status">剩餘: 0</div>
 </header>
@@ -279,7 +285,7 @@
     </div>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v38 (Dual-Layer + Half-Grid)</div>
+<div id="watermark">Powered by Google Gemini v39 (Cardboard Brick Pyramid)</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
@@ -315,54 +321,59 @@
     const winVerses = ["流淚撒種的，必歡呼收割。(詩 126:5)", "那美好的仗我已經打過了。(提後 4:7)", "靠著那加給我力量的，凡事都能做。(腓 4:13)", "你們是世上的光。(太 5:14)", "得勝的，我要賜他在我寶座上與我同坐。(啟 3:21)"];
     const loseVerses = ["我的恩典是夠你用的。(林後 12:9)", "應當一無掛慮，只要凡事藉著禱告。(腓 4:6)", "你們要休息，要知道我是神。(詩 46:10)", "萬事都互相效力。(羅 8:28)"];
 
-    // v38: 地圖藍圖支援小數點座標 (半格)
     const MapBlueprints = {
-        turtle_real: () => generateTrueTurtle(), // 新增：真龜背
+        pyramid_brick: () => generateBrickPyramid(), // v39 新增：砌磚金字塔
+        turtle_real: () => generateTrueTurtle(),
         castle: () => generateWall(6, 8),
-        cross: () => generateCross(),
-        bridge: () => generateBridge(),
-        towers: () => generateTowers(),
         random: () => generateChaos()
     };
 
-    // v38: 真正的金字塔龜背陣 (支援半格)
-    function generateTrueTurtle() {
+    // v39: 真正的砌磚金字塔 (每層位移 0.5)
+    function generateBrickPyramid() {
         let slots = [];
-        // Layer 0: 基礎大盤 (12x8 約略)
-        // 簡化版龜背結構
+        // Layer 0: 8x10 底座 (起始 0,0)
         for(let r=0; r<8; r++) for(let c=0; c<10; c++) slots.push([0, r, c]);
         
-        // Layer 1: 縮小一圈 (6x6)
-        for(let r=1; r<7; r++) for(let c=2; c<8; c++) slots.push([1, r, c]);
+        // Layer 1: 7x9 (起始 0.5, 0.5) - 壓在L0的十字位
+        for(let r=0; r<7; r++) for(let c=0; c<9; c++) slots.push([1, r+0.5, c+0.5]);
+
+        // Layer 2: 6x8 (起始 1.0, 1.0) - 壓在L1的十字位
+        for(let r=0; r<6; r++) for(let c=0; c<8; c++) slots.push([2, r+1, c+1]);
+
+        // Layer 3: 5x7 (起始 1.5, 1.5)
+        for(let r=0; r<5; r++) for(let c=0; c<7; c++) slots.push([3, r+1.5, c+1.5]);
         
-        // Layer 2: 再縮小 (4x4)
-        for(let r=2; r<6; r++) for(let c=3; c<7; c++) slots.push([2, r, c]);
-        
-        // Layer 3: (2x2)
-        for(let r=3; r<5; r++) for(let c=4; c<6; c++) slots.push([3, r, c]);
-        
-        // Layer 4: 頂部單張 (放在十字中心) -> 3.5, 4.5
-        slots.push([4, 3.5, 4.5]);
-        
-        // 左右耳朵 (Layer 0 特殊位)
-        slots.push([0, 3.5, -1]); slots.push([0, 3.5, 10]);
-        slots.push([0, 3.5, -2]); slots.push([0, 3.5, 11]);
+        // Layer 4: 4x6 (起始 2.0, 2.0)
+        for(let r=0; r<4; r++) for(let c=0; c<6; c++) slots.push([4, r+2, c+2]);
+
+        // Layer 5: 2x4 (塔頂)
+        for(let r=1; r<3; r++) for(let c=1; c<5; c++) slots.push([5, r+2.5, c+2.5]);
 
         return slots;
     }
 
+    // v38: 龜背陣 (保留)
+    function generateTrueTurtle() {
+        let slots = [];
+        for(let r=0; r<8; r++) for(let c=0; c<10; c++) slots.push([0, r, c]);
+        for(let r=1; r<7; r++) for(let c=2; c<8; c++) slots.push([1, r, c]);
+        for(let r=2; r<6; r++) for(let c=3; c<7; c++) slots.push([2, r, c]);
+        for(let r=3; r<5; r++) for(let c=4; c<6; c++) slots.push([3, r, c]);
+        slots.push([4, 3.5, 4.5]);
+        slots.push([0, 3.5, -1]); slots.push([0, 3.5, 10]);
+        slots.push([0, 3.5, -2]); slots.push([0, 3.5, 11]);
+        return slots;
+    }
+
     function generateWall(rows, cols) { let slots=[]; for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) { slots.push([0, r, c]); if(r===0||r===rows-1||c===0||c===cols-1) slots.push([1, r, c]); } return slots; }
-    function generateCross() { let slots=[]; for(let r=0;r<8;r++) { slots.push([0,r,3]); slots.push([0,r,4]); slots.push([1,r,3]); } for(let c=0;c<8;c++) { slots.push([0,2,c]); slots.push([0,3,c]); slots.push([1,2,c]); } slots.push([2,2,3]); slots.push([2,3,3]); return slots; }
-    function generateBridge() { let slots=[]; for(let c=0;c<10;c++) { slots.push([0,2,c]); slots.push([0,3,c]); if(c<3||c>6) { slots.push([1,2,c]); slots.push([1,3,c]); slots.push([2,2,c]); } } return slots; }
-    function generateTowers() { let slots=[]; for(let r=0;r<6;r++) for(let c=0;c<8;c++) { if(c<2||c>5) { slots.push([0,r,c]); slots.push([1,r,c]); if(r>1&&r<4) slots.push([2,r,c]); } else if(r===2||r===3) slots.push([0,r,c]); } return slots; }
     function generateChaos() { let slots=[]; for(let r=0;r<6;r++) for(let c=0;c<8;c++) slots.push([0,r,c]); for(let i=0;i<32;i++) slots.push([Math.floor(Math.random()*2)+1, Math.floor(Math.random()*4)+1, Math.floor(Math.random()*6)+1]); return slots; }
 
     let tiles = [];
     let selectedTile = null;
     let moveHistory = [];
-    let tileW = 46, tileH = 60; // 配合樣式調整尺寸
+    let tileW = 46, tileH = 60; 
     let globalScale = 1;
-    let viewRotX = 25;
+    let viewRotX = 40; // v39: 視角調高
     let viewRotZ = 0;
 
     function changeMap(val) { startGame(val); }
@@ -374,64 +385,44 @@
         board.innerHTML = ''; tiles = []; selectedTile = null; moveHistory = [];
         
         let slots = MapBlueprints[mapType]();
-        
-        // 確保偶數張
         if(slots.length % 2 !== 0) slots.pop();
         
-        // 置中計算 (支援小數點)
         let minC = Infinity, maxC = -Infinity, minR = Infinity, maxR = -Infinity;
         slots.forEach(s => { 
             if(s[1]<minR) minR=s[1]; if(s[1]>maxR) maxR=s[1];
             if(s[2]<minC) minC=s[2]; if(s[2]>maxC) maxC=s[2];
         });
-        
-        // 將中心點移到 (0,0) 以便 transform 居中
         let centerR = (minR + maxR) / 2;
         let centerC = (minC + maxC) / 2;
         
-        // 建立虛擬牌組
         let virtualTiles = slots.map((s, i) => ({ 
             id: i, z: s[0], r: s[1] - centerR, c: s[2] - centerC, active: true 
         }));
 
-        // 逆向生成配對
         let pairs = [], tempTiles, success = false, attempt = 0;
-        while(!success && attempt < 50) { // 增加嘗試次數因為邏輯變複雜
+        while(!success && attempt < 50) { 
             tempTiles = JSON.parse(JSON.stringify(virtualTiles)); pairs = []; let possible = true;
             while(tempTiles.some(t => t.active)) {
                 let available = getAvailableTiles(tempTiles);
                 if(available.length < 2) { possible = false; break; }
-                
-                // 隨機選一對
-                let idx1 = Math.floor(Math.random()*available.length);
-                let t1 = available.splice(idx1, 1)[0];
-                let idx2 = Math.floor(Math.random()*available.length);
-                let t2 = available.splice(idx2, 1)[0]; // 簡單隨機
-                
-                // 在 tempTiles 中標記為已消除
-                // 這裡要找回原始引用來修改 active
+                let t1 = available.splice(Math.floor(Math.random()*available.length), 1)[0];
+                let t2 = available.splice(Math.floor(Math.random()*available.length), 1)[0]; 
                 tempTiles.find(t=>t.id===t1.id).active = false;
                 tempTiles.find(t=>t.id===t2.id).active = false;
-                
                 pairs.push([t1.id, t2.id]);
             }
             if(possible) success = true; attempt++;
         }
-        // 保底：若生成失敗，按順序配對
         if(!success) { console.log("生成失敗，使用保底"); pairs=[]; for(let i=0;i<virtualTiles.length;i+=2) pairs.push([virtualTiles[i].id, virtualTiles[i+1].id]); }
 
-        // 分配牌面
         let totalPairs = pairs.length, cardInventory = [], shuffledTypes = [...rawTiles].sort(()=>Math.random()-0.5);
         let typeIndex = 0;
-        for(let i=0; i<totalPairs; i+=2) { // 簡單輪替，不強求每種都出
+        for(let i=0; i<totalPairs; i+=2) {
             let card = shuffledTypes[typeIndex % shuffledTypes.length];
-            cardInventory.push(card); if(i+1<totalPairs) cardInventory.push(card); // 兩對同樣的牌(4張)
+            cardInventory.push(card); if(i+1<totalPairs) cardInventory.push(card);
             typeIndex++;
         }
-        // 如果牌數多，補滿庫存
-        while(cardInventory.length < totalPairs) {
-             cardInventory.push(shuffledTypes[Math.floor(Math.random()*shuffledTypes.length)]);
-        }
+        while(cardInventory.length < totalPairs) cardInventory.push(shuffledTypes[Math.floor(Math.random()*shuffledTypes.length)]);
         cardInventory.sort(()=>Math.random()-0.5);
         
         let finalTilesData = new Array(virtualTiles.length);
@@ -445,49 +436,28 @@
         updateStatusText();
     }
 
-    // --- v38 核心邏輯：物理覆蓋判定 (半格支援) ---
-    function getAvailableTiles(tileSet) {
-        return tileSet.filter(t => t.active && !isBlocked(t, tileSet));
-    }
+    function getAvailableTiles(tileSet) { return tileSet.filter(t => t.active && !isBlocked(t, tileSet)); }
 
     function isBlocked(tile, allTiles) {
-        // 1. 檢查上方是否有牌壓住 (Top blocked)
-        // 只要 z 比我大，且 (r, c) 距離 < 1 (即互相重疊)，就是壓住
+        // v38/v39 核心：半格判定邏輯
         let isCovered = allTiles.some(other => 
-            other.active && 
-            other.id !== tile.id && 
-            other.z > tile.z && 
-            Math.abs(other.r - tile.r) < 1 && 
-            Math.abs(other.c - tile.c) < 1
+            other.active && other.id !== tile.id && other.z > tile.z && 
+            Math.abs(other.r - tile.r) < 1 && Math.abs(other.c - tile.c) < 1
         );
         if (isCovered) return true;
 
-        // 2. 檢查左右是否有阻擋 (Side blocked)
-        // 規則：左邊有牌 OR 右邊有牌，則被鎖。
-        // 左邊判定：同層 (z相同)，r重疊 (abs < 1)，c 在我左邊 (other.c < tile.c) 且緊貼 (diff <= 1)
         let leftBlocked = allTiles.some(other => 
-            other.active && 
-            other.id !== tile.id && 
-            other.z === tile.z && 
-            Math.abs(other.r - tile.r) < 1 && 
-            other.c < tile.c && (tile.c - other.c) <= 1 // 距離<=1代表緊貼或重疊
+            other.active && other.id !== tile.id && other.z === tile.z && 
+            Math.abs(other.r - tile.r) < 1 && other.c < tile.c && (tile.c - other.c) <= 1
         );
-
         let rightBlocked = allTiles.some(other => 
-            other.active && 
-            other.id !== tile.id && 
-            other.z === tile.z && 
-            Math.abs(other.r - tile.r) < 1 && 
-            other.c > tile.c && (other.c - tile.c) <= 1
+            other.active && other.id !== tile.id && other.z === tile.z && 
+            Math.abs(other.r - tile.r) < 1 && other.c > tile.c && (other.c - tile.c) <= 1
         );
-
         return leftBlocked && rightBlocked;
     }
 
-    // 實時遊戲中的判定 (針對 DOM tiles)
-    function checkLocked(tileObj) {
-        return isBlocked(tileObj, tiles);
-    }
+    function checkLocked(tileObj) { return isBlocked(tileObj, tiles); }
 
     function renderTiles(slots, dataMap) {
         const board = document.getElementById('game-board');
@@ -497,29 +467,16 @@
             const card = dataMap[index];
             el.innerHTML = `<div class="tile-shadow-layer"></div><div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
             
-            // 座標轉換為像素 (支援小數點)
-            // 為了居中，這裡的 slot.r/c 已經是相對於中心的偏移量
-            // 但 absolute 定位通常從左上角算，所以我們利用 CSS transform: translate(-50%, -50%) 來處理
-            // 這裡只需設定相對距離
             let left = slot.c * tileW; 
             let top = slot.r * tileH; 
-            let zHeight = slot.z * 10; // 層級高度
+            let zHeight = slot.z * 16; // v39: 增加層高
             
-            el.style.left = 0 + 'px'; // 歸零，全靠 transform
-            el.style.top = 0 + 'px';
-            
-            // 組合變換：位置 + Z軸高度
+            el.style.left = 0 + 'px'; el.style.top = 0 + 'px';
             el.style.transform = `translate(${left}px, ${top}px) translateZ(${zHeight}px)`;
-            
-            // 儲存基礎高度與位置供後續動畫使用
             el.dataset.baseTrans = `translate(${left}px, ${top}px) translateZ(${zHeight}px)`;
             el.style.zIndex = Math.floor(slot.z * 100 + slot.r + slot.c + 1000); 
             
-            const tileObj = { 
-                el: el, data: card, 
-                z: slot.z, r: slot.r, c: slot.c, 
-                active: true, id: index 
-            };
+            const tileObj = { el: el, data: card, z: slot.z, r: slot.r, c: slot.c, active: true, id: index };
             el.onclick = () => onTileClick(tileObj);
             board.appendChild(el);
             tiles.push(tileObj);
@@ -527,19 +484,13 @@
         updateLockStatus();
     }
 
-    function updateLockStatus() { 
-        tiles.forEach(t => { 
-            if(!t.active) return; 
-            t.isLocked = checkLocked(t); 
-            t.el.classList.toggle('locked', t.isLocked); 
-        }); 
-    }
+    function updateLockStatus() { tiles.forEach(t => { if(!t.active) return; t.isLocked = checkLocked(t); t.el.classList.toggle('locked', t.isLocked); }); }
 
     function onTileClick(tile) {
         if(!tile.active || tile.isLocked) return;
         if(selectedTile === tile) { 
             tile.el.classList.remove('selected'); 
-            tile.el.style.transform = tile.el.dataset.baseTrans; // 恢復原位
+            tile.el.style.transform = tile.el.dataset.baseTrans;
             selectedTile = null; 
         }
         else if(selectedTile) {
@@ -554,7 +505,6 @@
                 selectedTile.el.style.transform = selectedTile.el.dataset.baseTrans;
                 selectedTile = tile; 
                 tile.el.classList.add('selected'); 
-                // 浮起效果：在基礎變換上疊加 Z 軸位移
                 tile.el.style.transform = `${tile.el.dataset.baseTrans} translateZ(20px)`;
             }
         } else { 
@@ -571,11 +521,8 @@
         tile1.active = true; tile2.active = true;
         tile1.el.style.display = ''; tile2.el.style.display = '';
         tile1.el.classList.remove('selected'); tile2.el.classList.remove('selected');
-        
-        // 恢復變換
         tile1.el.style.transform = tile1.el.dataset.baseTrans;
         tile2.el.style.transform = tile2.el.dataset.baseTrans;
-
         if(selectedTile) { 
             selectedTile.el.classList.remove('selected'); 
             selectedTile.el.style.transform = selectedTile.el.dataset.baseTrans;
@@ -586,7 +533,6 @@
 
     function checkGameState() { if(tiles.filter(t=>t.active).length===0) showModal('win'); else if(!hasAvailableMoves()) showModal('lose'); }
     
-    // v38: 提示邏輯也要用新的 block 判斷
     function hasAvailableMoves() {
         let free = tiles.filter(t=>t.active && !checkLocked(t));
         for(let i=0;i<free.length;i++) for(let j=i+1;j<free.length;j++) if(free[i].data.t === free[j].data.t) return true;
@@ -597,10 +543,10 @@
         const overlay = document.getElementById('msg-overlay'), title = document.getElementById('overlay-title'), verse = document.getElementById('overlay-verse'), btn = document.getElementById('overlay-btn');
         if(type==='win') {
             title.innerText="🎉 哈利路亞！(勝利)"; title.style.color="#ffb300"; verse.innerText=winVerses[Math.floor(Math.random()*winVerses.length)];
-            btn.innerText="挑戰下一關 🚀"; btn.onclick=()=>{ document.getElementById('map-select').value=['turtle_real','random','castle','cross','bridge','towers'][Math.floor(Math.random()*6)]; startGame(document.getElementById('map-select').value); };
+            btn.innerText="挑戰下一關 🚀"; btn.onclick=()=>{ document.getElementById('map-select').value=['pyramid_brick','turtle_real','random','castle'][Math.floor(Math.random()*4)]; startGame(document.getElementById('map-select').value); };
             btn.className = "btn"; 
         } else {
-            title.innerText="💪 恩典夠用 (暫時無路)"; title.style.color="#4fc3f7"; verse.innerText=loseVerses[Math.floor(Math.random()*loseVerses.length)];
+            title.innerText="💪 恩典夠用 (暫時無路)"; title.style.color="#039be5"; verse.innerText=loseVerses[Math.floor(Math.random()*loseVerses.length)];
             btn.innerText="重新開始 🔄"; btn.onclick=()=>forceNewGame();
             btn.className = "btn btn-blue"; 
         }
@@ -625,10 +571,8 @@
     function autoHint() {
         let free=tiles.filter(t=>t.active && !checkLocked(t));
         for(let i=0;i<free.length;i++) for(let j=i+1;j<free.length;j++) if(free[i].data.t === free[j].data.t) {
-            free[i].el.style.transform += " scale(1.1)"; 
-            free[j].el.style.transform += " scale(1.1)";
-            free[i].el.style.filter = "brightness(1.2)";
-            free[j].el.style.filter = "brightness(1.2)";
+            free[i].el.style.transform += " scale(1.1)"; free[j].el.style.transform += " scale(1.1)";
+            free[i].el.style.filter = "brightness(1.2)"; free[j].el.style.filter = "brightness(1.2)";
             setTimeout(()=>{ 
                 if(free[i].active) { free[i].el.style.transform = free[i].el.dataset.baseTrans; free[i].el.style.filter = ""; }
                 if(free[j].active) { free[j].el.style.transform = free[j].el.dataset.baseTrans; free[j].el.style.filter = ""; }
@@ -642,7 +586,6 @@
     function applyViewTransform() {
         const board = document.getElementById('game-board');
         if(!board) return;
-        // v38: 基礎視角
         board.style.transform = `translate(-50%, -50%) rotateX(${viewRotX}deg) rotateZ(${viewRotZ}deg) scale(${globalScale})`;
     }
 
@@ -651,7 +594,7 @@
         const view = document.getElementById('game-viewport');
         if(!board || !view) return;
         board.style.transform = 'none';
-        const boardW = 600; const boardH = 600; // 估計值
+        const boardW = 700; const boardH = 700;
         const viewW = view.clientWidth; const viewH = view.clientHeight;
         globalScale = Math.min((viewW - 40) / boardW, (viewH - 40) / boardH);
         if(globalScale > 1.2) globalScale = 1.2;
@@ -713,9 +656,9 @@
         });
     }
 
-    // 啟動預設為真龜背
-    document.getElementById('map-select').value = 'turtle_real';
-    startGame('turtle_real'); 
+    // v39: 預設啟動新的砌磚金字塔
+    document.getElementById('map-select').value = 'pyramid_brick';
+    startGame('pyramid_brick'); 
 </script>
 </body>
 </html>
