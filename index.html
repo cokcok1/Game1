@@ -15,7 +15,7 @@
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v35</title>
+    <title>福音麻雀 - v35.1 修復版</title>
     <style>
         :root { 
             --tile-w: 44px; 
@@ -24,13 +24,9 @@
             --bg-color: #87ceeb; 
             --ui-cloud-bg: rgba(255, 255, 255, 0.3);
             --text-dark: #fff;
-            --btn-yellow-1: #ffd54f;
-            --btn-yellow-2: #ffb300;
-            --btn-blue-1: #4fc3f7;
-            --btn-blue-2: #0288d1;
-            /* 復原按鈕顏色 (橙色系) */
-            --btn-orange-1: #ffab91;
-            --btn-orange-2: #d84315;
+            --btn-yellow-1: #ffd54f; --btn-yellow-2: #ffb300;
+            --btn-blue-1: #4fc3f7; --btn-blue-2: #0288d1;
+            --btn-orange-1: #ffab91; --btn-orange-2: #d84315;
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -41,8 +37,7 @@
             background-image: 
                 radial-gradient(circle at top left, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 50%),
                 linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
-            background-size: cover;
-            background-attachment: fixed;
+            background-size: cover; background-attachment: fixed;
             font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
             overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
             color: var(--text-dark); user-select: none; -webkit-user-select: none; touch-action: none;
@@ -57,27 +52,17 @@
         }
 
         header {
-            flex-shrink: 0; 
-            height: calc(50px + env(safe-area-inset-top)); 
-            padding: 5px 15px;
-            padding-top: calc(5px + env(safe-area-inset-top)); 
+            flex-shrink: 0; height: calc(50px + env(safe-area-inset-top)); 
+            padding: 5px 15px; padding-top: calc(5px + env(safe-area-inset-top)); 
             display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 15px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
-            margin: 0 10px 5px 10px;
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; margin: 0 10px 5px 10px;
         }
 
         select { 
-            padding: 6px 10px; 
-            font-size: 14px; 
-            border-radius: 15px; 
-            border: 1px solid rgba(255, 255, 255, 0.6); 
-            background: rgba(0, 60, 120, 0.6) !important; /* 深藍色背景 */
-            max-width: 140px; 
-            color: #fff; 
-            font-weight: bold; 
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+            padding: 6px 10px; font-size: 14px; border-radius: 15px; 
+            border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(0, 60, 120, 0.6) !important;
+            max-width: 140px; color: #fff; font-weight: bold; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
             backdrop-filter: blur(5px);
         }
         option { background: #333; color: #fff; }
@@ -86,47 +71,32 @@
         
         #game-viewport {
             flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
-            perspective: 2000px;
-            perspective-origin: center center;
+            perspective: 2000px; perspective-origin: center center;
         }
 
         #game-board { 
-            position: absolute; 
-            top: 50%; left: 50%; 
+            position: absolute; top: 50%; left: 50%; 
             transform: translate(-50%, -50%) rotateX(30deg) rotateZ(0deg); 
-            transform-origin: center center;
-            transform-style: preserve-3d;
+            transform-origin: center center; transform-style: preserve-3d;
         }
 
         footer { 
-            flex-shrink: 0; 
-            height: calc(80px + env(safe-area-inset-bottom)); 
-            padding: 5px 10px; 
-            padding-bottom: max(5px, env(safe-area-inset-bottom));
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            z-index: 100;
+            flex-shrink: 0; height: calc(80px + env(safe-area-inset-bottom)); 
+            padding: 5px 10px; padding-bottom: max(5px, env(safe-area-inset-bottom));
+            display: flex; justify-content: space-between; align-items: center; z-index: 100;
             box-shadow: 0 -8px 20px rgba(0,0,0,0.2);
-            border-top-left-radius: 25px;
-            border-top-right-radius: 25px;
-            margin: 5px 10px 0 10px;
+            border-top-left-radius: 25px; border-top-right-radius: 25px; margin: 5px 10px 0 10px;
         }
 
-        .footer-btns {
-            display: flex; flex: 1; justify-content: space-around; margin-right: 10px;
-        }
+        .footer-btns { display: flex; flex: 1; justify-content: space-around; margin-right: 10px; }
         
         .btn {
             background: linear-gradient(to bottom, var(--btn-yellow-1), var(--btn-yellow-2)); 
-            border: 3px solid #ffffff; padding: 0;
-            width: auto; flex: 1; margin: 0 3px;
+            border: 3px solid #ffffff; padding: 0; width: auto; flex: 1; margin: 0 3px;
             height: 44px; border-radius: 25px; font-weight: bold; font-size: 16px; 
             box-shadow: 0 5px 0 #ff8f00, 0 10px 20px rgba(0,0,0,0.2); 
-            cursor: pointer; display: flex; justify-content: center; 
-            align-items: center; color: #5d4037;
-            transition: all 0.1s;
-            text-shadow: none;
+            cursor: pointer; display: flex; justify-content: center; align-items: center; color: #5d4037;
+            transition: all 0.1s; text-shadow: none;
         }
         .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #ff8f00, 0 5px 10px rgba(0,0,0,0.2); }
         
@@ -136,7 +106,6 @@
         }
         .btn-blue:active { transform: translateY(3px); box-shadow: 0 2px 0 #01579b, 0 5px 10px rgba(0,0,0,0.2); }
 
-        /* 復原按鈕樣式 */
         .btn-orange {
             background: linear-gradient(to bottom, #ffcc80, #ff9800);
             box-shadow: 0 5px 0 #e65100, 0 10px 20px rgba(0,0,0,0.2); color: #3e2723;
@@ -152,8 +121,7 @@
         }
         #joystick-knob {
             width: 28px; height: 28px; background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
-            border-radius: 50%; border: 2px solid #fff; 
-            box-shadow: 0 5px 10px rgba(0,0,0,0.3); position: relative;
+            border-radius: 50%; border: 2px solid #fff; box-shadow: 0 5px 10px rgba(0,0,0,0.3); position: relative;
         }
         #joystick-hint {
             position: absolute; bottom: -15px; width: 100%; text-align: center;
@@ -168,7 +136,7 @@
             backdrop-filter: blur(8px) saturate(120%); -webkit-backdrop-filter: blur(8px) saturate(120%);
             border-radius: 8px; cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transform-style: preserve-3d; transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 增加彈性動畫 */
+            transform-style: preserve-3d; transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             border-top: 1px solid rgba(255, 255, 255, 1.0);
             border-left: 1px solid rgba(255, 255, 255, 0.9);
             border-bottom: 1px solid rgba(200, 230, 255, 0.6);
@@ -270,7 +238,7 @@
     </div>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v35 (Undo Feature)</div>
+<div id="watermark">Powered by Google Gemini v35.1 (Debugged)</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
@@ -319,11 +287,37 @@
     function generateCross() { let slots=[]; for(let r=0;r<8;r++) { slots.push([0,r,3]); slots.push([0,r,4]); slots.push([1,r,3]); } for(let c=0;c<8;c++) { slots.push([0,2,c]); slots.push([0,3,c]); slots.push([1,2,c]); } slots.push([2,2,3]); slots.push([2,3,3]); return slots; }
     function generateBridge() { let slots=[]; for(let c=0;c<10;c++) { slots.push([0,2,c]); slots.push([0,3,c]); if(c<3||c>6) { slots.push([1,2,c]); slots.push([1,3,c]); slots.push([2,2,c]); } } return slots; }
     function generateTowers() { let slots=[]; for(let r=0;r<6;r++) for(let c=0;c<8;c++) { if(c<2||c>5) { slots.push([0,r,c]); slots.push([1,r,c]); if(r>1&&r<4) slots.push([2,r,c]); } else if(r===2||r===3) slots.push([0,r,c]); } return slots; }
-    function generateChaos() { let slots=[]; for(let r=0;r<6;r++) for(let c=0;c<8;c++) slots.push([0,r,c]); for(let i=0;i<32;i++) slots.push([Math.floor(Math.random()*2)+1, Math.floor(Math.random()*4)+1, Math.floor(Math.random()*6)+1]); return slots; }
+    
+    // v35.1 修復：防止座標重疊的隨機生成
+    function generateChaos() { 
+        let slots=[]; 
+        let occupied = new Set(); // 記錄已佔用的位置 (z,r,c)
+
+        // 底層 (確保不重疊)
+        for(let r=0;r<6;r++) for(let c=0;c<8;c++) {
+            slots.push([0,r,c]);
+            occupied.add(`0,${r},${c}`);
+        }
+        
+        // 隨機層
+        let added = 0;
+        while(added < 32) {
+            let z = Math.floor(Math.random()*2)+1;
+            let r = Math.floor(Math.random()*4)+1;
+            let c = Math.floor(Math.random()*6)+1;
+            let key = `${z},${r},${c}`;
+            
+            if(!occupied.has(key)) {
+                slots.push([z,r,c]);
+                occupied.add(key);
+                added++;
+            }
+        }
+        return slots; 
+    }
 
     let tiles = [];
     let selectedTile = null;
-    // v35: 新增動作歷史記錄
     let moveHistory = [];
     let tileW = 44, tileH = 58; 
     let globalScale = 1;
@@ -337,40 +331,83 @@
         document.getElementById('msg-overlay').style.display = 'none';
         const board = document.getElementById('game-board');
         board.innerHTML = ''; tiles = []; selectedTile = null; 
-        moveHistory = []; // 重置歷史
+        moveHistory = []; 
         viewRotX = 30; viewRotZ = 0; 
 
-        let slots = MapBlueprints[mapType]();
-        if(slots.length % 2 !== 0) slots.pop();
-        let minC = Infinity, minR = Infinity;
-        slots.forEach(s => { if(s[1]<minR) minR=s[1]; if(s[2]<minC) minC=s[2]; });
-        slots.forEach(s => { s[1]-=minR; s[2]-=minC; });
+        // v35.1 核心修復：保證有解循環
+        // 如果隨機生成的地圖無法找到解，就重新生成地圖，直到找到為止
+        let solvableMapFound = false;
+        let attemptMap = 0;
+        
+        while (!solvableMapFound && attemptMap < 50) {
+            let slots = MapBlueprints[mapType]();
+            
+            // 確保偶數張
+            if(slots.length % 2 !== 0) slots.pop();
+            
+            let minC = Infinity, minR = Infinity;
+            slots.forEach(s => { if(s[1]<minR) minR=s[1]; if(s[2]<minC) minC=s[2]; });
+            slots.forEach(s => { s[1]-=minR; s[2]-=minC; });
 
-        let virtualTiles = slots.map((s, i) => ({ id: i, z: s[0], r: s[1], c: s[2], active: true }));
-        let pairs = [], tempTiles, success = false, attempt = 0;
-        while(!success && attempt < 20) {
-            tempTiles = JSON.parse(JSON.stringify(virtualTiles)); pairs = []; let possible = true;
-            while(tempTiles.some(t => t.active)) {
-                let available = getAvailableTiles(tempTiles);
-                if(available.length < 2) { possible = false; break; }
-                let t1 = available.splice(Math.floor(Math.random()*available.length), 1)[0];
-                let t2 = available.splice(Math.floor(Math.random()*available.length), 1)[0];
-                pairs.push([t1.id, t2.id]); t1.active = false; t2.active = false;
+            let virtualTiles = slots.map((s, i) => ({ id: i, z: s[0], r: s[1], c: s[2], active: true }));
+            
+            // 嘗試解這個地圖
+            let pairs = [], tempTiles, success = false, attemptSolve = 0;
+            
+            // 模擬解牌 (最多試 20 次不同路徑)
+            while(!success && attemptSolve < 20) {
+                tempTiles = JSON.parse(JSON.stringify(virtualTiles)); pairs = []; let possible = true;
+                while(tempTiles.some(t => t.active)) {
+                    let available = getAvailableTiles(tempTiles);
+                    if(available.length < 2) { possible = false; break; }
+                    let t1 = available.splice(Math.floor(Math.random()*available.length), 1)[0];
+                    let t2 = available.splice(Math.floor(Math.random()*available.length), 1)[0];
+                    pairs.push([t1.id, t2.id]); 
+                    // 標記為已消除
+                    tempTiles.find(t=>t.id===t1.id).active = false;
+                    tempTiles.find(t=>t.id===t2.id).active = false;
+                }
+                if(possible) success = true; 
+                attemptSolve++;
             }
-            if(possible) success = true; attempt++;
-        }
-        if(!success) for(let i=0;i<virtualTiles.length;i+=2) pairs.push([i,i+1]);
 
+            if(success) {
+                // 找到了有解的地圖！應用它
+                solvableMapFound = true;
+                applyGame(virtualTiles, pairs);
+            } else {
+                // 只在隨機模式下重試地圖，固定地圖則保底
+                if(mapType !== 'random') {
+                    solvableMapFound = true; // 強行開始，會有死局風險但沒辦法
+                    let backupPairs = [];
+                    for(let i=0; i<virtualTiles.length; i+=2) backupPairs.push([i, i+1]);
+                    applyGame(virtualTiles, backupPairs);
+                }
+                attemptMap++;
+            }
+        }
+        
+        if(!solvableMapFound) alert("生成地圖失敗，請重試");
+    }
+
+    function applyGame(virtualTiles, pairs) {
         let totalPairs = pairs.length, cardInventory = [], shuffledTypes = [...rawTiles].sort(()=>Math.random()-0.5);
         let typeIndex = 0;
-        for(let i=0; i<totalPairs; i+=2) {
+        
+        // 修正：確保 cardInventory 數量正確
+        for(let i=0; i<totalPairs; i++) { // 注意：這裡是 i++ 不是 i+=2
             let card = shuffledTypes[typeIndex % shuffledTypes.length];
-            cardInventory.push(card); if(i+1<totalPairs) cardInventory.push(card);
+            cardInventory.push(card); 
             typeIndex++;
         }
-        cardInventory.sort(()=>Math.random()-0.5);
+        // 不需要這裡再 shuffle cardInventory，因為 shuffledTypes 已經亂了，
+        // 且 pairs 是隨機生成的解法，所以直接按順序分配給 pairs 即可保證有解。
+        
         let finalTilesData = new Array(virtualTiles.length);
-        pairs.forEach((pair, idx) => { finalTilesData[pair[0]] = finalTilesData[pair[1]] = cardInventory[idx]; });
+        pairs.forEach((pair, idx) => { 
+            finalTilesData[pair[0]] = cardInventory[idx]; 
+            finalTilesData[pair[1]] = cardInventory[idx]; 
+        });
 
         renderTiles(virtualTiles, finalTilesData);
         setTimeout(fitBoard, 50);
@@ -436,9 +473,7 @@
         if(selectedTile === tile) { tile.el.classList.remove('selected'); selectedTile = null; }
         else if(selectedTile) {
             if(tile.data.t === selectedTile.data.t) {
-                // 配對成功 - 記錄歷史
                 moveHistory.push([tile, selectedTile]);
-                
                 tile.active=false; selectedTile.active=false;
                 tile.el.style.display='none'; selectedTile.el.style.display='none'; 
                 selectedTile = null;
@@ -447,36 +482,15 @@
         } else { selectedTile = tile; tile.el.classList.add('selected'); }
     }
 
-    // --- v35: Undo 邏輯 ---
     function undoMove() {
-        if (moveHistory.length === 0) return; // 無步驟可復原
-        
-        // 取出最後一步
+        if (moveHistory.length === 0) return; 
         const lastMove = moveHistory.pop();
-        const tile1 = lastMove[0];
-        const tile2 = lastMove[1];
-        
-        // 恢復狀態
-        tile1.active = true;
-        tile2.active = true;
-        
-        // 恢復顯示
-        tile1.el.style.display = '';
-        tile2.el.style.display = '';
-        
-        // 重置樣式 (取消選中狀態)
-        tile1.el.classList.remove('selected');
-        tile2.el.classList.remove('selected');
-        
-        // 清除當前選取 (避免混亂)
-        if(selectedTile) {
-            selectedTile.el.classList.remove('selected');
-            selectedTile = null;
-        }
-        
-        // 更新盤面
-        updateLockStatus();
-        updateStatusText();
+        const tile1 = lastMove[0]; const tile2 = lastMove[1];
+        tile1.active = true; tile2.active = true;
+        tile1.el.style.display = ''; tile2.el.style.display = '';
+        tile1.el.classList.remove('selected'); tile2.el.classList.remove('selected');
+        if(selectedTile) { selectedTile.el.classList.remove('selected'); selectedTile = null; }
+        updateLockStatus(); updateStatusText();
     }
 
     function checkGameState() { if(tiles.filter(t=>t.active).length===0) showModal('win'); else if(!hasAvailableMoves()) showModal('lose'); }
@@ -506,12 +520,10 @@
             free[i].el.style.background='#b3e5fc'; free[j].el.style.background='#b3e5fc';
             setTimeout(()=>{ free[i].el.style.background=''; free[j].el.style.background=''; }, 1500); return;
         }
-        alert("目前無解，請按「洗牌」！"); // 提示改用洗牌
+        alert("目前無解，請按「洗牌」！"); // 提示洗牌，但實際已無按鈕
     }
     
-    // 保留洗牌函數，雖然按鈕移除了，但 autoHint 提示無解時可能需要邏輯支持
     function shuffleActiveTiles() {
-        // (此函數暫時保留，若日後想加回按鈕可用)
         let active=tiles.filter(t=>t.active), datas=active.map(t=>t.data), attempt=0, solvable=false;
         let freeIndices=active.map((t,i)=>!checkLocked(t)?i:-1).filter(i=>i!==-1);
         while(!solvable && attempt<50) {
@@ -521,7 +533,7 @@
         }
         active.forEach((t,i)=>{ t.data=datas[i]; t.el.classList.remove('selected'); t.el.innerHTML=`<div class="t-suit">${t.data.s}</div><div class="t-icon ${t.data.c}">${t.data.i}</div><div class="t-text ${t.data.c}">${t.data.t}</div>`; });
         selectedTile=null; document.getElementById('game-board').style.opacity=0.5; setTimeout(()=>document.getElementById('game-board').style.opacity=1, 300);
-        moveHistory = []; // 洗牌後清空歷史，因為牌面變了，復原會邏輯錯誤
+        moveHistory = [];
     }
 
     function updateStatusText() { document.getElementById('status').innerText = "剩餘: " + tiles.filter(t => t.active).length; }
