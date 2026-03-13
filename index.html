@@ -15,22 +15,18 @@
     <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
     <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
 
-    <title>福音麻雀 - v40 雙語經典版</title>
+    <title>福音麻雀 - v36.1 雙語水晶版</title>
     <style>
         :root { 
             --tile-w: 44px; 
             --tile-h: 58px; 
-            --depth: 12px;
-            /* v36 經典純深綠色背景 */
-            --bg-color: #054a29;
-            --ui-bg: #085e35;
+            --depth: 12px; 
+            --bg-color: #87ceeb; 
+            --ui-cloud-bg: rgba(255, 255, 255, 0.3);
             --text-dark: #fff;
             --btn-yellow-1: #ffd54f; --btn-yellow-2: #ffb300;
             --btn-blue-1: #4fc3f7; --btn-blue-2: #0288d1;
             --btn-orange-1: #ffab91; --btn-orange-2: #d84315;
-            /* 麻雀側面顏色 - 實心綠背 */
-            --tile-side-bottom: #0a3d22;
-            --tile-side-right: #0e4f2d;
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -38,46 +34,50 @@
         body {
             margin: 0; 
             background-color: var(--bg-color);
-            background-image: none;
+            background-image: 
+                radial-gradient(circle at top left, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 50%),
+                linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
+            background-size: cover; background-attachment: fixed;
             font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
             overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
             color: var(--text-dark); user-select: none; -webkit-user-select: none; touch-action: none;
         }
         
-        header, footer, .overlay-box, #joystick-zone, #status {
-            backdrop-filter: none; -webkit-backdrop-filter: none;
-            background: var(--ui-bg) !important;
-            border: 2px solid rgba(0, 0, 0, 0.2);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        /* UI 元素毛玻璃 */
+        header, footer, .overlay-box, #joystick-zone, #status, #lang-btn {
+            backdrop-filter: blur(10px) saturate(120%);
+            -webkit-backdrop-filter: blur(10px) saturate(120%);
+            background: rgba(255, 255, 255, 0.25) !important;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
 
         header {
             flex-shrink: 0; height: calc(50px + env(safe-area-inset-top)); 
             padding: 5px 15px; padding-top: calc(5px + env(safe-area-inset-top)); 
             display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
             border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; margin: 0 10px 5px 10px;
         }
 
-        .header-left {
-            display: flex; align-items: center; gap: 8px;
-        }
-
-        #lang-btn {
-            padding: 5px 10px; font-size: 14px; font-weight: bold; border-radius: 12px;
-            background: linear-gradient(to bottom, #eeeeee, #cccccc);
-            border: 2px solid #333; color: #333; cursor: pointer;
-            box-shadow: 0 2px 0 #999; transition: all 0.1s;
-        }
-        #lang-btn:active { transform: translateY(2px); box-shadow: 0 0 0 #999; }
+        .header-left { display: flex; gap: 8px; align-items: center; }
 
         select { 
             padding: 6px 10px; font-size: 14px; border-radius: 15px; 
-            border: 2px solid rgba(0,0,0,0.3); background: #043a20 !important;
-            max-width: 140px; color: #fff; font-weight: bold; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(0, 60, 120, 0.6) !important;
+            max-width: 140px; color: #fff; font-weight: bold; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+            backdrop-filter: blur(5px);
         }
         option { background: #333; color: #fff; }
         
-        #status { font-size: 15px; font-weight: bold; background: rgba(255, 213, 79, 1) !important; color: #5d4037; padding: 6px 15px; border-radius: 20px; box-shadow: 0 3px 0 #ffca28, 0 5px 10px rgba(0,0,0,0.3); border: none; }
+        #lang-btn {
+            padding: 6px 12px; font-size: 14px; font-weight: bold; border-radius: 15px; cursor: pointer;
+            color: #fff; background: rgba(0, 100, 200, 0.5) !important; border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: all 0.2s;
+        }
+        #lang-btn:active { transform: scale(0.95); }
+
+        #status { font-size: 15px; font-weight: bold; background: rgba(255, 213, 79, 0.85) !important; color: #d84315; padding: 6px 15px; border-radius: 20px; box-shadow: 0 3px 0 #ffca28, 0 5px 10px rgba(0,0,0,0.2); text-shadow: none; }
         
         #game-viewport {
             flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
@@ -94,6 +94,7 @@
             flex-shrink: 0; height: calc(80px + env(safe-area-inset-bottom)); 
             padding: 5px 10px; padding-bottom: max(5px, env(safe-area-inset-bottom));
             display: flex; justify-content: space-between; align-items: center; z-index: 100;
+            box-shadow: 0 -8px 20px rgba(0,0,0,0.2);
             border-top-left-radius: 25px; border-top-right-radius: 25px; margin: 5px 10px 0 10px;
         }
 
@@ -101,114 +102,119 @@
         
         .btn {
             background: linear-gradient(to bottom, var(--btn-yellow-1), var(--btn-yellow-2)); 
-            border: 2px solid #fff; padding: 0; width: auto; flex: 1; margin: 0 3px;
+            border: 3px solid #ffffff; padding: 0; width: auto; flex: 1; margin: 0 3px;
             height: 44px; border-radius: 25px; font-weight: bold; font-size: 16px; 
-            box-shadow: 0 4px 0 #e65100, 0 6px 10px rgba(0,0,0,0.4); 
-            cursor: pointer; display: flex; justify-content: center; align-items: center; color: #3e2723;
+            box-shadow: 0 5px 0 #ff8f00, 0 10px 20px rgba(0,0,0,0.2); 
+            cursor: pointer; display: flex; justify-content: center; align-items: center; color: #5d4037;
             transition: all 0.1s; text-shadow: none;
         }
-        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #e65100, 0 2px 5px rgba(0,0,0,0.4); }
+        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #ff8f00, 0 5px 10px rgba(0,0,0,0.2); }
         
         .btn-blue { 
             background: linear-gradient(to bottom, var(--btn-blue-1), var(--btn-blue-2)); 
-            box-shadow: 0 4px 0 #01579b, 0 6px 10px rgba(0,0,0,0.4); color: white; border-color: #e1f5fe;
+            box-shadow: 0 5px 0 #01579b, 0 10px 20px rgba(0,0,0,0.2); color: white; 
         }
-        .btn-blue:active { transform: translateY(3px); box-shadow: 0 1px 0 #01579b, 0 2px 5px rgba(0,0,0,0.4); }
+        .btn-blue:active { transform: translateY(3px); box-shadow: 0 2px 0 #01579b, 0 5px 10px rgba(0,0,0,0.2); }
 
         .btn-orange {
             background: linear-gradient(to bottom, #ffcc80, #ff9800);
-            box-shadow: 0 4px 0 #bf360c, 0 6px 10px rgba(0,0,0,0.4); color: #3e2723; border-color: #fff3e0;
+            box-shadow: 0 5px 0 #e65100, 0 10px 20px rgba(0,0,0,0.2); color: #3e2723;
         }
-        .btn-orange:active { transform: translateY(3px); box-shadow: 0 1px 0 #bf360c, 0 2px 5px rgba(0,0,0,0.4); }
+        .btn-orange:active { transform: translateY(3px); box-shadow: 0 2px 0 #e65100, 0 5px 10px rgba(0,0,0,0.2); }
 
         #joystick-zone {
             position: relative; width: 60px; height: 60px; z-index: 150; flex-shrink: 0;
-            background: rgba(0, 0, 0, 0.3) !important; 
-            border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 50%; 
-            touch-action: none; display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 2px 5px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.2) !important; 
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2), inset 0 2px 5px rgba(255,255,255,0.3);
         }
         #joystick-knob {
             width: 28px; height: 28px; background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
-            border-radius: 50%; border: 2px solid #fff; box-shadow: 0 3px 5px rgba(0,0,0,0.4); position: relative;
+            border-radius: 50%; border: 2px solid #fff; box-shadow: 0 5px 10px rgba(0,0,0,0.3); position: relative;
         }
         #joystick-hint {
             position: absolute; bottom: -15px; width: 100%; text-align: center;
-            font-size: 9px; color: rgba(255, 255, 255, 0.7); pointer-events: none; font-weight: bold;
+            font-size: 9px; color: rgba(255, 255, 255, 0.9); pointer-events: none; font-weight: bold;
+             text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
-        /* --- 經典實體麻雀樣式 --- */
+        /* 麻雀牌 (水晶樣式) */
         .tile {
             position: absolute; width: var(--tile-w); height: var(--tile-h);
-            background-color: #ffffff; backdrop-filter: none; -webkit-backdrop-filter: none;
-            border-radius: 4px; cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px) saturate(120%); -webkit-backdrop-filter: blur(8px) saturate(120%);
+            border-radius: 8px; cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transform-style: preserve-3d; transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: inset 0 1px 1px rgba(255,255,255,1), inset 0 -2px 3px rgba(0,0,0,0.1);
-            border-top: 1px solid #f0f0f0; border-left: 1px solid #e0e0e0;
-            border-bottom: 1px solid var(--tile-side-bottom); border-right: 1px solid var(--tile-side-right);
-        }
-
-        .tile-shadow-layer {
-            position: absolute; width: 100%; height: 100%; top:0; left:0;
-            border-radius: 4px; pointer-events: none; transform: translateZ(-1px);
-            box-shadow: 2px 3px 4px rgba(0,0,0,0.5), 6px 8px 15px rgba(0,0,0,0.3);
-            transition: all 0.15s;
+            border-top: 1px solid rgba(255, 255, 255, 1.0);
+            border-left: 1px solid rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid rgba(200, 230, 255, 0.6);
+            border-right: 1px solid rgba(200, 230, 255, 0.6);
+            box-shadow: 0 2px 4px rgba(0, 50, 100, 0.3), 0 8px 20px rgba(0, 50, 100, 0.2);
         }
 
         .tile::before {
             content: ''; position: absolute; width: 100%; height: var(--depth);
-            bottom: 0; left: 0; background-color: var(--tile-side-bottom);
-            transform-origin: bottom; transform: rotateX(-90deg); border-radius: 0 0 4px 4px;
-            background-image: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(0,0,0,0.2));
+            bottom: 0; left: 0;
+            background: linear-gradient(to bottom, rgba(240, 250, 255, 0.7), rgba(180, 220, 240, 0.85));
+            transform-origin: bottom; transform: rotateX(-90deg);
+            border-radius: 0 0 8px 8px;
+            border: 1px solid rgba(220, 240, 255, 0.6); border-top: none;
         }
         .tile::after {
             content: ''; position: absolute; width: var(--depth); height: 100%;
-            top: 0; right: 0; background-color: var(--tile-side-right);
-            transform-origin: right; transform: rotateY(90deg); border-radius: 0 4px 4px 0;
-            background-image: linear-gradient(to right, rgba(255,255,255,0.1), rgba(0,0,0,0.1));
+            top: 0; right: 0;
+            background: linear-gradient(to right, rgba(240, 250, 255, 0.7), rgba(200, 230, 250, 0.8));
+            transform-origin: right; transform: rotateY(90deg);
+            border-radius: 0 8px 8px 0;
+            border: 1px solid rgba(220, 240, 255, 0.6); border-left: none;
         }
 
-        .tile.locked { background-color: #e0e0e0; box-shadow: inset 0 0 15px rgba(0,0,0,0.2); }
-        .tile.locked .tile-shadow-layer { box-shadow: 1px 2px 2px rgba(0,0,0,0.4), 3px 4px 8px rgba(0,0,0,0.2); }
-        .tile.locked img, .tile.locked .t-icon { opacity: 0.4; filter: grayscale(100%); }
-        .tile.locked .t-text, .tile.locked .t-suit { color: #888; }
+        .tile.locked { 
+            background-color: rgba(220, 230, 240, 0.9);
+            filter: grayscale(60%) brightness(0.9);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+        .tile.locked img, .tile.locked .t-icon { opacity: 0.3; }
 
         .tile.selected { 
-            background-color: #fff9c4; transform: translateZ(calc(var(--base-z) + 30px)) scale(1.05) !important; 
-            z-index: 9999 !important; border-color: #ffb300;
-        }
-        .tile.selected .tile-shadow-layer {
-            box-shadow: 10px 15px 30px rgba(0,0,0,0.6), 20px 30px 60px rgba(0,0,0,0.3);
-            transform: translateZ(-30px);
+            background-color: #fffde7; 
+            transform: translateZ(calc(var(--base-z) + 30px)) scale(1.08) !important; 
+            box-shadow: 0 0 15px rgba(255, 235, 59, 0.9), 0 30px 60px rgba(0, 50, 100, 0.4);
+            border: 2px solid #ffca28; z-index: 9999 !important;
         }
 
-        .t-suit { position: absolute; top: 2px; right: 4px; font-size: 10px; color: #888; line-height: 1; backface-visibility: hidden; font-weight: bold; }
-        .t-icon { font-size: 28px; line-height: 1; margin-top: 2px; backface-visibility: hidden; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2)); }
-        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; backface-visibility: hidden; }
+        .t-suit { position: absolute; top: 2px; right: 4px; font-size: 10px; color: #777; line-height: 1; backface-visibility: hidden; font-weight: bold; }
+        .t-icon { font-size: 28px; line-height: 1; margin-top: 2px; backface-visibility: hidden; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
+        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; backface-visibility: hidden; text-shadow: 0 1px 0 rgba(255,255,255,1); }
         
-        .c-red { color: #c62828; } .c-blue { color: #1565c0; } .c-green { color: #2e7d32; }
+        .c-red { color: #d32f2f; } .c-blue { color: #1565c0; } .c-green { color: #2e7d32; }
 
         #msg-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7); display: none; flex-direction: column;
+            background: rgba(0, 50, 100, 0.4); 
+            display: none; flex-direction: column;
             justify-content: center; align-items: center; z-index: 200; text-align: center; padding: 20px;
+            backdrop-filter: blur(15px);
         }
         .overlay-box {
-            background: #fff; padding: 30px; border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.7); border: 3px solid #e0e0e0; max-width: 90%; color: #333;
+            background: rgba(255, 255, 255, 0.9); padding: 30px; border-radius: 30px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.7);
+            max-width: 90%; color: #333;
         }
-        .overlay-title { font-size: 30px; font-weight: bold; margin-bottom: 20px; color: #ffb300; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
+        .overlay-title { font-size: 32px; font-weight: bold; margin-bottom: 20px; color: #ffb300; text-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .overlay-verse { 
             font-size: 20px; color: #0288d1; line-height: 1.5; 
-            background: #e3f2fd; padding: 20px; border-radius: 15px; 
-            width: 100%; margin-bottom: 20px; border: 2px solid #bbdefb; font-weight: bold; 
+            background: rgba(224, 242, 241, 0.8); padding: 20px; border-radius: 20px; 
+            width: 100%; margin-bottom: 20px; border: 1px solid rgba(178, 223, 219, 0.8);
+            font-weight: bold; 
         }
 
         #watermark {
             position: absolute; bottom: 95px; left: 20px; font-size: 11px;
-            color: rgba(255, 255, 255, 0.4); pointer-events: none; z-index: 150; font-weight: bold;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            color: rgba(255, 255, 255, 0.6); pointer-events: none; z-index: 150; font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
     </style>
 </head>
@@ -216,15 +222,9 @@
 
 <header>
     <div class="header-left">
-        <button id="lang-btn" onclick="toggleLang()">EN</button>
         <select id="map-select" onchange="changeMap(this.value)">
-            <option id="opt-random" value="random">🎲 無限隨機</option>
-            <option id="opt-turtle" value="turtle">🐢 經典龜背</option>
-            <option id="opt-castle" value="castle">🏰 堅固堡壘</option>
-            <option id="opt-cross" value="cross">✝️ 榮耀十架</option>
-            <option id="opt-bridge" value="bridge">🌉 恩典之橋</option>
-            <option id="opt-towers" value="towers">🗼 雙子塔</option>
-        </select>
+            </select>
+        <button id="lang-btn" onclick="toggleLanguage()">EN</button>
     </div>
     <div id="status">剩餘: 0</div>
 </header>
@@ -235,9 +235,9 @@
 
 <footer>
     <div class="footer-btns">
-        <button id="btn-new" class="btn btn-blue" onclick="forceNewGame()">🔄 新局</button>
-        <button id="btn-undo" class="btn btn-orange" onclick="undoMove()">↩️ 復原</button>
-        <button id="btn-hint" class="btn" onclick="autoHint()">💡 提示</button>
+        <button class="btn btn-blue" id="btn-new" onclick="forceNewGame()">🔄 新局</button>
+        <button class="btn btn-orange" id="btn-undo" onclick="undoMove()">↩️ 復原</button>
+        <button class="btn" id="btn-hint" onclick="autoHint()">💡 提示</button>
     </div>
     <div id="joystick-zone">
         <div id="joystick-knob"></div>
@@ -245,115 +245,107 @@
     </div>
 </footer>
 
-<div id="watermark">Powered by Google Gemini v40 (Bilingual Classic)</div>
+<div id="watermark">Powered by Google Gemini v36.1 (Bilingual Crystal)</div>
 
 <div id="msg-overlay">
     <div class="overlay-box">
         <div id="overlay-title" class="overlay-title"></div>
         <div id="overlay-verse" class="overlay-verse"></div>
-        <button id="overlay-btn" class="btn" style="width: 220px; height: 50px; font-size: 20px;" onclick="nextLevel()">挑戰下一關</button>
+        <button id="overlay-btn" class="btn" style="width: 220px; height: 50px; font-size: 20px;" onclick="forceNewGame()">挑戰下一關</button>
     </div>
 </div>
 
 <script>
-    // --- 雙語系統 i18n ---
-    let currentLang = 'zh';
+    // --- 多語言字典 (i18n) ---
+    let currentLang = 'zh'; // 預設語言：繁體中文
 
     const i18n = {
-        'zh': {
-            map_random: '🎲 無限隨機',
-            map_turtle: '🐢 經典龜背',
-            map_castle: '🏰 堅固堡壘',
-            map_cross: '✝️ 榮耀十架',
-            map_bridge: '🌉 恩典之橋',
-            map_towers: '🗼 雙子塔',
-            status_left: '剩餘: ',
-            btn_new: '🔄 新局',
-            btn_undo: '↩️ 復原',
-            btn_hint: '💡 提示',
-            joystick_hint: '視角',
-            win_title: '🎉 哈利路亞！(勝利)',
-            win_btn: '挑戰下一關 🚀',
-            lose_title: '💪 恩典夠用 (暫時無路)',
-            lose_btn: '重新開始 🔄',
-            alert_no_move: '目前無解，請按「復原」或「新局」！',
-            alert_map_fail: '生成地圖失敗，請重試',
-            watermark: 'Powered by Google Gemini v40 (Bilingual Classic)'
+        zh: {
+            langToggleText: "EN",
+            maps: {
+                random: "🎲 無限隨機",
+                turtle: "🐢 經典龜背",
+                castle: "🏰 堅固堡壘",
+                cross: "✝️ 榮耀十架",
+                bridge: "🌉 恩典之橋",
+                towers: "🗼 雙子塔"
+            },
+            statusPrefix: "剩餘: ",
+            btnNew: "🔄 新局",
+            btnUndo: "↩️ 復原",
+            btnHint: "💡 提示",
+            viewHint: "視角",
+            winTitle: "🎉 哈利路亞！(勝利)",
+            loseTitle: "💪 恩典夠用 (無路可走)",
+            btnNextLevel: "挑戰下一關 🚀",
+            btnRestart: "重新開始 🔄",
+            alertNoMoves: "目前無解，請按「復原」或「新局」！"
         },
-        'en': {
-            map_random: '🎲 Random',
-            map_turtle: '🐢 Classic Turtle',
-            map_castle: '🏰 Castle',
-            map_cross: '✝️ Cross',
-            map_bridge: '🌉 Bridge',
-            map_towers: '🗼 Twin Towers',
-            status_left: 'Left: ',
-            btn_new: '🔄 New',
-            btn_undo: '↩️ Undo',
-            btn_hint: '💡 Hint',
-            joystick_hint: 'View',
-            win_title: '🎉 Hallelujah! (You Win)',
-            win_btn: 'Next Level 🚀',
-            lose_title: '💪 Grace is Sufficient (No moves)',
-            lose_btn: 'Restart 🔄',
-            alert_no_move: 'No moves available! Try Undo or New Game.',
-            alert_map_fail: 'Failed to generate map, please retry',
-            watermark: 'Powered by Google Gemini v40 (Bilingual Classic)'
+        en: {
+            langToggleText: "繁",
+            maps: {
+                random: "🎲 Random",
+                turtle: "🐢 Turtle",
+                castle: "🏰 Castle",
+                cross: "✝️ Cross",
+                bridge: "🌉 Bridge",
+                towers: "🗼 Towers"
+            },
+            statusPrefix: "Left: ",
+            btnNew: "🔄 New",
+            btnUndo: "↩️ Undo",
+            btnHint: "💡 Hint",
+            viewHint: "View",
+            winTitle: "🎉 Hallelujah! (Win)",
+            loseTitle: "💪 Grace is Sufficient",
+            btnNextLevel: "Next Level 🚀",
+            btnRestart: "Restart 🔄",
+            alertNoMoves: "No moves available. Please use 'Undo' or 'New'!"
         }
     };
 
-    const verses = {
-        'zh': {
-            win: ["流淚撒種的，必歡呼收割。(詩 126:5)", "那美好的仗我已經打過了。(提後 4:7)", "靠著那加給我力量的，凡事都能做。(腓 4:13)", "你們是世上的光。(太 5:14)", "得勝的，我要賜他在我寶座上與我同坐。(啟 3:21)"],
-            lose: ["我的恩典是夠你用的。(林後 12:9)", "應當一無掛慮，只要凡事藉著禱告。(腓 4:6)", "你們要休息，要知道我是神。(詩 46:10)", "萬事都互相效力。(羅 8:28)"]
+    // 雙語聖經金句
+    const versesDict = {
+        win: {
+            zh: ["流淚撒種的，必歡呼收割。(詩 126:5)", "那美好的仗我已經打過了。(提後 4:7)", "靠著那加給我力量的，凡事都能做。(腓 4:13)", "你們是世上的光。(太 5:14)", "得勝的，我要賜他在我寶座上與我同坐。(啟 3:21)"],
+            en: ["Those who sow with tears will reap with songs of joy. (Psalm 126:5)", "I have fought the good fight, I have finished the race. (2 Timothy 4:7)", "I can do all this through him who gives me strength. (Philippians 4:13)", "You are the light of the world. (Matthew 5:14)", "To the one who is victorious, I will give the right to sit with me on my throne. (Revelation 3:21)"]
         },
-        'en': {
-            win: ["Those who sow with tears will reap with songs of joy. (Ps 126:5)", "I have fought the good fight. (2 Tim 4:7)", "I can do all this through him who gives me strength. (Phil 4:13)", "You are the light of the world. (Matt 5:14)", "To the one who is victorious, I will give the right to sit with me on my throne. (Rev 3:21)"],
-            lose: ["My grace is sufficient for you. (2 Cor 12:9)", "Do not be anxious about anything, but in every situation, by prayer and petition. (Phil 4:6)", "Be still, and know that I am God. (Ps 46:10)", "In all things God works for the good of those who love him. (Rom 8:28)"]
+        lose: {
+            zh: ["我的恩典是夠你用的。(林後 12:9)", "應當一無掛慮，只要凡事藉著禱告。(腓 4:6)", "你們要休息，要知道我是神。(詩 46:10)", "萬事都互相效力。(羅 8:28)"],
+            en: ["My grace is sufficient for you. (2 Corinthians 12:9)", "Do not be anxious about anything, but in every situation, by prayer and petition. (Philippians 4:6)", "Be still, and know that I am God. (Psalm 46:10)", "In all things God works for the good of those who love him. (Romans 8:28)"]
         }
     };
 
-    function toggleLang() {
+    // 語言切換功能
+    function toggleLanguage() {
         currentLang = currentLang === 'zh' ? 'en' : 'zh';
-        document.getElementById('lang-btn').innerText = currentLang === 'zh' ? 'EN' : '繁';
-        updateUI();
-    }
-
-    function updateUI() {
+        
         const dict = i18n[currentLang];
-        document.getElementById('opt-random').innerText = dict.map_random;
-        document.getElementById('opt-turtle').innerText = dict.map_turtle;
-        document.getElementById('opt-castle').innerText = dict.map_castle;
-        document.getElementById('opt-cross').innerText = dict.map_cross;
-        document.getElementById('opt-bridge').innerText = dict.map_bridge;
-        document.getElementById('opt-towers').innerText = dict.map_towers;
-
-        document.getElementById('btn-new').innerHTML = dict.btn_new;
-        document.getElementById('btn-undo').innerHTML = dict.btn_undo;
-        document.getElementById('btn-hint').innerHTML = dict.btn_hint;
-        document.getElementById('joystick-hint').innerText = dict.joystick_hint;
-        document.getElementById('watermark').innerText = dict.watermark;
-
-        updateStatusText();
-
-        // 刷新如果當前有彈窗
-        const overlay = document.getElementById('msg-overlay');
-        if (overlay.style.display === 'flex') {
-            const btn = document.getElementById('overlay-btn');
-            if(btn.className.includes('btn-blue')) {
-                // Lose screen
-                document.getElementById('overlay-title').innerText = dict.lose_title;
-                btn.innerText = dict.lose_btn;
-            } else {
-                // Win screen
-                document.getElementById('overlay-title').innerText = dict.win_title;
-                btn.innerText = dict.win_btn;
-            }
-            // 經文不刷新，以免突然切換另一段經文，除非重新觸發
+        
+        // 更新按鈕與標籤
+        document.getElementById('lang-btn').innerText = dict.langToggleText;
+        document.getElementById('btn-new').innerText = dict.btnNew;
+        document.getElementById('btn-undo').innerText = dict.btnUndo;
+        document.getElementById('btn-hint').innerText = dict.btnHint;
+        document.getElementById('joystick-hint').innerText = dict.viewHint;
+        
+        // 更新選單文字 (保持目前選中的關卡)
+        const select = document.getElementById('map-select');
+        const currentVal = select.value;
+        select.innerHTML = '';
+        for (const [key, value] of Object.entries(dict.maps)) {
+            const opt = document.createElement('option');
+            opt.value = key;
+            opt.innerText = value;
+            if(key === currentVal) opt.selected = true;
+            select.appendChild(opt);
         }
+        
+        updateStatusText();
     }
 
-    // --- 麻雀庫 (保留中文面) ---
+
+    // 麻雀資料庫 (內容保持中文)
     const rawTiles = [
         {t:"摩西", i:"🌊", s:"萬", c:"c-red"}, {t:"大衛", i:"👑", s:"萬", c:"c-red"},
         {t:"保羅", i:"📜", s:"萬", c:"c-red"}, {t:"彼得", i:"🐟", s:"萬", c:"c-red"},
@@ -375,8 +367,7 @@
         {t:"亮光", i:"💡", s:"筒", c:"c-blue"}, {t:"天國", i:"☁️", s:"筒", c:"c-blue"},
         {t:"喜樂", i:"😄", s:"番", c:"#333"}
     ];
-    
-    // --- 地圖生成 ---
+
     const MapBlueprints = {
         turtle: () => generatePyramid(6, 8, [6,6, 4,4, 2,2, 1,1]), 
         castle: () => generateWall(6, 8),
@@ -391,9 +382,10 @@
     function generateBridge() { let slots=[]; for(let c=0;c<10;c++) { slots.push([0,2,c]); slots.push([0,3,c]); if(c<3||c>6) { slots.push([1,2,c]); slots.push([1,3,c]); slots.push([2,2,c]); } } return slots; }
     function generateTowers() { let slots=[]; for(let r=0;r<6;r++) for(let c=0;c<8;c++) { if(c<2||c>5) { slots.push([0,r,c]); slots.push([1,r,c]); if(r>1&&r<4) slots.push([2,r,c]); } else if(r===2||r===3) slots.push([0,r,c]); } return slots; }
     
-    // v35.1 修復版防止座標重疊的隨機生成
+    // v35.1 邏輯：防重疊隨機
     function generateChaos() { 
-        let slots=[]; let occupied = new Set();
+        let slots=[]; 
+        let occupied = new Set(); 
         for(let r=0;r<6;r++) for(let c=0;c<8;c++) { slots.push([0,r,c]); occupied.add(`0,${r},${c}`); }
         let added = 0;
         while(added < 32) {
@@ -414,22 +406,24 @@
     let viewRotX = 30;
     let viewRotZ = 0;
 
+    // 初始化時先載入語言選單
+    window.onload = () => {
+        toggleLanguage(); // 調用一次來生成初始選項
+        document.getElementById('map-select').value = 'random';
+        startGame('random');
+    };
+
     function changeMap(val) { startGame(val); }
     function forceNewGame() { startGame(document.getElementById('map-select').value); }
-    
-    function nextLevel() {
-        const maps = ['random','turtle','castle','cross','bridge','towers'];
-        document.getElementById('map-select').value = maps[Math.floor(Math.random() * maps.length)];
-        startGame(document.getElementById('map-select').value);
-    }
 
     function startGame(mapType) {
         document.getElementById('msg-overlay').style.display = 'none';
         const board = document.getElementById('game-board');
-        board.innerHTML = ''; tiles = []; selectedTile = null; moveHistory = [];
+        board.innerHTML = ''; tiles = []; selectedTile = null; 
+        moveHistory = []; 
         viewRotX = 30; viewRotZ = 0; 
 
-        // v35.1: 保證有解循環
+        // 保證有解演算法
         let solvableMapFound = false;
         let attemptMap = 0;
         
@@ -442,8 +436,8 @@
             slots.forEach(s => { s[1]-=minR; s[2]-=minC; });
 
             let virtualTiles = slots.map((s, i) => ({ id: i, z: s[0], r: s[1], c: s[2], active: true }));
-            
             let pairs = [], tempTiles, success = false, attemptSolve = 0;
+            
             while(!success && attemptSolve < 20) {
                 tempTiles = JSON.parse(JSON.stringify(virtualTiles)); pairs = []; let possible = true;
                 while(tempTiles.some(t => t.active)) {
@@ -472,7 +466,7 @@
                 attemptMap++;
             }
         }
-        if(!solvableMapFound) alert(i18n[currentLang].alert_map_fail);
+        if(!solvableMapFound) alert("Map generation failed.");
     }
 
     function applyGame(virtualTiles, pairs) {
@@ -488,7 +482,6 @@
             finalTilesData[pair[0]] = cardInventory[idx]; 
             finalTilesData[pair[1]] = cardInventory[idx]; 
         });
-
         renderTiles(virtualTiles, finalTilesData);
         setTimeout(fitBoard, 50);
         updateStatusText();
@@ -514,13 +507,14 @@
             el.className = 'tile';
             
             const card = dataMap[index];
-            el.innerHTML = `<div class="tile-shadow-layer"></div><div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
+            el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
             
             let left = slot.c * tileW; 
             let top = slot.r * tileH; 
             let zHeight = slot.z * 12; 
             
-            el.style.left = left + 'px'; el.style.top = top + 'px'; 
+            el.style.left = left + 'px'; 
+            el.style.top = top + 'px'; 
             el.style.transform = `translateZ(${zHeight}px)`; 
             el.style.setProperty('--base-z', zHeight + 'px');
             el.style.zIndex = slot.z * 10 + slot.r; 
@@ -585,20 +579,23 @@
         const verse = document.getElementById('overlay-verse');
         const btn = document.getElementById('overlay-btn');
         const dict = i18n[currentLang];
-        const vDict = verses[currentLang];
+        const verseArray = versesDict[type][currentLang];
 
-        if(type === 'win') {
-            title.innerText = dict.win_title;
-            title.style.color = "#ffb300";
-            verse.innerText = vDict.win[Math.floor(Math.random() * vDict.win.length)];
-            btn.innerText = dict.win_btn;
-            btn.onclick = () => nextLevel();
+        if(type==='win') {
+            title.innerText = dict.winTitle;
+            title.style.color = "#ffb300"; 
+            verse.innerText = verseArray[Math.floor(Math.random()*verseArray.length)];
+            btn.innerText = dict.btnNextLevel; 
+            btn.onclick = () => { 
+                document.getElementById('map-select').value=['random','turtle','castle','cross','bridge','towers'][Math.floor(Math.random()*6)]; 
+                startGame(document.getElementById('map-select').value); 
+            };
             btn.className = "btn"; 
         } else {
-            title.innerText = dict.lose_title;
-            title.style.color = "#4fc3f7";
-            verse.innerText = vDict.lose[Math.floor(Math.random() * vDict.lose.length)];
-            btn.innerText = dict.lose_btn;
+            title.innerText = dict.loseTitle; 
+            title.style.color = "#4fc3f7"; 
+            verse.innerText = verseArray[Math.floor(Math.random()*verseArray.length)];
+            btn.innerText = dict.btnRestart; 
             btn.onclick = () => forceNewGame();
             btn.className = "btn btn-blue"; 
         }
@@ -611,11 +608,11 @@
             free[i].el.style.background='#b3e5fc'; free[j].el.style.background='#b3e5fc';
             setTimeout(()=>{ free[i].el.style.background=''; free[j].el.style.background=''; }, 1500); return;
         }
-        alert(i18n[currentLang].alert_no_move);
+        alert(i18n[currentLang].alertNoMoves);
     }
 
     function updateStatusText() { 
-        document.getElementById('status').innerText = i18n[currentLang].status_left + tiles.filter(t => t.active).length; 
+        document.getElementById('status').innerText = i18n[currentLang].statusPrefix + tiles.filter(t => t.active).length; 
     }
 
     function applyViewTransform() {
@@ -638,7 +635,9 @@
 
     const joystickZone = document.getElementById('joystick-zone');
     const joystickKnob = document.getElementById('joystick-knob');
-    let isDragging = false; let startX, startY; let initialRotX, initialRotZ;
+    let isDragging = false;
+    let startX, startY;
+    let initialRotX, initialRotZ;
 
     function handleStart(e) {
         isDragging = true;
@@ -653,11 +652,14 @@
         e.preventDefault(); 
         const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
         const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-        const deltaX = clientX - startX; const deltaY = clientY - startY;
-        const maxDist = 30; const dist = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+        const deltaX = clientX - startX;
+        const deltaY = clientY - startY;
+        const maxDist = 30;
+        const dist = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
         const limitedDist = Math.min(dist, maxDist);
         const angle = Math.atan2(deltaY, deltaX);
-        const knobX = Math.cos(angle) * limitedDist; const knobY = Math.sin(angle) * limitedDist;
+        const knobX = Math.cos(angle) * limitedDist;
+        const knobY = Math.sin(angle) * limitedDist;
         joystickKnob.style.transform = `translate(${knobX}px, ${knobY}px)`;
         viewRotZ = initialRotZ + (deltaX * 0.5); 
         viewRotX = initialRotX - (deltaY * 0.5); 
@@ -681,13 +683,10 @@
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
             navigator.serviceWorker.register('./sw.js')
-                .then(function(reg) { console.log('SW OK'); }, function(err) { console.log('SW Fail'); });
+                .then(function(registration) { console.log('SW OK'); }, function(err) { console.log('SW Fail'); });
         });
     }
 
-    // 初始化 UI 語言
-    updateUI();
-    startGame('random'); 
 </script>
 </body>
 </html>
