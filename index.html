@@ -1,0 +1,945 @@
+ <!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <meta name="apple-mobile-web-app-title" content="福音麻雀">
+    <meta name="application-name" content="福音麻雀">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#054a29">
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
+    <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
+
+    <title>福音麻雀 - v36.3 雙語水晶版</title>
+    <style>
+        :root { 
+            --tile-w: 44px; 
+            --tile-h: 58px; 
+            --depth: 12px; 
+            --bg-color: #87ceeb; 
+            --ui-cloud-bg: rgba(255, 255, 255, 0.3);
+            --text-dark: #fff;
+            --btn-yellow-1: #ffd54f; --btn-yellow-2: #ffb300;
+            --btn-blue-1: #4fc3f7; --btn-blue-2: #0288d1;
+            --btn-orange-1: #ffab91; --btn-orange-2: #d84315;
+        }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0; 
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at top left, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 50%),
+                linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
+            background-size: cover; background-attachment: fixed;
+            font-family: "Comic Sans MS", "Chalkboard SE", "幼圆", "Microsoft JhengHei", sans-serif;
+            overflow: hidden; display: flex; flex-direction: column; height: 100vh; height: 100dvh; 
+            color: var(--text-dark); user-select: none; -webkit-user-select: none; touch-action: none;
+        }
+        
+        /* UI 元素毛玻璃 */
+        header, footer, .overlay-box, #joystick-zone, #status, #lang-btn {
+            backdrop-filter: blur(10px) saturate(120%);
+            -webkit-backdrop-filter: blur(10px) saturate(120%);
+            background: rgba(255, 255, 255, 0.25) !important;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        header {
+            flex-shrink: 0; height: calc(50px + env(safe-area-inset-top)); 
+            padding: 5px 15px; padding-top: calc(5px + env(safe-area-inset-top)); 
+            display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; margin: 0 10px 5px 10px;
+        }
+
+        .header-left { display: flex; gap: 8px; align-items: center; }
+
+        select { 
+            padding: 6px 10px; font-size: 14px; border-radius: 15px; 
+            border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(0, 60, 120, 0.6) !important;
+            max-width: 140px; color: #fff; font-weight: bold; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+            backdrop-filter: blur(5px);
+        }
+        option { background: #333; color: #fff; }
+        
+        #lang-btn {
+            padding: 6px 12px; font-size: 14px; font-weight: bold; border-radius: 15px; cursor: pointer;
+            color: #fff; background: rgba(0, 100, 200, 0.5) !important; border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: all 0.2s;
+        }
+        #lang-btn:active { transform: scale(0.95); }
+
+        #status { font-size: 15px; font-weight: bold; background: rgba(255, 213, 79, 0.85) !important; color: #d84315; padding: 6px 15px; border-radius: 20px; box-shadow: 0 3px 0 #ffca28, 0 5px 10px rgba(0,0,0,0.2); text-shadow: none; }
+        
+        #game-viewport {
+            flex: 1; width: 100%; position: relative; overflow: hidden; padding: 0;
+            perspective: 2000px; perspective-origin: center center;
+        }
+
+        #game-board { 
+            position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%) rotateX(30deg) rotateZ(0deg); 
+            transform-origin: center center; transform-style: preserve-3d;
+        }
+
+        footer { 
+            flex-shrink: 0; height: calc(80px + env(safe-area-inset-bottom)); 
+            padding: 5px 10px; padding-bottom: max(5px, env(safe-area-inset-bottom));
+            display: flex; justify-content: space-between; align-items: center; z-index: 100;
+            box-shadow: 0 -8px 20px rgba(0,0,0,0.2);
+            border-top-left-radius: 25px; border-top-right-radius: 25px; margin: 5px 10px 0 10px;
+        }
+
+        .footer-btns { display: flex; flex: 1; justify-content: space-around; margin-right: 10px; }
+        
+        .btn {
+            background: linear-gradient(to bottom, var(--btn-yellow-1), var(--btn-yellow-2)); 
+            border: 3px solid #ffffff; padding: 0; width: auto; flex: 1; margin: 0 3px;
+            height: 44px; border-radius: 25px; font-weight: bold; font-size: 16px; 
+            box-shadow: 0 5px 0 #ff8f00, 0 10px 20px rgba(0,0,0,0.2); 
+            cursor: pointer; display: flex; justify-content: center; align-items: center; color: #5d4037;
+            transition: all 0.1s; text-shadow: none;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #ff8f00, 0 5px 10px rgba(0,0,0,0.2); }
+        
+        .btn-blue { 
+            background: linear-gradient(to bottom, var(--btn-blue-1), var(--btn-blue-2)); 
+            box-shadow: 0 5px 0 #01579b, 0 10px 20px rgba(0,0,0,0.2); color: white; 
+        }
+        .btn-blue:active { transform: translateY(3px); box-shadow: 0 2px 0 #01579b, 0 5px 10px rgba(0,0,0,0.2); }
+
+        .btn-orange {
+            background: linear-gradient(to bottom, #ffcc80, #ff9800);
+            box-shadow: 0 5px 0 #e65100, 0 10px 20px rgba(0,0,0,0.2); color: #3e2723;
+        }
+        .btn-orange:active { transform: translateY(3px); box-shadow: 0 2px 0 #e65100, 0 5px 10px rgba(0,0,0,0.2); }
+
+        #joystick-zone {
+            position: relative; width: 60px; height: 60px; z-index: 150; flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.2) !important; 
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%; touch-action: none; display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2), inset 0 2px 5px rgba(255,255,255,0.3);
+        }
+        #joystick-knob {
+            width: 28px; height: 28px; background: radial-gradient(circle at 30% 30%, #ffcc80, #ff9800); 
+            border-radius: 50%; border: 2px solid #fff; box-shadow: 0 5px 10px rgba(0,0,0,0.3); position: relative;
+        }
+        #joystick-hint {
+            position: absolute; bottom: -15px; width: 100%; text-align: center;
+            font-size: 9px; color: rgba(255, 255, 255, 0.9); pointer-events: none; font-weight: bold;
+             text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* 麻雀牌 (水晶樣式) */
+        .tile {
+            position: absolute; width: var(--tile-w); height: var(--tile-h);
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px) saturate(120%); -webkit-backdrop-filter: blur(8px) saturate(120%);
+            border-radius: 8px; cursor: pointer;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transform-style: preserve-3d;
+            /* ★ 加入基礎過渡，令 locked/selected 狀態切換更順滑 */
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                        opacity 0.3s ease,
+                        filter 0.2s ease;
+            border-top: 1px solid rgba(255, 255, 255, 1.0);
+            border-left: 1px solid rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid rgba(200, 230, 255, 0.6);
+            border-right: 1px solid rgba(200, 230, 255, 0.6);
+            box-shadow: 0 2px 4px rgba(0, 50, 100, 0.3), 0 8px 20px rgba(0, 50, 100, 0.2);
+        }
+
+        .tile::before {
+            content: ''; position: absolute; width: 100%; height: var(--depth);
+            bottom: 0; left: 0;
+            background: linear-gradient(to bottom, rgba(240, 250, 255, 0.7), rgba(180, 220, 240, 0.85));
+            transform-origin: bottom; transform: rotateX(-90deg);
+            border-radius: 0 0 8px 8px;
+            border: 1px solid rgba(220, 240, 255, 0.6); border-top: none;
+        }
+        .tile::after {
+            content: ''; position: absolute; width: var(--depth); height: 100%;
+            top: 0; right: 0;
+            background: linear-gradient(to right, rgba(240, 250, 255, 0.7), rgba(200, 230, 250, 0.8));
+            transform-origin: right; transform: rotateY(90deg);
+            border-radius: 0 8px 8px 0;
+            border: 1px solid rgba(220, 240, 255, 0.6); border-left: none;
+        }
+
+        .tile.locked { 
+            background-color: rgba(220, 230, 240, 0.9);
+            filter: grayscale(60%) brightness(0.9);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+        .tile.locked img, .tile.locked .t-icon { opacity: 0.3; }
+
+        .tile.selected { 
+            background-color: #fffde7; 
+            transform: translateZ(calc(var(--base-z) + 30px)) scale(1.08) !important; 
+            box-shadow: 0 0 15px rgba(255, 235, 59, 0.9), 0 30px 60px rgba(0, 50, 100, 0.4);
+            border: 2px solid #ffca28; z-index: 9999 !important;
+        }
+
+        /* ★ 消除動畫 keyframe：升起 + 放大 + 光暈 + 淡出 */
+        @keyframes tileMatch {
+            0%   { opacity: 1;   transform: translateZ(var(--base-z)) scale(1); filter: brightness(1); }
+            30%  { opacity: 1;   transform: translateZ(calc(var(--base-z) + 50px)) scale(1.15); filter: brightness(1.8) drop-shadow(0 0 12px #ffe082); }
+            100% { opacity: 0;   transform: translateZ(calc(var(--base-z) + 80px)) scale(0.6); filter: brightness(2) blur(4px); }
+        }
+
+        /* ★ 復原動畫 keyframe：從上方掉落回來 */
+        @keyframes tileRestore {
+            0%   { opacity: 0; transform: translateZ(calc(var(--base-z) + 60px)) scale(0.7); }
+            70%  { opacity: 1; transform: translateZ(calc(var(--base-z) - 8px)) scale(1.05); }
+            100% { opacity: 1; transform: translateZ(var(--base-z)) scale(1); }
+        }
+
+        .tile.matching {
+            animation: tileMatch 0.4s ease-out forwards;
+            pointer-events: none;
+            z-index: 9998 !important;
+        }
+
+        .tile.restoring {
+            animation: tileRestore 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            pointer-events: none;
+        }
+
+        .t-suit { position: absolute; top: 2px; right: 4px; font-size: 10px; color: #777; line-height: 1; backface-visibility: hidden; font-weight: bold; }
+        .t-icon { font-size: 28px; line-height: 1; margin-top: 2px; backface-visibility: hidden; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
+        .t-text { font-size: 11px; font-weight: 900; margin-top: 0px; color: #333; backface-visibility: hidden; text-shadow: 0 1px 0 rgba(255,255,255,1); }
+        
+        .c-red { color: #d32f2f; } .c-blue { color: #1565c0; } .c-green { color: #2e7d32; }
+
+        #msg-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 50, 100, 0.4); 
+            display: none; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 200; text-align: center; padding: 20px;
+            backdrop-filter: blur(15px);
+        }
+        .overlay-box {
+            background: rgba(255, 255, 255, 0.9); padding: 30px; border-radius: 30px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.7);
+            max-width: 90%; color: #333;
+        }
+        .overlay-title { font-size: 32px; font-weight: bold; margin-bottom: 20px; color: #ffb300; text-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .overlay-verse { 
+            font-size: 20px; color: #0288d1; line-height: 1.5; 
+            background: rgba(224, 242, 241, 0.8); padding: 20px; border-radius: 20px; 
+            width: 100%; margin-bottom: 20px; border: 1px solid rgba(178, 223, 219, 0.8);
+            font-weight: bold; 
+        }
+
+        #watermark {
+            position: absolute; bottom: 95px; left: 20px; font-size: 11px;
+            color: rgba(255, 255, 255, 0.6); pointer-events: none; z-index: 150; font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <select id="map-select" onchange="changeMap(this.value)">
+            </select>
+        <button id="lang-btn" onclick="toggleLanguage()">EN</button>
+    </div>
+    <div id="status">剩餘: 0</div>
+</header>
+
+<div id="game-viewport">
+    <div id="game-board"></div>
+</div>
+
+<footer>
+    <div class="footer-btns">
+        <button class="btn btn-blue" id="btn-new" onclick="forceNewGame()">🔄 新局</button>
+        <button class="btn btn-orange" id="btn-undo" onclick="undoMove()">↩️ 復原</button>
+        <button class="btn" id="btn-hint" onclick="autoHint()">💡 提示</button>
+    </div>
+    <div id="joystick-zone">
+        <div id="joystick-knob"></div>
+        <div id="joystick-hint">視角</div>
+    </div>
+</footer>
+
+<div id="watermark">Powered by Google Gemini v36.3 (Shanghai Layout)</div>
+
+<div id="msg-overlay">
+    <div class="overlay-box">
+        <div id="overlay-title" class="overlay-title"></div>
+        <div id="overlay-verse" class="overlay-verse"></div>
+        <button id="overlay-btn" class="btn" style="width: 220px; height: 50px; font-size: 20px;" onclick="forceNewGame()">挑戰下一關</button>
+    </div>
+</div>
+
+<script>
+    // --- 多語言字典 (i18n) ---
+    let currentLang = 'zh';
+
+    // ★ Web Audio 音效系統（不需要任何外部檔案）
+    let audioCtx = null;
+    function getAudioCtx() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        return audioCtx;
+    }
+
+    function playSound(type) {
+        try {
+            const ctx = getAudioCtx();
+            // 恢復被瀏覽器暫停的 AudioContext（iOS 需要）
+            if (ctx.state === 'suspended') ctx.resume();
+
+            const now = ctx.currentTime;
+
+            if (type === 'select') {
+                // 選牌：輕快的單音「叮」
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, now);
+                osc.frequency.exponentialRampToValueAtTime(1100, now + 0.05);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                osc.start(now); osc.stop(now + 0.15);
+
+            } else if (type === 'deselect') {
+                // 取消選牌：稍低的音
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(660, now);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                osc.start(now); osc.stop(now + 0.12);
+
+            } else if (type === 'match') {
+                // 消除成功：兩音和弦「叮咚」
+                [880, 1320].forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.06);
+                    gain.gain.setValueAtTime(0.3, now + i * 0.06);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.4);
+                    osc.start(now + i * 0.06); osc.stop(now + i * 0.06 + 0.4);
+                });
+
+            } else if (type === 'locked') {
+                // 點擊鎖住嘅牌：低沉短音提示
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
+
+            } else if (type === 'undo') {
+                // 復原：下行音階
+                [660, 550, 440].forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.07);
+                    gain.gain.setValueAtTime(0.2, now + i * 0.07);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.15);
+                    osc.start(now + i * 0.07); osc.stop(now + i * 0.07 + 0.15);
+                });
+
+            } else if (type === 'win') {
+                // 勝利：上行五音和弦
+                [523, 659, 784, 1047, 1319].forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.1);
+                    gain.gain.setValueAtTime(0.25, now + i * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.5);
+                    osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.5);
+                });
+
+            } else if (type === 'lose') {
+                // 無路可走：下行悲鳴
+                [440, 370, 311, 262].forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.12);
+                    gain.gain.setValueAtTime(0.2, now + i * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.3);
+                    osc.start(now + i * 0.12); osc.stop(now + i * 0.12 + 0.3);
+                });
+            }
+        } catch(e) { /* 靜音降級，唔影響遊戲 */ }
+    }
+
+    const i18n = {
+        zh: {
+            langToggleText: "EN",
+            maps: {
+                random: "🎲 無限隨機",
+                turtle: "🐢 經典龜背",
+                castle: "🏰 堅固堡壘",
+                cross: "✝️ 榮耀十架",
+                bridge: "🌉 恩典之橋",
+                towers: "🗼 雙子塔"
+            },
+            statusPrefix: "剩餘: ",
+            btnNew: "🔄 新局",
+            btnUndo: "↩️ 復原",
+            btnHint: "💡 提示",
+            viewHint: "視角",
+            winTitle: "🎉 哈利路亞！(勝利)",
+            loseTitle: "💪 恩典夠用 (無路可走)",
+            btnNextLevel: "挑戰下一關 🚀",
+            btnRestart: "重新開始 🔄",
+            alertNoMoves: "目前無解，請按「復原」或「新局」！"
+        },
+        en: {
+            langToggleText: "繁",
+            maps: {
+                random: "🎲 Random",
+                turtle: "🐢 Turtle",
+                castle: "🏰 Castle",
+                cross: "✝️ Cross",
+                bridge: "🌉 Bridge",
+                towers: "🗼 Towers"
+            },
+            statusPrefix: "Left: ",
+            btnNew: "🔄 New",
+            btnUndo: "↩️ Undo",
+            btnHint: "💡 Hint",
+            viewHint: "View",
+            winTitle: "🎉 Hallelujah! (Win)",
+            loseTitle: "💪 Grace is Sufficient",
+            btnNextLevel: "Next Level 🚀",
+            btnRestart: "Restart 🔄",
+            alertNoMoves: "No moves available. Please use 'Undo' or 'New'!"
+        }
+    };
+
+    const versesDict = {
+        win: {
+            zh: ["流淚撒種的，必歡呼收割。(詩 126:5)", "那美好的仗我已經打過了。(提後 4:7)", "靠著那加給我力量的，凡事都能做。(腓 4:13)", "你們是世上的光。(太 5:14)", "得勝的，我要賜他在我寶座上與我同坐。(啟 3:21)"],
+            en: ["Those who sow with tears will reap with songs of joy. (Psalm 126:5)", "I have fought the good fight, I have finished the race. (2 Timothy 4:7)", "I can do all this through him who gives me strength. (Philippians 4:13)", "You are the light of the world. (Matthew 5:14)", "To the one who is victorious, I will give the right to sit with me on my throne. (Revelation 3:21)"]
+        },
+        lose: {
+            zh: ["我的恩典是夠你用的。(林後 12:9)", "應當一無掛慮，只要凡事藉著禱告。(腓 4:6)", "你們要休息，要知道我是神。(詩 46:10)", "萬事都互相效力。(羅 8:28)"],
+            en: ["My grace is sufficient for you. (2 Corinthians 12:9)", "Do not be anxious about anything, but in every situation, by prayer and petition. (Philippians 4:6)", "Be still, and know that I am God. (Psalm 46:10)", "In all things God works for the good of those who love him. (Romans 8:28)"]
+        }
+    };
+
+    // ★ 修正：用獨立 applyLanguage，避免 toggleLanguage 初始化 bug
+    function applyLanguage(lang) {
+        const dict = i18n[lang];
+        document.getElementById('lang-btn').innerText = dict.langToggleText;
+        document.getElementById('btn-new').innerText = dict.btnNew;
+        document.getElementById('btn-undo').innerText = dict.btnUndo;
+        document.getElementById('btn-hint').innerText = dict.btnHint;
+        document.getElementById('joystick-hint').innerText = dict.viewHint;
+
+        const select = document.getElementById('map-select');
+        const currentVal = select.value;
+        select.innerHTML = '';
+        for (const [key, value] of Object.entries(dict.maps)) {
+            const opt = document.createElement('option');
+            opt.value = key;
+            opt.innerText = value;
+            if (key === currentVal) opt.selected = true;
+            select.appendChild(opt);
+        }
+        updateStatusText();
+    }
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'zh' ? 'en' : 'zh';
+        applyLanguage(currentLang);
+    }
+
+    const rawTiles = [
+        {t:"摩西", i:"🌊", s:"萬", c:"c-red"}, {t:"大衛", i:"👑", s:"萬", c:"c-red"},
+        {t:"保羅", i:"📜", s:"萬", c:"c-red"}, {t:"彼得", i:"🐟", s:"萬", c:"c-red"},
+        {t:"約拿", i:"🐋", s:"萬", c:"c-red"}, {t:"馬利亞", i:"🤰", s:"萬", c:"c-red"},
+        {t:"亞伯蘭", i:"🐑", s:"萬", c:"c-red"}, {t:"但以理", i:"🦁", s:"萬", c:"c-red"},
+        {t:"教會", i:"⛪", s:"筒", c:"c-blue"}, {t:"西奈", i:"⛰️", s:"筒", c:"c-blue"},
+        {t:"紅海", i:"🌊", s:"筒", c:"c-blue"}, {t:"伊甸", i:"🍎", s:"筒", c:"c-blue"},
+        {t:"加利利", i:"🛶", s:"筒", c:"c-blue"}, {t:"聖殿", i:"🏛️", s:"筒", c:"c-blue"},
+        {t:"耶利哥", i:"🧱", s:"筒", c:"c-blue"}, {t:"方舟", i:"🚢", s:"筒", c:"c-blue"},
+        {t:"十架", i:"✝️", s:"索", c:"c-green"}, {t:"聖經", i:"📖", s:"索", c:"c-green"},
+        {t:"五餅", i:"🍞", s:"索", c:"c-green"}, {t:"二魚", i:"🐟", s:"索", c:"c-green"},
+        {t:"寶血", i:"🍷", s:"索", c:"c-green"}, {t:"聖靈", i:"🕊️", s:"索", c:"c-green"},
+        {t:"信", i:"🛡️", s:"番", c:"#333"}, {t:"望", i:"⚓", s:"番", c:"#333"},
+        {t:"愛", i:"❤️", s:"番", c:"#333"}, {t:"阿們", i:"🙏", s:"番", c:"#333"},
+        {t:"禱告", i:"🤲", s:"番", c:"#333"}, {t:"復活", i:"🌅", s:"番", c:"#333"},
+        {t:"挪亞", i:"🌈", s:"萬", c:"c-red"}, {t:"約書亞", i:"🎺", s:"萬", c:"c-red"},
+        {t:"以利亞", i:"🔥", s:"萬", c:"c-red"}, 
+        {t:"葡萄", i:"🍇", s:"索", c:"c-green"}, {t:"磐石", i:"🪨", s:"索", c:"c-green"},
+        {t:"亮光", i:"💡", s:"筒", c:"c-blue"}, {t:"天國", i:"☁️", s:"筒", c:"c-blue"},
+        {t:"喜樂", i:"😄", s:"番", c:"#333"}
+    ];
+
+    const MapBlueprints = {
+        turtle: () => generatePyramid(6, 8, [6,6, 4,4, 2,2, 1,1]), 
+        castle: () => generateWall(6, 8),
+        cross: () => generateCross(),
+        bridge: () => generateBridge(),
+        towers: () => generateTowers(),
+        random: () => generateChaos()
+    };
+    function generatePyramid(rows, cols, layerSizes) { let slots=[]; let cl=0; for(let i=0;i<layerSizes.length;i+=2){ let h=layerSizes[i], w=layerSizes[i+1]; let sr=Math.floor((rows-h)/2), sc=Math.floor((cols-w)/2); for(let r=0;r<h;r++) for(let c=0;c<w;c++) slots.push([cl, sr+r, sc+c]); cl++; } return slots; }
+    function generateWall(rows, cols) { let slots=[]; for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) { slots.push([0, r, c]); if(r===0||r===rows-1||c===0||c===cols-1) slots.push([1, r, c]); } return slots; }
+    function generateCross() { let slots=[]; for(let r=0;r<8;r++) { slots.push([0,r,3]); slots.push([0,r,4]); slots.push([1,r,3]); } for(let c=0;c<8;c++) { slots.push([0,2,c]); slots.push([0,3,c]); slots.push([1,2,c]); } slots.push([2,2,3]); slots.push([2,3,3]); return slots; }
+    function generateBridge() { let slots=[]; for(let c=0;c<10;c++) { slots.push([0,2,c]); slots.push([0,3,c]); if(c<3||c>6) { slots.push([1,2,c]); slots.push([1,3,c]); slots.push([2,2,c]); } } return slots; }
+    function generateTowers() { let slots=[]; for(let r=0;r<6;r++) for(let c=0;c<8;c++) { if(c<2||c>5) { slots.push([0,r,c]); slots.push([1,r,c]); if(r>1&&r<4) slots.push([2,r,c]); } else if(r===2||r===3) slots.push([0,r,c]); } return slots; }
+    
+    function generateChaos() { 
+        let slots=[]; 
+        let occupied = new Set(); 
+        for(let r=0;r<6;r++) for(let c=0;c<8;c++) { slots.push([0,r,c]); occupied.add(`0,${r},${c}`); }
+        let added = 0;
+        // ★ 加 safety 防止無限循環
+        let safety = 0;
+        while(added < 32 && safety < 2000) {
+            safety++;
+            let z = Math.floor(Math.random()*2)+1;
+            let r = Math.floor(Math.random()*4)+1;
+            let c = Math.floor(Math.random()*6)+1;
+            let key = `${z},${r},${c}`;
+            if(!occupied.has(key)) { slots.push([z,r,c]); occupied.add(key); added++; }
+        }
+        return slots; 
+    }
+
+    let tiles = [];
+    let selectedTile = null;
+    let moveHistory = [];
+    let tileW = 44, tileH = 58; 
+    let globalScale = 1;
+    let viewRotX = 30;
+    let viewRotZ = 0;
+
+    // ★ 修正初始化：直接 applyLanguage 而非 toggleLanguage
+    window.onload = () => {
+        applyLanguage(currentLang);
+        document.getElementById('map-select').value = 'random';
+        startGame('random');
+    };
+
+    function changeMap(val) { startGame(val); }
+    function forceNewGame() { startGame(document.getElementById('map-select').value); }
+
+    function startGame(mapType) {
+        document.getElementById('msg-overlay').style.display = 'none';
+        const board = document.getElementById('game-board');
+        board.innerHTML = ''; tiles = []; selectedTile = null; 
+        moveHistory = []; 
+        viewRotX = 30; viewRotZ = 0; 
+
+        let solvableMapFound = false;
+        let attemptMap = 0;
+        
+        while (!solvableMapFound && attemptMap < 50) {
+            let slots = MapBlueprints[mapType]();
+            if(slots.length % 2 !== 0) slots.pop();
+            
+            let minC = Infinity, minR = Infinity;
+            slots.forEach(s => { if(s[1]<minR) minR=s[1]; if(s[2]<minC) minC=s[2]; });
+            slots.forEach(s => { s[1]-=minR; s[2]-=minC; });
+
+            let virtualTiles = slots.map((s, i) => ({ id: i, z: s[0], r: s[1], c: s[2], active: true }));
+            let pairs = [], tempTiles, success = false, attemptSolve = 0;
+            
+            while(!success && attemptSolve < 20) {
+                tempTiles = JSON.parse(JSON.stringify(virtualTiles)); pairs = []; let possible = true;
+                while(tempTiles.some(t => t.active)) {
+                    let available = getAvailableTiles(tempTiles);
+                    if(available.length < 2) { possible = false; break; }
+                    let t1 = available.splice(Math.floor(Math.random()*available.length), 1)[0];
+                    let t2 = available.splice(Math.floor(Math.random()*available.length), 1)[0];
+                    pairs.push([t1.id, t2.id]); 
+                    tempTiles.find(t=>t.id===t1.id).active = false;
+                    tempTiles.find(t=>t.id===t2.id).active = false;
+                }
+                if(possible) success = true; 
+                attemptSolve++;
+            }
+
+            if(success) {
+                solvableMapFound = true;
+                applyGame(virtualTiles, pairs);
+            } else {
+                if(mapType !== 'random') {
+                    solvableMapFound = true; 
+                    let backupPairs = [];
+                    for(let i=0; i<virtualTiles.length; i+=2) backupPairs.push([i, i+1]);
+                    applyGame(virtualTiles, backupPairs);
+                }
+                attemptMap++;
+            }
+        }
+        if(!solvableMapFound) alert("Map generation failed.");
+    }
+
+    function applyGame(virtualTiles, pairs) {
+        let totalPairs = pairs.length, cardInventory = [], shuffledTypes = [...rawTiles].sort(()=>Math.random()-0.5);
+        let typeIndex = 0;
+        for(let i=0; i<totalPairs; i++) { 
+            let card = shuffledTypes[typeIndex % shuffledTypes.length];
+            cardInventory.push(card); 
+            typeIndex++;
+        }
+        let finalTilesData = new Array(virtualTiles.length);
+        pairs.forEach((pair, idx) => { 
+            finalTilesData[pair[0]] = cardInventory[idx]; 
+            finalTilesData[pair[1]] = cardInventory[idx]; 
+        });
+        renderTiles(virtualTiles, finalTilesData);
+        setTimeout(fitBoard, 50);
+        updateStatusText();
+    }
+
+    function getAvailableTiles(tileSet) { return tileSet.filter(t => t.active && !checkLockedInSet(t, tileSet)); }
+    function checkLockedInSet(tile, tileSet) {
+        let hasTop=false, hasLeft=false, hasRight=false;
+        for(let other of tileSet) {
+            if(!other.active || other.id === tile.id) continue;
+            if(other.z === tile.z+1 && other.r === tile.r && other.c === tile.c) hasTop = true;
+            if(other.z === tile.z && other.r === tile.r) { if(other.c === tile.c-1) hasLeft=true; if(other.c === tile.c+1) hasRight=true; }
+        }
+        return hasTop || (hasLeft && hasRight);
+    }
+
+    function renderTiles(slots, dataMap) {
+        const board = document.getElementById('game-board');
+        const fragment = document.createDocumentFragment();
+        // ★ 半格偏移量：每升一層，X/Y 各偏移半格，做到上海麻雀騎格效果
+        const offsetX = tileW / 2;
+        const offsetY = tileH / 2;
+        // ★ 層高：用負值令上層視覺上「升起」
+        const layerZ = 16;
+
+        let maxLeft = 0, maxTop = 0;
+        slots.forEach((slot, index) => {
+            const el = document.createElement('div');
+            el.className = 'tile';
+
+            const card = dataMap[index];
+            el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${card.c}">${card.i}</div><div class="t-text ${card.c}">${card.t}</div>`;
+
+            // ★ 核心改動：left/top 加上 z * 半格偏移
+            const left    = slot.c * tileW  + slot.z * offsetX;
+            const top     = slot.r * tileH  + slot.z * offsetY;
+            const zHeight = slot.z * layerZ;
+
+            if (left  > maxLeft)  maxLeft  = left;
+            if (top   > maxTop)   maxTop   = top;
+
+            el.style.left = left + 'px';
+            el.style.top  = top  + 'px';
+            el.style.transform = `translateZ(${zHeight}px)`;
+            el.style.setProperty('--base-z', zHeight + 'px');
+            // ★ zIndex 同時考慮層 + row + col，確保高層牌永遠在前面
+            el.style.zIndex = slot.z * 1000 + slot.r * 20 + slot.c;
+
+            const tileObj = { el: el, data: card, z: slot.z, r: slot.r, c: slot.c, active: true, id: index };
+            el.onclick = () => onTileClick(tileObj);
+            fragment.appendChild(el);
+            tiles.push(tileObj);
+        });
+        board.appendChild(fragment);
+        // ★ board 尺寸要包含最高層偏移 + 一格牌寬高
+        board.style.width  = (maxLeft  + tileW  + 20) + 'px';
+        board.style.height = (maxTop   + tileH  + 20) + 'px';
+        updateLockStatus();
+    }
+
+    function updateLockStatus() { tiles.forEach(t => { if(!t.active) return; t.isLocked = checkLocked(t); t.el.classList.toggle('locked', t.isLocked); }); }
+    
+    // ★ 核心改動：改用實際像素座標做重疊判斷，配合半格偏移
+    // 上海麻雀標準：
+    //   壓頂：同格正上方有牌（z+1，且 r/c 完全相同）
+    //   夾邊：左右方向有牌「實際面積重疊」（同層，c 差距 < 1，且 r 差距 < 1）
+    function getTilePixelPos(tile) {
+        const offsetX = tileW / 2;
+        const offsetY = tileH / 2;
+        return {
+            x: tile.c * tileW  + tile.z * offsetX,
+            y: tile.r * tileH  + tile.z * offsetY
+        };
+    }
+
+    function tilesOverlapXY(a, b) {
+        // 兩牌在 XY 平面是否有面積重疊（用於判斷壓頂）
+        const pa = getTilePixelPos(a);
+        const pb = getTilePixelPos(b);
+        return Math.abs(pa.x - pb.x) < tileW && Math.abs(pa.y - pb.y) < tileH;
+    }
+
+    function checkLocked(tile) {
+        const pos = getTilePixelPos(tile);
+        let hasTop   = false;
+        let hasLeft  = false;
+        let hasRight = false;
+
+        for (let other of tiles) {
+            if (!other.active || other === tile) continue;
+            const op = getTilePixelPos(other);
+
+            // 壓頂：在更高層，且 XY 有重疊
+            if (other.z > tile.z && tilesOverlapXY(tile, other)) {
+                hasTop = true;
+            }
+
+            // 夾邊：同層，Y 有重疊，X 緊貼
+            if (other.z === tile.z) {
+                const dy = Math.abs(op.y - pos.y);
+                if (dy < tileH) {                          // Y 有重疊才算同行
+                    const dx = op.x - pos.x;
+                    if (dx > 0 && dx < tileW) hasRight = true;  // 右邊有牌
+                    if (dx < 0 && dx > -tileW) hasLeft  = true; // 左邊有牌
+                }
+            }
+        }
+        return hasTop || (hasLeft && hasRight);
+    }
+
+    // ★ 同步修正 checkLockedInSet（用於有解演算法），保持一致邏輯
+    function checkLockedInSet(tile, tileSet) {
+        let hasTop = false, hasLeft = false, hasRight = false;
+        for (let other of tileSet) {
+            if (!other.active || other.id === tile.id) continue;
+            // 壓頂：z 更高，r/c 相同（虛擬格，未偏移，直接比格子）
+            if (other.z > tile.z && other.r === tile.r && other.c === tile.c) hasTop = true;
+            // 夾邊：同層同行，c 差1
+            if (other.z === tile.z && other.r === tile.r) {
+                if (other.c === tile.c - 1) hasLeft  = true;
+                if (other.c === tile.c + 1) hasRight = true;
+            }
+        }
+        return hasTop || (hasLeft && hasRight);
+    }
+
+    // ★ 核心改動：消除用動畫，完成後再隱藏
+    function removeTileWithAnim(tileObj, delay, callback) {
+        const el = tileObj.el;
+        el.classList.remove('selected');
+        // 稍微錯開兩張牌的動畫時機，更有層次感
+        setTimeout(() => {
+            el.classList.add('matching');
+            el.addEventListener('animationend', () => {
+                el.style.display = 'none';
+                el.classList.remove('matching');
+                if (callback) callback();
+            }, { once: true });
+        }, delay);
+    }
+
+    function onTileClick(tile) {
+        if (!tile.active) return;
+        if (tile.isLocked) { playSound('locked'); return; }  // ★ 點鎖住嘅牌有音效提示
+
+        if(selectedTile === tile) { 
+            playSound('deselect');                            // ★ 取消選牌
+            tile.el.classList.remove('selected'); 
+            selectedTile = null; 
+        } else if(selectedTile) {
+            if(tile.data.t === selectedTile.data.t) {
+                playSound('match');                           // ★ 消除成功
+                const t1 = tile;
+                const t2 = selectedTile;
+                t1.active = false; 
+                t2.active = false;
+                moveHistory.push([t1, t2]);
+                selectedTile = null;
+
+                removeTileWithAnim(t1, 0, null);
+                removeTileWithAnim(t2, 60, () => {
+                    updateLockStatus();
+                    updateStatusText();
+                    checkGameState();
+                });
+            } else { 
+                playSound('select');                          // ★ 換選另一張
+                selectedTile.el.classList.remove('selected'); 
+                selectedTile = tile; 
+                tile.el.classList.add('selected'); 
+            }
+        } else { 
+            playSound('select');                              // ★ 首次選牌
+            selectedTile = tile; 
+            tile.el.classList.add('selected'); 
+        }
+    }
+
+    // ★ 復原加入 restoring 動畫
+    function undoMove() {
+        if (moveHistory.length === 0) return;
+        playSound('undo');                                    // ★ 復原音效
+        const lastMove = moveHistory.pop();
+        const t1 = lastMove[0]; 
+        const t2 = lastMove[1];
+
+        if(selectedTile) { selectedTile.el.classList.remove('selected'); selectedTile = null; }
+
+        [t1, t2].forEach((tile, i) => {
+            tile.active = true;
+            tile.el.style.display = '';
+            tile.el.classList.remove('selected');
+            // 錯開動畫時機
+            setTimeout(() => {
+                tile.el.classList.add('restoring');
+                tile.el.addEventListener('animationend', () => {
+                    tile.el.classList.remove('restoring');
+                }, { once: true });
+            }, i * 50);
+        });
+
+        updateLockStatus(); 
+        updateStatusText();
+    }
+
+    function checkGameState() { 
+        if(tiles.filter(t=>t.active).length===0) { playSound('win'); showModal('win'); }
+        else if(!hasAvailableMoves()) { playSound('lose'); showModal('lose'); }
+    }
+    function hasAvailableMoves() {
+        let free = tiles.filter(t=>t.active && !t.isLocked);
+        for(let i=0;i<free.length;i++) for(let j=i+1;j<free.length;j++) if(free[i].data.t === free[j].data.t) return true;
+        return false;
+    }
+
+    function showModal(type) {
+        const overlay = document.getElementById('msg-overlay');
+        const title = document.getElementById('overlay-title');
+        const verse = document.getElementById('overlay-verse');
+        const btn = document.getElementById('overlay-btn');
+        const dict = i18n[currentLang];
+        const verseArray = versesDict[type][currentLang];
+
+        if(type==='win') {
+            title.innerText = dict.winTitle;
+            title.style.color = "#ffb300"; 
+            verse.innerText = verseArray[Math.floor(Math.random()*verseArray.length)];
+            btn.innerText = dict.btnNextLevel; 
+            btn.onclick = () => { 
+                document.getElementById('map-select').value=['random','turtle','castle','cross','bridge','towers'][Math.floor(Math.random()*6)]; 
+                startGame(document.getElementById('map-select').value); 
+            };
+            btn.className = "btn"; 
+        } else {
+            title.innerText = dict.loseTitle; 
+            title.style.color = "#4fc3f7"; 
+            verse.innerText = verseArray[Math.floor(Math.random()*verseArray.length)];
+            btn.innerText = dict.btnRestart; 
+            btn.onclick = () => forceNewGame();
+            btn.className = "btn btn-blue"; 
+        }
+        overlay.style.display='flex';
+    }
+
+    function autoHint() {
+        let free=tiles.filter(t=>t.active && !t.isLocked);
+        for(let i=0;i<free.length;i++) for(let j=i+1;j<free.length;j++) if(free[i].data.t === free[j].data.t) {
+            free[i].el.style.background='#b3e5fc'; free[j].el.style.background='#b3e5fc';
+            setTimeout(()=>{ free[i].el.style.background=''; free[j].el.style.background=''; }, 1500); return;
+        }
+        alert(i18n[currentLang].alertNoMoves);
+    }
+
+    function updateStatusText() { 
+        document.getElementById('status').innerText = i18n[currentLang].statusPrefix + tiles.filter(t => t.active).length; 
+    }
+
+    function applyViewTransform() {
+        const board = document.getElementById('game-board');
+        if(!board) return;
+        board.style.transform = `translate(-50%, -50%) rotateX(${viewRotX}deg) rotateZ(${viewRotZ}deg) scale(${globalScale})`;
+    }
+
+    function fitBoard() {
+        const board = document.getElementById('game-board');
+        const view = document.getElementById('game-viewport');
+        if(!board || !view) return;
+        board.style.transform = 'none';
+        const boardW = board.scrollWidth; const boardH = board.scrollHeight;
+        const viewW = view.clientWidth; const viewH = view.clientHeight;
+        globalScale = Math.min((viewW - 40) / boardW, (viewH - 40) / boardH);
+        applyViewTransform();
+    }
+    window.addEventListener('resize', fitBoard);
+
+    const joystickZone = document.getElementById('joystick-zone');
+    const joystickKnob = document.getElementById('joystick-knob');
+    let isDragging = false;
+    let startX, startY;
+    let initialRotX, initialRotZ;
+
+    function handleStart(e) {
+        isDragging = true;
+        startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+        initialRotX = viewRotX; initialRotZ = viewRotZ;
+        joystickKnob.style.transition = 'none';
+    }
+
+    function handleMove(e) {
+        if (!isDragging) return;
+        e.preventDefault(); 
+        const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+        const deltaX = clientX - startX;
+        const deltaY = clientY - startY;
+        const maxDist = 30;
+        const dist = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+        const limitedDist = Math.min(dist, maxDist);
+        const angle = Math.atan2(deltaY, deltaX);
+        const knobX = Math.cos(angle) * limitedDist;
+        const knobY = Math.sin(angle) * limitedDist;
+        joystickKnob.style.transform = `translate(${knobX}px, ${knobY}px)`;
+        viewRotZ = initialRotZ + (deltaX * 0.5); 
+        viewRotX = initialRotX - (deltaY * 0.5); 
+        viewRotX = Math.max(0, Math.min(viewRotX, 60)); 
+        applyViewTransform();
+    }
+
+    function handleEnd() {
+        isDragging = false;
+        joystickKnob.style.transition = 'transform 0.2s';
+        joystickKnob.style.transform = 'translate(0, 0)';
+    }
+
+    joystickZone.addEventListener('mousedown', handleStart);
+    joystickZone.addEventListener('touchstart', handleStart, {passive: false});
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('touchmove', handleMove, {passive: false});
+    window.addEventListener('mouseup', handleEnd);
+    window.addEventListener('touchend', handleEnd);
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('./sw.js')
+                .then(function(registration) { console.log('SW OK'); }, function(err) { console.log('SW Fail'); });
+        });
+    }
+</script>
+</body>
+</html>
