@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <meta name="apple-mobile-web-app-title" content="福音麻雀">
+    <meta name="application-name" content="福音麻雀">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#054a29">
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://cokcok1.github.io/Game1/mj.png">
+    <link rel="icon" type="image/png" href="https://cokcok1.github.io/Game1/mj.png">
+
+    <title>福音麻雀 - 上海經典 v37.2</title>
+    <style>
+:root{--tile-w:52px;--tile-h:68px;--depth:13px;--ink:#f6ead0}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{margin:0;width:100%;height:100%;overflow:hidden;background:#0b2334}body{margin:0;width:100%;height:100%;height:100dvh;overflow:hidden}
+body{font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;color:var(--ink);
+background:radial-gradient(ellipse at 50% 17%,#486b78 0%,#193e50 43%,#0a202d 80%);
+display:flex;flex-direction:column;user-select:none;-webkit-user-select:none}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.4;background:
+radial-gradient(circle at 10% 90%,#b89a59 0,transparent 26%),
+radial-gradient(circle at 90% 70%,#4b9a85 0,transparent 28%)}
+header{z-index:5;flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;
+min-height:66px;padding:calc(12px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));background:#0b2334dd;
+border-bottom:1px solid #bda47470;box-shadow:0 8px 28px #0006}
+.brand{display:flex;flex-direction:column;gap:1px}.brand strong{font-size:21px;letter-spacing:3px;color:#f5d995}
+.brand small{font-size:10px;letter-spacing:2px;color:#b2c4c5}
+.header-left{display:flex;align-items:center;gap:8px}
+select,#lang-btn{color:#f8e9c5;background:#25495a;border:1px solid #9a967c;
+border-radius:9px;padding:9px;font-size:13px;font-weight:700;max-width:170px}
+#status{font-size:14px;white-space:nowrap;border:1px solid #d1ad6d70;
+padding:9px 13px;border-radius:10px;background:#284251}
+#game-viewport{position:relative;flex:1;min-height:0;overflow:hidden;
+perspective:1800px;perspective-origin:center center;touch-action:none}
+#game-viewport:before{content:"";position:absolute;inset:7% 3%;border:1px solid #d8bc7833;
+border-radius:28px;background:radial-gradient(ellipse at center,#3a626077,#102e3b44 65%,transparent 100%);pointer-events:none}
+#game-board{position:absolute;top:50%;left:50%;transform-style:preserve-3d;transform-origin:center}
+.tile{position:absolute;width:var(--tile-w);height:var(--tile-h);border-radius:7px;
+display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
+background:linear-gradient(145deg,#fffef4 0%,#f7f1df 58%,#e6d6b6 100%);
+border:1px solid #fff8e5;outline:1px solid #7d6248;
+box-shadow:2px 3px 0 #a58b6d,4px 7px 0 #705b48,5px 10px 7px #001b22a0;
+transform-style:preserve-3d;transition:filter .14s,box-shadow .14s,opacity .14s}
+.tile:before{content:"";position:absolute;left:1px;right:-5px;bottom:-12px;height:12px;
+transform:skewX(-25deg);transform-origin:top;background:linear-gradient(#c7b093,#826c57);
+border:1px solid #76614f;border-radius:0 0 4px 4px;pointer-events:none}
+.tile:after{content:"";position:absolute;right:-8px;top:4px;width:8px;height:calc(100% + 2px);
+background:linear-gradient(90deg,#d6c2a3,#8b765d);transform:skewY(-38deg);
+transform-origin:top left;border-radius:0 3px 4px 0;pointer-events:none}
+.tile.locked{filter:brightness(.94) saturate(.9);cursor:default;background:linear-gradient(145deg,#e9e4d8,#d9d1c0)}
+.tile.locked .t-icon,.tile.locked .t-text{opacity:1!important;filter:none!important}
+.tile.locked .t-text{color:#203840!important;text-shadow:0 1px #fff9}
+.tile.locked .t-suit{color:#514b43!important}
+.tile.selected{filter:brightness(1.16);outline:3px solid #ffe36d;box-shadow:0 0 16px #f9dc61,3px 7px 0 #766149,6px 12px 10px #0008;z-index:9999!important}
+.t-suit{position:absolute;top:3px;right:5px;color:#786a57;font-size:9px;font-weight:bold}
+.t-icon{font-size:29px;line-height:1.05;filter:drop-shadow(0 1px 1px #0003)}
+.t-text{font-size:14px;font-weight:900;line-height:1.3;text-shadow:0 1px #fff}
+.c-dark{color:#263940}.c-red{color:#a83227}.c-blue{color:#23618b}.c-green{color:#28754d}
+footer{position:relative;z-index:5;flex:none;display:flex;align-items:center;gap:15px;
+justify-content:center;padding:13px 18px calc(14px + env(safe-area-inset-bottom));
+background:#0b2334ec;border-top:1px solid #bda47470}
+.footer-btns{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+.btn{font:700 14px inherit;font-family:inherit;font-weight:800;color:#f6e9c7;
+border:1px solid #9c8357;background:linear-gradient(#466b70,#1d3d4c);
+padding:11px 16px;border-radius:10px;cursor:pointer;box-shadow:0 3px 0 #071924;white-space:nowrap}
+.btn:active{transform:translateY(2px)}.btn-blue{background:linear-gradient(#648e8a,#2d5c60)}
+.btn-orange{background:linear-gradient(#aa8650,#74532c)}
+#joystick-zone{position:relative;width:54px;height:54px;flex:none;border:2px solid #ae986e;
+border-radius:50%;background:#244556;display:grid;place-items:center;touch-action:none}
+#joystick-knob{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff1c4,#bd8c45);border:2px solid #e6ce96}
+#joystick-hint{position:absolute;bottom:-10px;white-space:nowrap;font-size:9px;color:#dfcba2}
+#watermark{position:absolute;bottom:12px;left:16px;font-size:10px;color:#b1c4c8a8;pointer-events:none}
+#msg-overlay{display:none;position:fixed;inset:0;z-index:100;align-items:center;justify-content:center;
+background:#061b2ad9;backdrop-filter:blur(9px);padding:18px}
+.overlay-box{background:linear-gradient(#fdf5e2,#e4d1ac);color:#263c41;padding:30px;
+border:4px solid #b69b63;border-radius:18px;text-align:center;max-width:420px;width:100%;box-shadow:0 22px 60px #0009}
+.overlay-title{font-size:27px;font-weight:900;color:#a66a28;margin-bottom:16px}
+.overlay-verse{font-size:17px;line-height:1.7;margin-bottom:22px}
+.overlay-box .btn{width:100%!important}
+#scene-hint{position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:12px;
+color:#e9dcb8b0;pointer-events:none;white-space:nowrap;text-align:center}
+@media(max-width:620px){
+header{padding:calc(8px + env(safe-area-inset-top,0px)) 10px 8px;min-height:58px;gap:6px}
+.brand strong{font-size:15px;letter-spacing:1px}.brand small{display:none}
+select{max-width:118px;padding:7px 5px;font-size:11px}#lang-btn{padding:7px}
+#status{font-size:11px;padding:7px}
+footer{padding:10px 5px calc(15px + env(safe-area-inset-bottom));gap:7px}
+.footer-btns{gap:5px;flex-wrap:nowrap}.btn{padding:10px 7px;font-size:12px}
+#joystick-zone{width:45px;height:45px}#joystick-knob{width:23px;height:23px}
+#scene-hint{font-size:10px}
+}
+</style>
+</head>
+<body>
+
+<header>
+    <div class="brand"><strong>福音麻雀</strong><small>SHANGHAI SOLITAIRE</small></div>
+    <div class="header-left">
+        <select id="map-select" onchange="changeMap(this.value)">
+            </select>
+        <button id="lang-btn" onclick="toggleLanguage()">EN</button>
+    </div>
+    <div id="status">剩餘: 0</div>
+</header>
+
+<div id="game-viewport">
+    <div id="scene-hint">單指拖動 · 雙指縮放 · 雙擊重設</div>
+    <div id="game-board"></div>
+</div>
+
+<footer>
+    <div class="footer-btns">
+        <button class="btn btn-blue" id="btn-new" onclick="forceNewGame()">🔄 新局</button>
+        <button class="btn btn-orange" id="btn-undo" onclick="undoMove()">↩️ 復原</button>
+        <button class="btn" id="btn-hint" onclick="autoHint()">💡 提示</button>
+    </div>
+
+</footer>
+
+<div id="watermark">福音麻雀 v37.2 · iPhone 修正版</div>
+
+<div id="msg-overlay">
+    <div class="overlay-box">
+        <div id="overlay-title" class="overlay-title"></div>
+        <div id="overlay-verse" class="overlay-verse"></div>
+        <button id="overlay-btn" class="btn" style="width: 220px; height: 50px; font-size: 20px;" onclick="forceNewGame()">挑戰下一關</button>
+    </div>
+</div>
+
+<script>
+    // --- 多語言字典 (i18n) ---
+    let currentLang = 'zh'; // 預設語言：繁體中文
+
+    const i18n = {
+        zh: {
+            langToggleText: "EN",
+            maps: {
+                random: "🎲 無限隨機",
+                turtle: "🐢 經典龜背",
+                castle: "🏰 堅固堡壘",
+                cross: "✝️ 榮耀十架",
+                bridge: "🌉 恩典之橋",
+                towers: "🗼 雙子塔"
+            },
+            statusPrefix: "剩餘: ",
+            btnNew: "🔄 新局",
+            btnUndo: "↩️ 復原",
+            btnHint: "💡 提示",
+            viewHint: "視角",
+            winTitle: "🎉 哈利路亞！(勝利)",
+            loseTitle: "💪 恩典夠用 (無路可走)",
+            btnNextLevel: "挑戰下一關 🚀",
+            btnRestart: "重新開始 🔄",
+            alertNoMoves: "目前無解，請按「復原」或「新局」！"
+        },
+        en: {
+            langToggleText: "繁",
+            maps: {
+                random: "🎲 Random",
+                turtle: "🐢 Turtle",
+                castle: "🏰 Castle",
+                cross: "✝️ Cross",
+                bridge: "🌉 Bridge",
+                towers: "🗼 Towers"
+            },
+            statusPrefix: "Left: ",
+            btnNew: "🔄 New",
+            btnUndo: "↩️ Undo",
+            btnHint: "💡 Hint",
+            viewHint: "View",
+            winTitle: "🎉 Hallelujah! (Win)",
+            loseTitle: "💪 Grace is Sufficient",
+            btnNextLevel: "Next Level 🚀",
+            btnRestart: "Restart 🔄",
+            alertNoMoves: "No moves available. Please use 'Undo' or 'New'!"
+        }
+    };
+
+    // 雙語聖經金句
+    const versesDict = {
+        win: {
+            zh: ["流淚撒種的，必歡呼收割。(詩 126:5)", "那美好的仗我已經打過了。(提後 4:7)", "靠著那加給我力量的，凡事都能做。(腓 4:13)", "你們是世上的光。(太 5:14)", "得勝的，我要賜他在我寶座上與我同坐。(啟 3:21)"],
+            en: ["Those who sow with tears will reap with songs of joy. (Psalm 126:5)", "I have fought the good fight, I have finished the race. (2 Timothy 4:7)", "I can do all this through him who gives me strength. (Philippians 4:13)", "You are the light of the world. (Matthew 5:14)", "To the one who is victorious, I will give the right to sit with me on my throne. (Revelation 3:21)"]
+        },
+        lose: {
+            zh: ["我的恩典是夠你用的。(林後 12:9)", "應當一無掛慮，只要凡事藉著禱告。(腓 4:6)", "你們要休息，要知道我是神。(詩 46:10)", "萬事都互相效力。(羅 8:28)"],
+            en: ["My grace is sufficient for you. (2 Corinthians 12:9)", "Do not be anxious about anything, but in every situation, by prayer and petition. (Philippians 4:6)", "Be still, and know that I am God. (Psalm 46:10)", "In all things God works for the good of those who love him. (Romans 8:28)"]
+        }
+    };
+
+    // 語言切換功能
+    function toggleLanguage() {
+        currentLang = currentLang === 'zh' ? 'en' : 'zh';
+        
+        const dict = i18n[currentLang];
+        
+        // 更新按鈕與標籤
+        document.getElementById('lang-btn').innerText = dict.langToggleText;
+        document.getElementById('btn-new').innerText = dict.btnNew;
+        document.getElementById('btn-undo').innerText = dict.btnUndo;
+        document.getElementById('btn-hint').innerText = dict.btnHint;
+
+        
+        // 更新選單文字 (保持目前選中的關卡)
+        const select = document.getElementById('map-select');
+        const currentVal = select.value;
+        select.innerHTML = '';
+        for (const [key, value] of Object.entries(dict.maps)) {
+            const opt = document.createElement('option');
+            opt.value = key;
+            opt.innerText = value;
+            if(key === currentVal) opt.selected = true;
+            select.appendChild(opt);
+        }
+        
+        updateStatusText();
+    }
+
+
+    // 麻雀資料庫 (內容保持中文)
+    const rawTiles = [
+        {t:"摩西", i:"🌊", s:"萬", c:"c-red"}, {t:"大衛", i:"👑", s:"萬", c:"c-red"},
+        {t:"保羅", i:"📜", s:"萬", c:"c-red"}, {t:"彼得", i:"🐟", s:"萬", c:"c-red"},
+        {t:"約拿", i:"🐋", s:"萬", c:"c-red"}, {t:"馬利亞", i:"🤰", s:"萬", c:"c-red"},
+        {t:"亞伯蘭", i:"🐑", s:"萬", c:"c-red"}, {t:"但以理", i:"🦁", s:"萬", c:"c-red"},
+        {t:"教會", i:"⛪", s:"筒", c:"c-blue"}, {t:"西奈", i:"⛰️", s:"筒", c:"c-blue"},
+        {t:"紅海", i:"🌊", s:"筒", c:"c-blue"}, {t:"伊甸", i:"🍎", s:"筒", c:"c-blue"},
+        {t:"加利利", i:"🛶", s:"筒", c:"c-blue"}, {t:"聖殿", i:"🏛️", s:"筒", c:"c-blue"},
+        {t:"耶利哥", i:"🧱", s:"筒", c:"c-blue"}, {t:"方舟", i:"🚢", s:"筒", c:"c-blue"},
+        {t:"十架", i:"✝️", s:"索", c:"c-green"}, {t:"聖經", i:"📖", s:"索", c:"c-green"},
+        {t:"五餅", i:"🍞", s:"索", c:"c-green"}, {t:"二魚", i:"🐟", s:"索", c:"c-green"},
+        {t:"寶血", i:"🍷", s:"索", c:"c-green"}, {t:"聖靈", i:"🕊️", s:"索", c:"c-green"},
+        {t:"信", i:"🛡️", s:"番", c:"#333"}, {t:"望", i:"⚓", s:"番", c:"#333"},
+        {t:"愛", i:"❤️", s:"番", c:"#333"}, {t:"阿們", i:"🙏", s:"番", c:"#333"},
+        {t:"禱告", i:"🤲", s:"番", c:"#333"}, {t:"復活", i:"🌅", s:"番", c:"#333"},
+        {t:"挪亞", i:"🌈", s:"萬", c:"c-red"}, {t:"約書亞", i:"🎺", s:"萬", c:"c-red"},
+        {t:"以利亞", i:"🔥", s:"萬", c:"c-red"}, 
+        {t:"葡萄", i:"🍇", s:"索", c:"c-green"}, {t:"磐石", i:"🪨", s:"索", c:"c-green"},
+        {t:"亮光", i:"💡", s:"筒", c:"c-blue"}, {t:"天國", i:"☁️", s:"筒", c:"c-blue"},
+        {t:"喜樂", i:"😄", s:"番", c:"#333"}
+    ];
+
+    const MapBlueprints = {
+        turtle: () => generatePyramid(6, 8, [6,6, 4,4, 2,2, 1,1]), 
+        castle: () => generateWall(6, 8),
+        cross: () => generateCross(),
+        bridge: () => generateBridge(),
+        towers: () => generateTowers(),
+        random: () => generateChaos()
+    };
+    function generatePyramid(rows, cols, layerSizes) { let slots=[]; let cl=0; for(let i=0;i<layerSizes.length;i+=2){ let h=layerSizes[i], w=layerSizes[i+1]; let sr=Math.floor((rows-h)/2), sc=Math.floor((cols-w)/2); for(let r=0;r<h;r++) for(let c=0;c<w;c++) slots.push([cl, sr+r, sc+c]); cl++; } return slots; }
+    function generateWall(rows, cols) { let slots=[]; for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) { slots.push([0, r, c]); if(r===0||r===rows-1||c===0||c===cols-1) slots.push([1, r, c]); } return slots; }
+    function generateCross() { let slots=[]; for(let r=0;r<8;r++) { slots.push([0,r,3]); slots.push([0,r,4]); slots.push([1,r,3]); } for(let c=0;c<8;c++) { slots.push([0,2,c]); slots.push([0,3,c]); slots.push([1,2,c]); } slots.push([1,3,4]); slots.push([2,2,3]); slots.push([2,3,3]); return slots; }
+    function generateBridge() { let slots=[]; for(let c=0;c<10;c++) { slots.push([0,2,c]); slots.push([0,3,c]); if(c<3||c>6) { slots.push([1,2,c]); slots.push([1,3,c]); slots.push([2,2,c]); } } return slots; }
+    function generateTowers() { let slots=[]; for(let r=0;r<6;r++) for(let c=0;c<8;c++) { if(c<2||c>5) { slots.push([0,r,c]); slots.push([1,r,c]); if(r>1&&r<4) slots.push([2,r,c]); } else if(r===2||r===3) slots.push([0,r,c]); } return slots; }
+    
+    // 不規則上海麻雀牌局：座標使用半張牌作單位。
+    // 基層牌位在偶數格，上層牌位在奇數格，橫向及縱向各錯開半張。
+    function generateChaos() {
+        const occupied = new Set();
+        const cells = [];
+        const key = (z,r,c) => `${z},${r},${c}`;
+        const add = (z,r,c) => {
+            const k = key(z,r,c);
+            if (occupied.has(k)) return false;
+            occupied.add(k); cells.push([z,r,c]); return true;
+        };
+        // 隨機生長連通但不規則的基層輪廓，而非填滿長方形。
+        add(0, 8, 10);
+        const base = [[8,10]];
+        const target = 50 + 2 * Math.floor(Math.random()*11); // 48–64
+        let tries = 0;
+        while(base.length < target && tries++ < 3000) {
+            const [r,c] = base[Math.floor(Math.random()*base.length)];
+            const [dr,dc] = [[2,0],[-2,0],[0,2],[0,-2]][Math.floor(Math.random()*4)];
+            const nr=r+dr, nc=c+dc;
+            if(nr<0 || nr>18 || nc<0 || nc>22) continue;
+            if(add(0,nr,nc)) base.push([nr,nc]);
+        }
+        // 上層必須有下層四角承托；每層都錯開半張。
+        for(let z=1;z<=3;z++) {
+            const candidates = [];
+            for(let r=z;r<=18+z;r+=2) for(let c=z;c<=22+z;c+=2) {
+                if ([[r-1,c-1],[r-1,c+1],[r+1,c-1],[r+1,c+1]]
+                    .every(([rr,cc]) => occupied.has(key(z-1,rr,cc)))) candidates.push([r,c]);
+            }
+            for(let i=candidates.length-1;i>0;i--) {
+                const j=Math.floor(Math.random()*(i+1));
+                [candidates[i],candidates[j]]=[candidates[j],candidates[i]];
+            }
+            const limit = z===1 ? 20 : z===2 ? 10 : 3;
+            let count=0;
+            for(const [r,c] of candidates) if(count<limit && Math.random()<0.75) {
+                if(add(z,r,c)) count++;
+            }
+        }
+        // 必須偶數張；優先移除最外側的基層牌。
+        if(cells.length%2) {
+            const removable=base.filter(([r,c]) =>
+                !cells.some(([z,rr,cc]) => z===1 && Math.abs(rr-r)===1 && Math.abs(cc-c)===1));
+            const [r,c]=removable[Math.floor(Math.random()*removable.length)];
+            const idx=cells.findIndex(t=>t[0]===0 && t[1]===r && t[2]===c);
+            cells.splice(idx,1);
+        }
+        return cells;
+    }
+
+    let tiles = [];
+    let selectedTile = null;
+    let moveHistory = [];
+    let tileW = 52, tileH = 68; 
+    let globalScale = 1;
+    let baseFitScale = 1, panX = 0, panY = 0;
+    const MIN_ZOOM = 0.25, MAX_ZOOM = 3.8;
+    let viewRotX = 0;
+    let viewRotZ = 0;
+
+    // 初始化時先載入語言選單
+    window.onload = () => {
+        toggleLanguage(); // 建立選單
+        toggleLanguage(); // 回復預設繁體中文
+        document.getElementById('map-select').value = 'random';
+        startGame('random');
+    };
+
+    function changeMap(val) { startGame(val); }
+    function forceNewGame() { document.getElementById('map-select').value='random'; startGame('random'); }
+
+    // 每一個座標只能有一張牌；同一層不能重疊。統一用唯一座標鍵。
+    const positionKey = t => `${t.z},${t.r},${t.c}`;
+    function normalizeSlots(slots) {
+        const unique = new Map();
+        for (const s of slots) unique.set(`${s[0]},${s[1]},${s[2]}`, [...s]);
+        const result = [...unique.values()];
+        const minR = Math.min(...result.map(s => s[1]));
+        const minC = Math.min(...result.map(s => s[2]));
+        for (const s of result) { s[1] -= minR; s[2] -= minC; }
+        // 固定地圖如出現奇數張，拒絕使用，不任意刪走一張破壞形狀。
+        if (result.length % 2) throw new Error('牌局格數必須為偶數');
+        return result;
+    }
+
+    // 真正的上海接龍遮擋：任何上層牌與本牌面積重疊即封鎖。
+    // 半格座標：同層相鄰牌的橫向距離為 2。
+    function isFreeInSet(tile, tileSet) {
+        if (!tile.active) return false;
+        let left=false, right=false, top=false;
+        for (const other of tileSet) {
+            if (!other.active || other.id===tile.id) continue;
+            if (other.z===tile.z+1 &&
+                Math.abs(other.r-tile.r)<2 && Math.abs(other.c-tile.c)<2) top=true;
+            if (other.z===tile.z && other.r===tile.r) {
+                if (other.c===tile.c-2) left=true;
+                if (other.c===tile.c+2) right=true;
+            }
+            if(top || (left && right)) return false;
+        }
+        return !top && (!left || !right);
+    }
+    function getAvailableTiles(tileSet) { return tileSet.filter(t => isFreeInSet(t, tileSet)); }
+    function checkLockedInSet(tile, tileSet) { return !isFreeInSet(tile, tileSet); }
+    function checkLocked(tile) { return !isFreeInSet(tile, tiles); }
+
+    // 隨機回溯，先找到一條完整的合法拆牌次序，再反向填入配對牌面。
+    // 如搜尋失敗，絕不以不可靠的順序配對代替。
+    function buildRemovalOrder(layout, maxNodes = 120000) {
+        const work = layout.map(t => ({...t, active: true}));
+        const dead = new Set();
+        let nodes = 0;
+        function visit(remaining) {
+            if (remaining === 0) return [];
+            if (++nodes > maxNodes) return null;
+            const key = work.filter(t => t.active).map(t => t.id).join(',');
+            if (dead.has(key)) return null;
+            const free = getAvailableTiles(work);
+            if (free.length < 2) { dead.add(key); return null; }
+            // 隨機選擇，但盡量先處理高層牌，降低回溯成本。
+            const options = [];
+            for (let i = 0; i < free.length; i++) for (let j = i + 1; j < free.length; j++)
+                options.push([free[i], free[j]]);
+            for (let i = options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [options[i], options[j]] = [options[j], options[i]];
+            }
+            options.sort((a,b) => (b[0].z+b[1].z)-(a[0].z+a[1].z));
+            for (const [a,b] of options) {
+                a.active = b.active = false;
+                const suffix = visit(remaining - 2);
+                a.active = b.active = true;
+                if (suffix) return [[a.id,b.id], ...suffix];
+                if (nodes > maxNodes) break;
+            }
+            dead.add(key);
+            return null;
+        }
+        return visit(work.length);
+    }
+
+    function startGame(mapType) {
+        document.getElementById('msg-overlay').style.display = 'none';
+        const board = document.getElementById('game-board');
+        board.innerHTML = ''; tiles = []; selectedTile = null; moveHistory = [];
+        viewRotX = 0; viewRotZ = 0;
+        let result = null;
+        for (let attempt = 0; attempt < (mapType === 'random' ? 20 : 5); attempt++) {
+            try {
+                const raw = MapBlueprints[mapType]();
+                const slots = normalizeSlots(mapType === 'random' ? raw : raw.map(([z,r,c]) => [z, r*2+z, c*2+z]));
+                const layout = slots.map((s,id) => ({id,z:s[0],r:s[1],c:s[2]}));
+                const order = buildRemovalOrder(layout);
+                if (order) { result = {layout, order}; break; }
+            } catch (err) { console.error('牌局配置錯誤',err); break; }
+        }
+        if (!result) {
+            alert(currentLang === 'zh' ? '未能建立已驗證有解的牌局，請重試或轉換地圖。' : 'Could not generate a verified solvable board. Try again or select another layout.');
+            updateStatusText(); return;
+        }
+        applyGame(result.layout, result.order);
+    }
+
+    function applyGame(layout, pairs) {
+        const inventory = [];
+        // 每種圖案最多四張；如總對數大於種類數，部分種類會有四張。
+        const types = [...rawTiles];
+        for (let i = types.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [types[i],types[j]] = [types[j],types[i]];
+        }
+        for (let i = 0; i < pairs.length; i++) inventory.push(types[i % types.length]);
+        const assigned = new Array(layout.length);
+        pairs.forEach(([a,b],i) => { assigned[a] = inventory[i]; assigned[b] = inventory[i]; });
+        renderTiles(layout, assigned);
+        requestAnimationFrame(() => requestAnimationFrame(fitBoard));
+        updateStatusText();
+    }
+
+    function renderTiles(slots, dataMap) {
+        const board = document.getElementById('game-board');
+        let maxX=0, maxY=0;
+        slots.forEach((slot, index) => {
+            if(slot.c > maxX) maxX = slot.c; if(slot.r > maxY) maxY = slot.r;
+            const el = document.createElement('div');
+            el.className = 'tile';
+            
+            const card = dataMap[index];
+            const ink = card.c.startsWith("c-") ? card.c : "c-dark";
+            el.innerHTML = `<div class="t-suit">${card.s}</div><div class="t-icon ${ink}">${card.i}</div><div class="t-text ${ink}">${card.t}</div>`;
+            
+            let left = slot.c * tileW / 2; 
+            let top = slot.r * tileH / 2; 
+            let zHeight = slot.z * 15; 
+            
+            el.style.left = (left + slot.z * 3) + 'px'; 
+            el.style.top = (top - slot.z * 8) + 'px'; 
+            el.style.transform = `translateZ(${zHeight}px)`; 
+            el.style.setProperty('--base-z', zHeight + 'px');
+            el.style.zIndex = slot.z * 1000 + slot.r * 10 + slot.c; 
+            
+            const tileObj = { el: el, data: card, z: slot.z, r: slot.r, c: slot.c, active: true, id: index };
+            el.onclick = () => onTileClick(tileObj);
+            board.appendChild(el);
+            tiles.push(tileObj);
+        });
+        board.style.width = (maxX / 2 + 1) * tileW + 'px';
+        board.style.height = (maxY / 2 + 1) * tileH + 'px';
+        updateLockStatus();
+    }
+
+    function updateLockStatus() { tiles.forEach(t => { if(!t.active) return; t.isLocked = checkLocked(t); t.el.classList.toggle('locked', t.isLocked); }); }
+    
+    function onTileClick(tile) {
+        if(!tile.active || tile.isLocked) return;
+        if(selectedTile === tile) { tile.el.classList.remove('selected'); selectedTile = null; }
+        else if(selectedTile) {
+            if(tile.data.t === selectedTile.data.t) {
+                moveHistory.push([tile, selectedTile]);
+                tile.active=false; selectedTile.active=false;
+                tile.el.style.display='none'; selectedTile.el.style.display='none';
+                selectedTile.el.classList.remove('selected'); 
+                selectedTile = null;
+                updateLockStatus(); updateStatusText(); checkGameState();
+            } else { selectedTile.el.classList.remove('selected'); selectedTile = tile; tile.el.classList.add('selected'); }
+        } else { selectedTile = tile; tile.el.classList.add('selected'); }
+    }
+
+    function undoMove() {
+        if (moveHistory.length === 0) return; 
+        const lastMove = moveHistory.pop();
+        const tile1 = lastMove[0]; const tile2 = lastMove[1];
+        tile1.active = true; tile2.active = true;
+        tile1.el.style.display = ''; tile2.el.style.display = '';
+        tile1.el.classList.remove('selected'); tile2.el.classList.remove('selected');
+        if(selectedTile) { selectedTile.el.classList.remove('selected'); selectedTile = null; }
+        document.getElementById('msg-overlay').style.display = 'none';
+        updateLockStatus(); updateStatusText();
+    }
+
+    function checkGameState() { if(tiles.filter(t=>t.active).length===0) showModal('win'); else if(!hasAvailableMoves()) showModal('lose'); }
+    function hasAvailableMoves() {
+        let free = tiles.filter(t=>t.active && !t.isLocked);
+        for(let i=0;i<free.length;i++) for(let j=i+1;j<free.length;j++) if(free[i].data.t === free[j].data.t) return true;
+        return false;
+    }
+
+    function showModal(type) {
+        const overlay = document.getElementById('msg-overlay');
+        const title = document.getElementById('overlay-title');
+        const verse = document.getElementById('overlay-verse');
+        const btn = document.getElementById('overlay-btn');
+        const dict = i18n[currentLang];
+        const verseArray = versesDict[type][currentLang];
+
+        if(type==='win') {
+            title.innerText = dict.winTitle;
+            title.style.color = "#ffb300"; 
+            verse.innerText = verseArray[Math.floor(Math.random()*verseArray.length)];
+            btn.innerText = dict.btnNextLevel; 
+            btn.onclick = () => { 
+                document.getElementById('map-select').value='random'; 
+                startGame(document.getElementById('map-select').value); 
+            };
+            btn.className = "btn"; 
+        } else {
+            title.innerText = dict.loseTitle; 
+            title.style.color = "#4fc3f7"; 
+            verse.innerText = verseArray[Math.floor(Math.random()*verseArray.length)];
+            btn.innerText = dict.btnRestart; 
+            btn.onclick = () => forceNewGame();
+            btn.className = "btn btn-blue"; 
+        }
+        overlay.style.display='flex';
+    }
+
+    // 搜尋當前局面真正可拆清的下一步。超過運算上限則明確告知，絕不亂提示。
+    function findWinningMove(maxNodes = 180000) {
+        const work = tiles.map(t => ({id:t.id,z:t.z,r:t.r,c:t.c,active:t.active,type:t.data.t}));
+        const dead = new Set();
+        let nodes = 0, limitReached = false;
+        function solve(left) {
+            if (left === 0) return [];
+            if (++nodes > maxNodes) { limitReached = true; return null; }
+            const key = work.filter(t => t.active).map(t => t.id).join(',');
+            if (dead.has(key)) return null;
+            const free = getAvailableTiles(work);
+            const grouped = new Map();
+            for (const t of free) {
+                if (!grouped.has(t.type)) grouped.set(t.type, []);
+                grouped.get(t.type).push(t);
+            }
+            const candidates = [];
+            for (const group of grouped.values())
+                for (let i=0;i<group.length;i++) for (let j=i+1;j<group.length;j++)
+                    candidates.push([group[i],group[j]]);
+            candidates.sort((a,b) => (b[0].z+b[1].z)-(a[0].z+a[1].z));
+            for (const [a,b] of candidates) {
+                a.active=b.active=false;
+                const next = solve(left-2);
+                a.active=b.active=true;
+                if (next) return [[a.id,b.id],...next];
+                if (limitReached) return null;
+            }
+            dead.add(key); return null;
+        }
+        const path = solve(work.filter(t=>t.active).length);
+        return {move:path?.[0] ?? null, limitReached};
+    }
+    function autoHint() {
+        const {move,limitReached} = findWinningMove();
+        if (!move) {
+            alert(currentLang === 'zh'
+                ? (limitReached ? '局面較複雜，暫時無法驗證安全提示。可以嘗試復原。' : '目前局面無法拆清，請嘗試復原或重新開始。')
+                : (limitReached ? 'Hint search limit reached. Try Undo.' : 'No complete solution from this position. Try Undo.'));
+            return;
+        }
+        for (const id of move) {
+            const el = tiles[id].el;
+            el.style.background='#b3e5fc';
+            setTimeout(() => { if (el.isConnected) el.style.background=''; },1500);
+        }
+    }
+
+    function updateStatusText() { 
+        document.getElementById('status').innerText = i18n[currentLang].statusPrefix + tiles.filter(t => t.active).length; 
+    }
+
+    function applyViewTransform() {
+        const board = document.getElementById('game-board');
+        if(!board) return;
+        board.style.transform = `translate(calc(-50% + ${panX}px), calc(-50% + ${panY}px)) scale(${globalScale})`;
+    }
+
+    function fitBoard() {
+        const board = document.getElementById('game-board');
+        const view = document.getElementById('game-viewport');
+        if(!board || !view) return;
+        board.style.transform = 'none';
+        const boardW = board.scrollWidth; const boardH = board.scrollHeight;
+        const viewW = view.clientWidth; const viewH = view.clientHeight;
+        baseFitScale = Math.min(1.2, (viewW - 32) / (boardW + 35), (viewH - 40) / (boardH + 45));
+        globalScale = Math.max(0.15, Math.min(MAX_ZOOM, baseFitScale));
+        panX = 0; panY = 0;
+        applyViewTransform();
+    }
+    window.addEventListener('resize', fitBoard);
+
+
+    // 兩指縮放、單指拖動畫面：只影響視角，不修改牌局座標及規則。
+    const gameViewport = document.getElementById('game-viewport');
+    const touchPoints = new Map();
+    let gestureStart = null, suppressTileClicksUntil = 0;
+    function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
+    function midpoint(a,b){return {x:(a.x+b.x)/2,y:(a.y+b.y)/2};}
+    function beginGesture(){
+        const pts=[...touchPoints.values()];
+        gestureStart={points:pts,scale:globalScale,panX,panY,moved:false};
+    }
+    gameViewport.addEventListener('pointerdown',e=>{
+        if(e.pointerType==='mouse') return;
+        touchPoints.set(e.pointerId,{x:e.clientX,y:e.clientY});
+        try{gameViewport.setPointerCapture(e.pointerId);}catch(_){}
+        beginGesture();
+    });
+    gameViewport.addEventListener('pointermove',e=>{
+        if(!touchPoints.has(e.pointerId)) return;
+        touchPoints.set(e.pointerId,{x:e.clientX,y:e.clientY});
+        if(!gestureStart) return;
+        const pts=[...touchPoints.values()], old=gestureStart.points;
+        if(pts.length>=2 && old.length>=2){
+            const ratio=distance(pts[0],pts[1])/Math.max(1,distance(old[0],old[1]));
+            const next=Math.max(MIN_ZOOM,Math.min(MAX_ZOOM,gestureStart.scale*ratio));
+            const a=midpoint(old[0],old[1]),b=midpoint(pts[0],pts[1]);
+            const rect=gameViewport.getBoundingClientRect();
+            const offsetX=a.x-rect.left-rect.width/2-gestureStart.panX;
+            const offsetY=a.y-rect.top-rect.height/2-gestureStart.panY;
+            panX=gestureStart.panX+(b.x-a.x)-offsetX*(next/gestureStart.scale-1);
+            panY=gestureStart.panY+(b.y-a.y)-offsetY*(next/gestureStart.scale-1);
+            globalScale=next;
+            gestureStart.moved=true;
+        }else if(pts.length===1 && old.length===1){
+            const dx=pts[0].x-old[0].x,dy=pts[0].y-old[0].y;
+            if(Math.hypot(dx,dy)>6) gestureStart.moved=true;
+            if(gestureStart.moved){panX=gestureStart.panX+dx;panY=gestureStart.panY+dy;}
+        }
+        if(gestureStart.moved){suppressTileClicksUntil=performance.now()+400;applyViewTransform();}
+    },{passive:false});
+    function endGesture(e){
+        if(!touchPoints.has(e.pointerId)) return;
+        if(gestureStart?.moved) suppressTileClicksUntil=performance.now()+400;
+        touchPoints.delete(e.pointerId);
+        beginGesture();
+    }
+    gameViewport.addEventListener('pointerup',endGesture);
+    gameViewport.addEventListener('pointercancel',endGesture);
+    gameViewport.addEventListener('click',e=>{
+        if(performance.now()<suppressTileClicksUntil){e.preventDefault();e.stopPropagation();}
+    },true);
+    gameViewport.addEventListener('wheel',e=>{
+        e.preventDefault();
+        const next=Math.max(MIN_ZOOM,Math.min(MAX_ZOOM,globalScale*Math.exp(-e.deltaY*.001)));
+        const rect=gameViewport.getBoundingClientRect();
+        const x=e.clientX-rect.left-rect.width/2-panX,y=e.clientY-rect.top-rect.height/2-panY;
+        panX-=x*(next/globalScale-1);panY-=y*(next/globalScale-1);
+        globalScale=next;applyViewTransform();
+    },{passive:false});
+    gameViewport.addEventListener('dblclick',e=>{e.preventDefault();fitBoard();});
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('./sw.js')
+                .then(function(registration) { console.log('SW OK'); }, function(err) { console.log('SW Fail'); });
+        });
+    }
+
+</script>
+</body>
+</html>
